@@ -1,15 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using StackExchange.Redis;
+using Neo4jClient;
 
-public class KviziramService
+public class GuestService: IGuestService
 {
-    private IDatabase _redis;    
-
-    public KviziramService(KviziramContext _context) {
-        _redis = _context.Redis;
+    private IDatabase _redis;
+    private IGraphClient _neo;
+    
+    public GuestService(KviziramContext context) {
+        _redis = context.Redis.GetDatabase();
+        _neo = context.Neo;
     }
 
     public async Task addString(string key, string value) {
