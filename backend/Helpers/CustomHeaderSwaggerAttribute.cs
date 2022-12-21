@@ -18,5 +18,16 @@ public class CustomHeaderSwaggerAttribute : IOperationFilter
                 Type = "string"
             }
         });
+
+        operation.Parameters.Add(new OpenApiParameter
+        {
+            Name = "Authentication",
+            In = ParameterLocation.Header,
+            Required = false,
+            Schema = new OpenApiSchema
+            {
+                Type = "string"
+            }
+        });
     }
 }

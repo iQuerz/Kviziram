@@ -1,10 +1,20 @@
 public static class Msg
 {
-    //Generic responses 
-    public const string Unknown = "Oops! An unknown error happened";
+    #region Generic messages 
+    public const string Unknown = "Oops! An unknown error happened on the server";
     public const string NoPermission = "You don't have permission";
-    public const string NoPrivileges = "You don't have any privileges";
-    public const string NoSession = "Your session has expired";
     public const string NoObject = "The object doesn't exist";
     public const string Deleted = " has been deleted";
+    #endregion
+
+    #region Login/Register messages
+    public const string NoAuth = "Authorization failed";
+    public const string NoSession = "Session doesn't exist";
+    public const string BadEmail = "Account with this email doesn't exist";
+    public const string UsedEmail = "The email you enter is already registered";
+    public const string BadPassword = "Bad password entered";
+    public const string AlreadyLoggedIn = "You're already logged in";
+    #endregion 
+
+
 }

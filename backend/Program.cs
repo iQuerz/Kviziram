@@ -32,6 +32,7 @@ builder.Services.AddScoped<KviziramContext, KviziramContext>();
 
 // Services
 builder.Services.AddScoped<IGuestService, GuestService>();
+builder.Services.AddScoped<ILoginRegisterService, LoginRegisterService>();
 
 // Utility for god knows what
 builder.Services.AddScoped<Utility, Utility>();

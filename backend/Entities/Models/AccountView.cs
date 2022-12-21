@@ -1,20 +1,13 @@
-
-using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 
-public class Account
+public class AccountView
 {
     public Guid ID { get; set; } 
 
-    [Required]
     public string Username { get; set; }
 
-    [Required]
     public string Email { get; set; }
-
-    [Required]
-    public string Password { get; set; }
 
     public string Avatar { get; set; } = "";
 
@@ -22,9 +15,21 @@ public class Account
 
     public bool isAdmin { get; set; } = false;
 
-    public Account() {
+    public AccountView() {
         this.Username = "";
         this.Email = "";
-        this.Password = "";
     }
+
+    public AccountView(Account account) {
+        this.ID = account.ID;
+        this.Username = account.Username;
+        this.Email =  account.Email;
+        this.Status = account.Status;
+        this.isAdmin = account.isAdmin;
+    }
+
+    public string ToJsonString() {
+        return JsonSerializer.Serialize<AccountView>(this);
+    }
+    
 }
