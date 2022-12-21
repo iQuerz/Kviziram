@@ -1,7 +1,5 @@
 using StackExchange.Redis;
-using Microsoft.AspNetCore.Mvc;
 using Neo4jClient;
-using Microsoft.AspNetCore.Http;
 
 public class LoginRegisterService: ILoginRegisterService
 {
@@ -28,7 +26,7 @@ public class LoginRegisterService: ILoginRegisterService
         if (checkAccount.account == null) throw new KviziramException(Msg.NoAuth);
         verifyPassword(loginInfo.password, checkAccount.account.Password);
 
-        string newSID = "guest:" + BCrypt.Net.BCrypt.GenerateSalt() + ":id";
+        string newSID = "account:" + BCrypt.Net.BCrypt.GenerateSalt() + ":id";
         AccountView accountView = new AccountView(checkAccount.account);
 
         await _redis.StringSetAsync(newSID, accountView.ToJsonString(), new TimeSpan(0, 60, 0));

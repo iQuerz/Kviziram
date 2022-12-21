@@ -18,6 +18,7 @@ builder.Services.AddSwaggerGen(c =>
                 c.OperationFilter<CustomHeaderSwaggerAttribute>();
             });
 
+#region Server Connections
 // Redis
 ConnectionMultiplexer redisClient = ConnectionMultiplexer.Connect(KviziramConfig.redis);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redisClient);
@@ -26,6 +27,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(redisClient);
 GraphClient neoClient = new GraphClient(new Uri(KviziramConfig.NJ_ADDRESS), KviziramConfig.NJ_USER, KviziramConfig.NJ_PASS);
 neoClient.ConnectAsync().Wait();
 builder.Services.AddSingleton<IGraphClient>(neoClient);
+#endregion
 
 // Context
 builder.Services.AddScoped<KviziramContext, KviziramContext>();
@@ -33,6 +35,8 @@ builder.Services.AddScoped<KviziramContext, KviziramContext>();
 // Services
 builder.Services.AddScoped<IGuestService, GuestService>();
 builder.Services.AddScoped<ILoginRegisterService, LoginRegisterService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+
 
 // Utility for god knows what
 builder.Services.AddScoped<Utility, Utility>();
@@ -46,7 +50,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseCors("CORS");
 

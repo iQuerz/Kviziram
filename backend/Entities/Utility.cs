@@ -22,13 +22,14 @@ public class Utility
         return sID.Contains("account") || sID.Contains("guest");
     }
 
-    public async Task<bool> CallerExists()
-    {
-        if (await _redis.KeyExistsAsync(_context.SID)) {
-            await _context.Redis.GetDatabase().KeyExpireAsync(_context.SID, new TimeSpan(0, 30, 0));
-            return true;
-        }
-        return false;
+    public void CallerExists() {
+        if (_context.SID == null)
+            throw new KviziramException(Msg.NoSession);
+
+        if (_redis.KeyExists(_context.SID)) 
+            _context.Redis.GetDatabase().KeyExpire(_context.SID, new TimeSpan(0, 60, 0));
+        else
+            throw new KviziramException(Msg.NoSession);
     }
 
     public bool AlreadyLogged() {
@@ -37,21 +38,14 @@ public class Utility
         return false;
     }
 
-    public async Task<AccountView?> isAccountCaller()
-    {
-        if (await _redis.KeyExistsAsync(_context.SID)) {
-            var accountString = await _redis.StringGetAsync(_context.SID);
-            AccountView? accountView = JsonSerializer.Deserialize<AccountView>(accountString);
-            return accountView;
-        } 
-        throw new KviziramException(Msg.NoSession);
-    }
+    public void SetAccountAndGuestCaller() {
+        CallerExists();
 
-    public Guest isGuestCaller()
-    {
-        //TODO: Iskoristiti _contex.SID da se povuku informacije o guest caller-u iz redisa
-        Guest caller = new Guest();
-        return caller;
+        string accountGuestString = _redis.StringGet(_context.SID).ToString();
+        if (accountGuestString.Contains("account")) 
+            _context.AccountCaller = JsonSerializer.Deserialize<AccountView>(accountGuestString);
+        else
+            _context.GuestCaller = JsonSerializer.Deserialize<Guest>(accountGuestString);
     }
     #endregion
 

@@ -5,7 +5,7 @@ using Neo4jClient;
 public class KviziramContext
 {
     public string? SID { get; set; }
-    public Account? AccountCaller { get; set; }
+    public AccountView? AccountCaller { get; set; }
     public Guest? GuestCaller { get; set; }
     public IConnectionMultiplexer Redis { get; set; }
     public IGraphClient Neo { get; set; }

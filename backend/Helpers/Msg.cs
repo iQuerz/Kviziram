@@ -16,5 +16,10 @@ public static class Msg
     public const string AlreadyLoggedIn = "You're already logged in";
     #endregion 
 
+    #region Account messages
+    public const string NoAccount = "Account doesn't exist";
+
+    #endregion
+
 
 }

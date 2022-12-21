@@ -16,6 +16,7 @@ public class AccountView
     public bool isAdmin { get; set; } = false;
 
     public AccountView() {
+        this.ID = Guid.NewGuid();
         this.Username = "";
         this.Email = "";
     }
