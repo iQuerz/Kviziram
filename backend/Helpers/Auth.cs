@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 
 public class Auth
 {
@@ -11,9 +12,15 @@ public class Auth
     public async Task Invoke(HttpContext context, KviziramContext _context, Utility _util) {
         try {
             string? sID = context.Request.Headers["SessionID"];
-            if (!string.IsNullOrEmpty(sID) && _util.isStringSidValid(sID))
+            if (!string.IsNullOrEmpty(sID) && _util.isStringSidValid(sID)) {
                 _context.SID = sID;
-            else 
+                string accountGuestString = (await _context.Redis.GetDatabase().StringGetAsync(_context.SID)).ToString();
+                if (_context.SID.Contains("account")) {
+                    _context.AccountCaller = JsonSerializer.Deserialize<AccountView>(accountGuestString);
+                }
+                else
+                    _context.GuestCaller = JsonSerializer.Deserialize<Guest>(accountGuestString);
+            } else 
                 _context.SID = null;
             await _next(context);
         } catch (Exception e) {

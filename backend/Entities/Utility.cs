@@ -26,26 +26,20 @@ public class Utility
         if (_context.SID == null)
             throw new KviziramException(Msg.NoSession);
 
-        if (_redis.KeyExists(_context.SID)) 
-            _context.Redis.GetDatabase().KeyExpire(_context.SID, new TimeSpan(0, 60, 0));
-        else
-            throw new KviziramException(Msg.NoSession);
+        if (_context.AccountCaller == null && _context.GuestCaller == null)
+            throw new KviziramException(Msg.NoAuth);
+    }
+
+    public (bool account, bool guest) IsCaller() {
+        bool account = (_context.AccountCaller == null) ? false : true;
+        bool guest = (_context.GuestCaller == null) ? false : true;
+        return (account, guest);
     }
 
     public bool AlreadyLogged() {
         if (_context.SID != null)
             throw new KviziramException(Msg.AlreadyLoggedIn);
         return false;
-    }
-
-    public void SetAccountAndGuestCaller() {
-        CallerExists();
-
-        string accountGuestString = _redis.StringGet(_context.SID).ToString();
-        if (accountGuestString.Contains("account")) 
-            _context.AccountCaller = JsonSerializer.Deserialize<AccountView>(accountGuestString);
-        else
-            _context.GuestCaller = JsonSerializer.Deserialize<Guest>(accountGuestString);
     }
     #endregion
 

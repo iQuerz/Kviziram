@@ -11,11 +11,11 @@ public class GuestService: IGuestService
         _neo = context.Neo;
     }
 
-    public async Task addString(string key, string value) {
+    public async Task AddString(string key, string value) {
         await _redis.StringSetAsync(key, value);
     }
 
-    public async Task<string?> getString(string key) {
+    public async Task<string?> GetString(string key) {
         return await _redis.StringGetAsync(key);
     }
     

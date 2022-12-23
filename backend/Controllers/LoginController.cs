@@ -10,9 +10,15 @@ public class LoginController : ControllerBase
         _kviziram = kviziram;
     }
 
-    [HttpPost]
+    [HttpGet]
     public async Task<ActionResult<string>> Login() {
         string? authHeader = HttpContext.Request.Headers["Authentication"];
-        return Ok(await _kviziram.login(authHeader));
-    }    
+        return Ok(await _kviziram.Login(authHeader));
+    }
+
+    [HttpGet("guest")]
+    public async Task<ActionResult<Guest>> LoginGuest(string username, Guid? uID = null) {
+        return Ok(await _kviziram.LoginGuest(username, uID));
+    }
+
 }

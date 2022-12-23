@@ -11,7 +11,13 @@ public class RegisterController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<bool>> register([FromBody] Account newAccount) {        
-        return Ok(await _kviziram.register(newAccount));
+    public async Task<ActionResult<bool>> Register([FromBody] Account newAccount) {        
+        return Ok(await _kviziram.Register(newAccount));
     } 
+
+    [HttpPost("guest")] 
+    public async Task<ActionResult<bool>> RegisterGuest([FromBody] Guest newGuest) {
+        return Ok(await _kviziram.RegisterGuest(newGuest));
+    }
+
 }

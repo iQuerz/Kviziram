@@ -27,4 +27,13 @@ public class AccountService: IAccountService {
 
         throw new KviziramException(Msg.NoAccount);
     }
+
+    public async Task<RelationshipState> RequestRelationshipAsync(Guid fuid) {
+        if (_context.AccountCaller != null) {
+
+        }
+        await Task.Delay(5);
+        throw new KviziramException(Msg.NoAccess);
+    }
+
 }

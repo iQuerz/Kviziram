@@ -2,6 +2,6 @@ using StackExchange.Redis;
 
 public interface IGuestService
 {
-    public Task addString(string key, string value);
-    public Task<string?> getString(string key);
+    public Task AddString(string key, string value);
+    public Task<string?> GetString(string key);
 }

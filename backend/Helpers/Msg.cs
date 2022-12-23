@@ -5,6 +5,7 @@ public static class Msg
     public const string NoPermission = "You don't have permission";
     public const string NoObject = "The object doesn't exist";
     public const string Deleted = " has been deleted";
+    public const string NoAccess = "You don't have access";
     #endregion
 
     #region Login/Register messages
