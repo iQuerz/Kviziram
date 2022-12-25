@@ -13,15 +13,24 @@ namespace backend.Controllers
             utility.CallerExists();
         }
 
-        [HttpGet("{uid}")]
-        public async Task<ActionResult<AccountView>> GetAccountView(Guid uid) {
-            return Ok(await _kviziram.GetAccountViewAsync(uid));
+        [HttpGet("{uID}")]
+        public async Task<ActionResult<AccountView>> GetAccountView(Guid uID) {
+            return Ok(await _kviziram.GetAccountViewAsync(uID));
         }
 
-        [HttpGet("me/friend/{fuid}/request")]
-        public async Task<ActionResult<RelationshipState>> RequestRelationship(Guid fuid) {
-            await _kviziram.RequestRelationshipAsync(fuid);
-            return Ok(RelationshipState.Pending);
+        [HttpGet("me/friend/{fuID}/request")]
+        public async Task<ActionResult> RequestRelationship(Guid fuID) {
+            return Ok(await _kviziram.RequestRelationshipAsync(fuID));
+        }
+
+        [HttpGet("me/friend/{fuID}/request/{answer}")]
+        public async Task<ActionResult> AnswerRelationship(Guid fuID, RelationshipState answer) {
+            return Ok(await _kviziram.AnswerRelationshipAsync(fuID, answer));
+        }
+
+        [HttpGet("me/friend/{fuID}/remove")]
+        public async Task<ActionResult> RemoveRelationship(Guid fuID) {            
+            return Ok(await _kviziram.RemoveRelationshipAsync(fuID));
         }
         
     }

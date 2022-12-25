@@ -21,7 +21,7 @@ public class LoginRegisterService: ILoginRegisterService
             throw new KviziramException(Msg.NoAuth);
 
         var loginInfo = DecodeAuth(authorization);
-        var checkAccount = await AccountEmailExists(loginInfo.email);
+        var checkAccount = await AccountEmailExistsQueryAsync(loginInfo.email);
 
         if (checkAccount.account == null) throw new KviziramException(Msg.NoAuth);
         VerifyPassword(loginInfo.password, checkAccount.account.Password);
@@ -35,7 +35,7 @@ public class LoginRegisterService: ILoginRegisterService
     }
 
     public async Task<bool> Register(Account newAccount) {
-        var checkAccount = await AccountEmailExists(newAccount.Email);
+        var checkAccount = await AccountEmailExistsQueryAsync(newAccount.Email);
         if (checkAccount.exists)
             throw new KviziramException(Msg.UsedEmail);
 
@@ -52,33 +52,19 @@ public class LoginRegisterService: ILoginRegisterService
         Guest? guest;
         
         if (uID == null) {
-            guest = new Guest();
-            guest.ID = Guid.NewGuid();
-            guest.Username = username;
+            guest = new Guest(Guid.NewGuid(), username);
         } else {
-            // IEnumerable<Guest?>  query = await 
-            Console.WriteLine("I am here: " + uID);
-            IEnumerable<Guest?> query = await _neo.Cypher
-                .Match("(g:Guest)")
-                .Where((Guest g) => g.ID == uID)
-                .Return(g => g.As<Guest>()).ResultsAsync;
-
-            guest = query.FirstOrDefault<Guest?>();
-            if (guest != null) {
-                guest.Username = username;
-
-                await _neo.Cypher
-                    .Match("(g:Guest)")
-                    .Where((Guest g) => g.ID == uID)
-                    .Set($"g.Username = '{username}'")
-                    .ExecuteWithoutResultsAsync();
-            }
+            guest = await GetGuestQueryAsync(uID);
+            if (guest != null) 
+                await UpdateGuestUsernameQueryAsync(guest.ID, username);
+            else 
+                throw new KviziramException(Msg.NoGuest);
         }
 
         if (guest == null) 
             throw new KviziramException(Msg.Unknown);
-        await _redis.StringSetAsync(newSID, guest.ToJsonString(), new TimeSpan(6,0,0));
-        
+
+        await _redis.StringSetAsync(newSID, guest.ToJsonString(), new TimeSpan(6,0,0));        
         return newSID;
     }
 
@@ -95,7 +81,35 @@ public class LoginRegisterService: ILoginRegisterService
         return (EmailPasswordArray[0], EmailPasswordArray[1]);
     }
 
-    public async Task<(bool exists, Account? account)> AccountEmailExists(string email) {
+    public string HashPassword(string pass) {
+        return BCrypt.Net.BCrypt.HashPassword(pass);
+    }
+
+    public void VerifyPassword(string passedPassword, string databasePassword) {
+        bool verified = BCrypt.Net.BCrypt.Verify(passedPassword, databasePassword);
+        if (verified == false) 
+            throw new KviziramException(Msg.BadPassword);
+    }
+
+    public async Task<Guest?> GetGuestQueryAsync(Guid? uID) {
+        IEnumerable<Guest?> query = await _neo.Cypher
+            .Match("(g:Guest)")
+            .Where((Guest g) => g.ID == uID)
+            .Return(g => g.As<Guest>()).ResultsAsync;
+
+            return query.FirstOrDefault<Guest?>();
+    }
+
+    public async Task UpdateGuestUsernameQueryAsync(Guid uID, string username) {
+        await _neo.Cypher
+            .Match("(g:Guest)")
+            .Where((Guest g) => g.ID == uID)
+            .Set("g.Username = $prop")
+            .WithParam("prop", username)
+            .ExecuteWithoutResultsAsync();
+    }
+
+    public async Task<(bool exists, Account? account)> AccountEmailExistsQueryAsync(string email) {
         IEnumerable<Account?>  query = await _neo.Cypher
             .Match("(a:Account)")
             .Where((Account a) => a.Email == email)
@@ -106,16 +120,6 @@ public class LoginRegisterService: ILoginRegisterService
             return (true, query.SingleOrDefault<Account?>());
 
         return (false, null);
-    }
-
-    public string HashPassword(string pass) {
-        return BCrypt.Net.BCrypt.HashPassword(pass);
-    }
-
-    public void VerifyPassword(string passedPassword, string databasePassword) {
-        bool verified = BCrypt.Net.BCrypt.Verify(passedPassword, databasePassword);
-        if (verified == false) 
-            throw new KviziramException(Msg.BadPassword);
     }
     #endregion
 }

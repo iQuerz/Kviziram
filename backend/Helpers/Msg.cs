@@ -19,7 +19,10 @@ public static class Msg
 
     #region Account messages
     public const string NoAccount = "Account doesn't exist";
-
+    public const string NoGuest = "Your guest uid is wrong";
+    public const string RequestSent = "Friendship request has been sent";
+    public const string RequestAnswer = "Relationship status set to: ";
+    public const string RelationshipRemove = "The relationship has been removed";
     #endregion
 
 

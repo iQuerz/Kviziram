@@ -10,6 +10,11 @@ public class Guest
         this.Username = "";
     }
 
+    public Guest(Guid uID, string username) {
+        this.ID = uID;
+        this.Username = username;
+    }
+
     public string ToJsonString() {
         return JsonSerializer.Serialize<Guest>(this);
     }

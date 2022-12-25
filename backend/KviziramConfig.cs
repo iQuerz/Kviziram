@@ -4,7 +4,7 @@ public static class KviziramConfig
 {
     public static ConfigurationOptions redis = new ConfigurationOptions
     {
-        EndPoints = { "localhost:49154" },
+        EndPoints = { "localhost:6379" },
         ClientName = "default",
         Password = "redispw"
     };
