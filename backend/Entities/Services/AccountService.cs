@@ -1,9 +1,8 @@
 using StackExchange.Redis;
-using Microsoft.AspNetCore.Mvc;
 using Neo4jClient;
-using Microsoft.AspNetCore.Http;
 
-public class AccountService: IAccountService {
+public class AccountService: IAccountService 
+{
     private KviziramContext _context;
     private IDatabase _redis;
     private IGraphClient _neo;
@@ -16,7 +15,7 @@ public class AccountService: IAccountService {
         _util = utility;
     }
 
-    #region Account Main Functions
+    #region Main Functions
     public async Task<AccountView> GetAccountViewAsync(Guid uID) {
         Account? account = await GetAccountQueryAsync(uID);
         if (account == null) 
@@ -50,7 +49,7 @@ public class AccountService: IAccountService {
 
     #endregion
 
-    #region Account Helper Functions
+    #region Helper Functions
     public async Task<Account?> GetAccountQueryAsync(Guid uID) {
         IEnumerable<Account?> query = await _neo.Cypher
             .Match("(a:Account)")
@@ -66,7 +65,8 @@ public class AccountService: IAccountService {
                 .Match("(me:Account)","(them:Account)")
                 .Where((Account me) => me.ID == _context.AccountCaller.ID)
                 .AndWhere((Account them) => them.ID == fuID)
-                .Merge("(me)-[:RELATIONSHIP {Status: $prop}]-(them)")
+                .AndWhere("NOT ((me)-[:RELATIONSHIP]-(them))")
+                .Merge("(me)-[:RELATIONSHIP {Status: $prop}]->(them)")
                 .WithParams(new {prop = RelationshipState.Pending})
                 .ExecuteWithoutResultsAsync();
         } else
@@ -76,7 +76,7 @@ public class AccountService: IAccountService {
     public async Task AnswerRelationshipQueryAsync(Guid fuID, RelationshipState answer) {
         if (_context.AccountCaller != null) {
             await _neo.Cypher
-                .Match("(me:Account)-[r:RELATIONSHIP]-(them:Account)")
+                .Match("(me:Account)<-[r:RELATIONSHIP]-(them:Account)")
                 .Where((Account me) => me.ID == _context.AccountCaller.ID)
                 .AndWhere((Account them) => them.ID == fuID)
                 .Set("r.Status = $prop")

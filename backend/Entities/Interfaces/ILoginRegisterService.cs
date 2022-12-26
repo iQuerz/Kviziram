@@ -5,6 +5,5 @@ public interface ILoginRegisterService
     public Task<bool> Register(Account newAccount);
 
     //Guest
-    public Task<string> LoginGuest(string username, Guid? uID = null);
-    public Task<bool> RegisterGuest(Guest newGuest);
+    public Task<string> LoginGuest(string username);
 }

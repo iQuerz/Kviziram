@@ -12,14 +12,18 @@ public class Auth
     public async Task Invoke(HttpContext context, KviziramContext _context, Utility _util) {
         try {
             string? sID = context.Request.Headers["SessionID"];
-            if (!string.IsNullOrEmpty(sID) && _util.isStringSidValid(sID)) {
-                _context.SID = sID;
-                string accountGuestString = (await _context.Redis.GetDatabase().StringGetAsync(_context.SID)).ToString();
-                if (_context.SID.Contains("account")) {
-                    _context.AccountCaller = JsonSerializer.Deserialize<AccountView>(accountGuestString);
+            if (!string.IsNullOrEmpty(sID)) {
+                string? account = (await _context.Redis.GetDatabase().StringGetAsync(_util.RedisKeyAccount(sID))).ToString();
+                string? guest = (await _context.Redis.GetDatabase().StringGetAsync(_util.RedisKeyGuest(sID))).ToString();
+
+                if (account != null) {
+                    _context.AccountCaller = JsonSerializer.Deserialize<AccountView>(account);
+                    _context.SID = _util.RedisKeyAccount(sID);
+                } 
+                else if (guest != null) {
+                    _context.GuestCaller = JsonSerializer.Deserialize<Guest>(guest);
+                    _context.SID = _util.RedisKeyGuest(sID);
                 }
-                else
-                    _context.GuestCaller = JsonSerializer.Deserialize<Guest>(accountGuestString);
             } else 
                 _context.SID = null;
             await _next(context);

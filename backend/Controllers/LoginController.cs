@@ -17,8 +17,8 @@ public class LoginController : ControllerBase
     }
 
     [HttpGet("guest")]
-    public async Task<ActionResult<Guest>> LoginGuest(string username, Guid? uID = null) {
-        return Ok(await _kviziram.LoginGuest(username, uID));
+    public async Task<ActionResult<string>> LoginGuest(string username) {
+        return Ok(await _kviziram.LoginGuest(username));
     }
 
 }

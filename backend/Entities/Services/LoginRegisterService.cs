@@ -13,7 +13,7 @@ public class LoginRegisterService: ILoginRegisterService
         _util = utility;
     }
 
-    #region Login/Register Main Functions
+    #region Main Functions
     public async Task<string> Login(string? authorization) {
         _util.AlreadyLogged();
 
@@ -26,10 +26,12 @@ public class LoginRegisterService: ILoginRegisterService
         if (checkAccount.account == null) throw new KviziramException(Msg.NoAuth);
         VerifyPassword(loginInfo.password, checkAccount.account.Password);
 
-        string newSID = "account:" + BCrypt.Net.BCrypt.GenerateSalt() + ":id";
+        string newSID = BCrypt.Net.BCrypt.GenerateSalt();
+        string accountKey = _util.RedisKeyAccount(newSID);
+
         AccountView accountView = new AccountView(checkAccount.account);
 
-        await _redis.StringSetAsync(newSID, accountView.ToJsonString(), new TimeSpan(12,0,0));
+        await _redis.StringSetAsync(accountKey, accountView.ToJsonString(), new TimeSpan(12,0,0));
 
         return newSID;
     }
@@ -47,35 +49,17 @@ public class LoginRegisterService: ILoginRegisterService
         return true;
     }
 
-    public async Task<string> LoginGuest(string username, Guid? uID = null) {
-        string newSID = "guest:" + BCrypt.Net.BCrypt.GenerateSalt() + ":id";
-        Guest? guest;
-        
-        if (uID == null) {
-            guest = new Guest(Guid.NewGuid(), username);
-        } else {
-            guest = await GetGuestQueryAsync(uID);
-            if (guest != null) 
-                await UpdateGuestUsernameQueryAsync(guest.ID, username);
-            else 
-                throw new KviziramException(Msg.NoGuest);
-        }
+    public async Task<string> LoginGuest(string username) {
+        string newSID = BCrypt.Net.BCrypt.GenerateSalt();
+        string guestKey = _util.RedisKeyGuest(newSID);
+        Guest? guest = new Guest(Guid.NewGuid(), username);
 
-        if (guest == null) 
-            throw new KviziramException(Msg.Unknown);
-
-        await _redis.StringSetAsync(newSID, guest.ToJsonString(), new TimeSpan(6,0,0));        
+        await _redis.StringSetAsync(guestKey, guest.ToJsonString(), new TimeSpan(6,0,0));        
         return newSID;
     }
-
-    public async Task<bool> RegisterGuest(Guest newGuest) {
-        await _neo.Cypher.Create("(g:Guest $prop)").WithParam("prop", newGuest).ExecuteWithoutResultsAsync();
-        return true;
-    }
-
     #endregion
 
-    #region Login/Register Helper Functions
+    #region Helper Functions
     public (string email, string password) DecodeAuth(string authorization) {
         string[] EmailPasswordArray = authorization.Split(":", 2);
         return (EmailPasswordArray[0], EmailPasswordArray[1]);
@@ -89,24 +73,6 @@ public class LoginRegisterService: ILoginRegisterService
         bool verified = BCrypt.Net.BCrypt.Verify(passedPassword, databasePassword);
         if (verified == false) 
             throw new KviziramException(Msg.BadPassword);
-    }
-
-    public async Task<Guest?> GetGuestQueryAsync(Guid? uID) {
-        IEnumerable<Guest?> query = await _neo.Cypher
-            .Match("(g:Guest)")
-            .Where((Guest g) => g.ID == uID)
-            .Return(g => g.As<Guest>()).ResultsAsync;
-
-            return query.FirstOrDefault<Guest?>();
-    }
-
-    public async Task UpdateGuestUsernameQueryAsync(Guid uID, string username) {
-        await _neo.Cypher
-            .Match("(g:Guest)")
-            .Where((Guest g) => g.ID == uID)
-            .Set("g.Username = $prop")
-            .WithParam("prop", username)
-            .ExecuteWithoutResultsAsync();
     }
 
     public async Task<(bool exists, Account? account)> AccountEmailExistsQueryAsync(string email) {

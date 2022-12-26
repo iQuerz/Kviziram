@@ -16,7 +16,7 @@ public class Utility
         _neo = context.Neo;
     }
 
-    #region Caller functions
+    #region Caller Functions
     public bool isStringSidValid(string sID)
     {
         return sID.Contains("account") || sID.Contains("guest");
@@ -41,6 +41,11 @@ public class Utility
             throw new KviziramException(Msg.AlreadyLoggedIn);
         return false;
     }
+    #endregion
+
+    #region Redis Key Functions
+    public string RedisKeyGuest(string key) { return "guest:" + key + ":id"; }
+    public string RedisKeyAccount(string key) { return "account:" + key + ":id"; }
     #endregion
 
     

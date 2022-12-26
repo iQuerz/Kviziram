@@ -22,6 +22,7 @@ public static class Msg
     public const string NoGuest = "Your guest uid is wrong";
     public const string RequestSent = "Friendship request has been sent";
     public const string RequestAnswer = "Relationship status set to: ";
+    public const string RequestFailed = "Request failed";
     public const string RelationshipRemove = "The relationship has been removed";
     #endregion
 
