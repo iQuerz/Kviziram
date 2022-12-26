@@ -10,4 +10,16 @@ public class AdController : ControllerBase
     {
         _kviziram = kviziram;
     }
+
+    #region GET Methods
+    #endregion
+
+    #region POST Methods
+    #endregion
+
+    #region PUT Methods
+    #endregion
+
+    #region DELETE Methods
+    #endregion
 }

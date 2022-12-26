@@ -6,6 +6,7 @@ public static class Msg
     public const string NoObject = "The object doesn't exist";
     public const string Deleted = " has been deleted";
     public const string NoAccess = "You don't have access";
+    public const string NoAnything = "Could not find anything";
     #endregion
 
     #region Login/Register messages
@@ -20,10 +21,12 @@ public static class Msg
     #region Account messages
     public const string NoAccount = "Account doesn't exist";
     public const string NoGuest = "Your guest uid is wrong";
+    public const string NoFriends = "You have no friends lmao";
     public const string RequestSent = "Friendship request has been sent";
     public const string RequestAnswer = "Relationship status set to: ";
     public const string RequestFailed = "Request failed";
     public const string RelationshipRemove = "The relationship has been removed";
+    public const string WrongRelationshipState = "What fuckin' relationship did you ask for?";
     #endregion
 
 

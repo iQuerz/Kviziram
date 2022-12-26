@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 public class AccountView
 {
@@ -10,7 +11,10 @@ public class AccountView
 
     public string Avatar { get; set; } = "";
 
-    public PlayerState Status { get; set; } = PlayerState.Online;  
+    public PlayerState Status { get; set; } = PlayerState.Online; 
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public RelationshipState? isFriend { get; set; } = null;
 
     public bool isAdmin { get; set; } = false;
 
