@@ -16,25 +16,25 @@ public class AccountService: IAccountService
     }
 
     #region Main Functions
-    public async Task<AccountView> GetAccountViewAsync(Guid uID) {
+    public async Task<AccountPoco> GetAccountViewAsync(Guid uID) {
         Account? account = await GetAccountQueryAsync(uID);
         if (account == null) 
             throw new KviziramException(Msg.NoAccount);
-        return new AccountView(account);
+        return new AccountPoco(account);
     }
 
-    public async Task<List<AccountView>> GetFriendsAsync(RelationshipState rState) {
+    public async Task<List<AccountPoco>> GetFriendsAsync(RelationshipState rState) {
         if (_util.IsCaller().account) {
-            List<AccountView>? listFriends = await GetFriendsQueryAsync(rState);
+            List<AccountPoco>? listFriends = await GetFriendsQueryAsync(rState);
             if (listFriends == null) throw new KviziramException(Msg.NoAnything);
             return listFriends;
         } 
         throw new KviziramException(Msg.NoAccess);
     }
 
-    public async Task<List<AccountView>> GetMutualFriendsAsync(RelationshipState rState) {
+    public async Task<List<AccountPoco>> GetMutualFriendsAsync(RelationshipState rState) {
         if (_util.IsCaller().account) {
-            List<AccountView>? listRecommendedFriends = await GetFriendsQueryAsync(rState);
+            List<AccountPoco>? listRecommendedFriends = await GetFriendsQueryAsync(rState);
 
             //Friends of Friends Query + Non Friend Accounts from played Games
             if (listRecommendedFriends == null) throw new KviziramException(Msg.NoAnything);
@@ -78,21 +78,21 @@ public class AccountService: IAccountService
         return query.SingleOrDefault();
     }
 
-    public async Task<List<AccountView>?> GetFriendsQueryAsync(RelationshipState rState) {
+    public async Task<List<AccountPoco>?> GetFriendsQueryAsync(RelationshipState rState) {
         if (_context.AccountCaller != null) {            
-            IEnumerable<AccountView> listAccounts;
+            IEnumerable<AccountPoco> listAccounts;
             if (rState == RelationshipState.Blocked) 
                 listAccounts = await _neo.Cypher
                     .Match("(me:Account)-[r:RELATIONSHIP]->(a:Account)")
                     .Where((Account me) => me.ID == _context.AccountCaller.ID)
-                    .AndWhere((RelationRelationship r) => r.Status.ToString() == rState.ToString())
-                    .Return(a => a.As<AccountView>()).ResultsAsync;
+                    .AndWhere((RelationshipDto r) => r.Status.ToString() == rState.ToString())
+                    .Return(a => a.As<AccountPoco>()).ResultsAsync;
             else {
                 listAccounts = await _neo.Cypher
                     .Match("(me:Account)-[r:RELATIONSHIP]-(a:Account)")
                     .Where((Account me) => me.ID == _context.AccountCaller.ID)
-                    .AndWhere((RelationRelationship r) => r.Status.ToString() == rState.ToString())
-                    .Return(a => a.As<AccountView>()).ResultsAsync;
+                    .AndWhere((RelationshipDto r) => r.Status.ToString() == rState.ToString())
+                    .Return(a => a.As<AccountPoco>()).ResultsAsync;
             }
             return listAccounts.ToList();
         }

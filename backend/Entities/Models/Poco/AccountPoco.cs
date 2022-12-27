@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-public class AccountView
+public class AccountPoco
 {
     public Guid ID { get; set; } 
 
@@ -18,13 +18,13 @@ public class AccountView
 
     public bool isAdmin { get; set; } = false;
 
-    public AccountView() {
+    public AccountPoco() {
         this.ID = Guid.NewGuid();
         this.Username = "";
         this.Email = "";
     }
 
-    public AccountView(Account account) {
+    public AccountPoco(Account account) {
         this.ID = account.ID;
         this.Username = account.Username;
         this.Email =  account.Email;
@@ -33,7 +33,7 @@ public class AccountView
     }
 
     public string ToJsonString() {
-        return JsonSerializer.Serialize<AccountView>(this);
+        return JsonSerializer.Serialize<AccountPoco>(this);
     }
     
 }
