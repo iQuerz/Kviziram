@@ -33,9 +33,9 @@ builder.Services.AddSingleton<IGraphClient>(neoClient);
 builder.Services.AddScoped<KviziramContext, KviziramContext>();
 
 // Services
-builder.Services.AddScoped<IGuestService, GuestService>();
 builder.Services.AddScoped<ILoginRegisterService, LoginRegisterService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IGuestService, GuestService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IAdService, AdService>();

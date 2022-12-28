@@ -15,17 +15,17 @@ public class Auth
             if (!string.IsNullOrEmpty(sID)) {
                 string? account = (await _context.Redis.GetDatabase().StringGetAsync(_util.RedisKeyAccount(sID))).ToString();
                 string? guest = (await _context.Redis.GetDatabase().StringGetAsync(_util.RedisKeyGuest(sID))).ToString();
-
                 if (account != null) {
-                    _context.AccountCaller = JsonSerializer.Deserialize<AccountView>(account);
+                    _context.AccountCaller = JsonSerializer.Deserialize<AccountPoco>(account);
                     _context.SID = _util.RedisKeyAccount(sID);
                 } 
                 else if (guest != null) {
                     _context.GuestCaller = JsonSerializer.Deserialize<Guest>(guest);
                     _context.SID = _util.RedisKeyGuest(sID);
                 }
-            } else 
+            } else {
                 _context.SID = null;
+            }
             await _next(context);
         } catch (Exception e) {
             await HandleExceptionAsync(context, e);

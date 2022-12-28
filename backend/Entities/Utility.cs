@@ -30,6 +30,24 @@ public class Utility
             throw new KviziramException(Msg.NoAuth);
     }
 
+    public AccountPoco CallerAccountExists() {
+        if (_context.AccountCaller == null)
+            throw new KviziramException(Msg.NoAuth);
+        return _context.AccountCaller;
+    }
+
+    public bool IsCallerAccountAdmin() {
+        if (!CallerAccountExists().isAdmin) 
+            throw new KviziramException(Msg.NoAccess);
+        else return true;
+    }
+
+    public Guest CallerGuestExists() {
+        if (_context.GuestCaller == null)
+            throw new KviziramException(Msg.NoAuth);
+        return _context.GuestCaller;
+    }
+
     public (bool account, bool guest) IsCaller() {
         bool account = (_context.AccountCaller == null) ? false : true;
         bool guest = (_context.GuestCaller == null) ? false : true;

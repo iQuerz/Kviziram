@@ -14,12 +14,12 @@ namespace backend.Controllers
         }
         
         #region GET Methods
-        [HttpGet("{uID}")]
+        [HttpGet]
         public async Task<ActionResult<AccountPoco>> GetAccountView(Guid uID) {
             return Ok(await _kviziram.GetAccountViewAsync(uID));
         }
 
-        [HttpGet("me/friends/{rState}")]
+        [HttpGet("me/friends/all/{rState}")]
         public async Task<ActionResult<List<AccountPoco>>> GetFriends(RelationshipState rState) {
             return Ok(await _kviziram.GetFriendsAsync(rState));
         }

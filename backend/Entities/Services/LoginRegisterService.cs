@@ -29,7 +29,7 @@ public class LoginRegisterService: ILoginRegisterService
         string newSID = BCrypt.Net.BCrypt.GenerateSalt();
         string accountKey = _util.RedisKeyAccount(newSID);
 
-        AccountView accountView = new AccountView(checkAccount.account);
+        AccountPoco accountView = new AccountPoco(checkAccount.account);
 
         await _redis.StringSetAsync(accountKey, accountView.ToJsonString(), new TimeSpan(12,0,0));
 

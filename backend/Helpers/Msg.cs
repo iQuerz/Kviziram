@@ -29,5 +29,9 @@ public static class Msg
     public const string WrongRelationshipState = "What fuckin' relationship did you ask for?";
     #endregion
 
+    #region Category messages
+    public const string NoCategory = "Category not found";
+    #endregion
+
 
 }
