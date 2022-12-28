@@ -33,5 +33,9 @@ public static class Msg
     public const string NoCategory = "Category not found";
     #endregion
 
+    #region Achievement messages
+    public const string NoAchievement = "Achievement not found";
+    #endregion
+
 
 }

@@ -85,7 +85,6 @@ public class CategoryService: ICategoryService
         await _neo.Cypher
             .Match("(c:Category)")
             .Where((Category c) => c.ID == uID)
-            .OptionalMatch("(c)<-[:QUIZ_CATEGORY]-(q:Quiz)")
             .DetachDelete("c")
             .ExecuteWithoutResultsAsync();
     }

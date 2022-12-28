@@ -16,9 +16,78 @@ public class AchievementService: IAchievementService
     }
 
     #region Main Functions
+    public async Task<Achievement> GetAchievementAsync(Guid uID) {
+        return await GetAchievementQueryAsync(uID);
+    }
+
+    public async Task<List<Achievement>> GetAllAchievementsAsync() {
+        return await GetAllAchievementsQueryAsync();
+    }
+
+    public async Task<Achievement> CreateAchievementAsync(Achievement newAchievement) {
+        newAchievement.ID = Guid.NewGuid();
+        await CreateAchievementQueryAsync(newAchievement);
+        return newAchievement;
+    }
+
+    public async Task<Achievement> UpdateAchievementAsync(Achievement updatedAchievement) {
+        Achievement achievementExists = await GetAchievementAsync(updatedAchievement.ID);
+        if (achievementExists == null)
+            throw new KviziramException(Msg.NoAchievement);
+        await UpdateAchievementQueryAsync(updatedAchievement);
+        return updatedAchievement;
+    }
+
+    public async Task<string> DeleteAchievementAsync(Guid uID) {
+        Achievement AchievementExists = await GetAchievementAsync(uID);
+        if (AchievementExists == null)
+            throw new KviziramException(Msg.NoAchievement);
+        await DeleteAchievementQueryAsync(uID);
+        return ("Achievement: " + uID + Msg.Deleted);
+    }
     #endregion
 
     #region Helper Functions
+    public async Task<Achievement> GetAchievementQueryAsync(Guid uID) {
+        var query = await _neo.Cypher
+            .Match("(a:Achievement)")
+            .Where((Achievement a) => a.ID == uID)
+            .Return(a => a.As<Achievement>())
+            .ResultsAsync;
+        return query.Single();
+    }
+
+    public async Task<List<Achievement>> GetAllAchievementsQueryAsync() {
+        var query = await _neo.Cypher
+            .Match("(a:Achievement)")
+            .Return(a => a.As<Achievement>())
+            .ResultsAsync;
+        return query.ToList();
+    }
+
+    public async Task CreateAchievementQueryAsync(Achievement newAchievement) {
+        await _neo.Cypher
+            .Create("(a:Achievement $prop)")
+            .WithParam("prop", newAchievement)
+            .ExecuteWithoutResultsAsync();
+    }
+
+    public async Task UpdateAchievementQueryAsync(Achievement updatedAchievement) {
+        await _neo.Cypher
+            .Match("(a:Achievement)")
+            .Where((Achievement a) => a.ID == updatedAchievement.ID)
+            .Set("a = $prop")
+            .WithParam("prop", updatedAchievement)
+            .ExecuteWithoutResultsAsync();
+    }
+
+    public async Task DeleteAchievementQueryAsync(Guid uID) {
+        await _neo.Cypher
+            .Match("(a:Achievement)")
+            .Where((Achievement a) => a.ID == uID)
+            .DetachDelete("a")
+            .ExecuteWithoutResultsAsync();
+    }
     #endregion
     
 }
