@@ -16,7 +16,7 @@ public class AccountService: IAccountService
     }
 
     #region Main Functions
-    public async Task<AccountPoco> GetAccountViewAsync(Guid uID) {
+    public async Task<AccountPoco> GetAccountAsync(Guid? uID) {
         Account? account = await GetAccountQueryAsync(uID);
         if (account == null) 
             throw new KviziramException(Msg.NoAccount);
@@ -69,9 +69,9 @@ public class AccountService: IAccountService
     #endregion
 
     #region Helper Functions
-    public async Task<Account?> GetAccountQueryAsync(Guid uID) {
+    public async Task<Account?> GetAccountQueryAsync(Guid? uID) {
         IEnumerable<Account?> query = await _neo.Cypher
-            .Match("(a:Account)")
+            .OptionalMatch("(a:Account)")
             .Where((Account a) => a.ID == uID)
             .Return(a => a.As<Account>()).ResultsAsync;
 

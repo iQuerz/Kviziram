@@ -7,17 +7,40 @@ public class QuizService: IQuizService
     private IDatabase _redis;
     private IGraphClient _neo;
     private Utility _util;
+
     private ICategoryService _category;
+    private IAccountService _account;
+    private IAchievementService _achievement;
+
     
-    public QuizService(KviziramContext context, Utility utility, ICategoryService category) {
+    public QuizService(KviziramContext context, Utility utility, ICategoryService category, IAccountService account, IAchievementService achievement) {
         _context = context;
         _redis = context.Redis.GetDatabase();
         _neo = context.Neo;
         _util = utility;
+
         _category = category;
+        _account = account;
+        _achievement = achievement;
     }
 
     #region Main Functions
+    public async Task<Quiz?> GetQuizAsync(Guid uID) {
+        var query = await GetQuizQueryAsync(uID);
+        return query;
+    }
+
+    public async Task<List<QuizPoco>?> SearchQuizzesAsync(QuizQuery quizQuery) {
+
+        var finalQuery = _neo.Cypher.OptionalMatch("(q:Quiz)");
+        if (quizQuery.CreatorID != null) finalQuery = finalQuery.Match("(q)<-[:CREATOR]-(a:Account)").Where((Account a) => a.ID == quizQuery.CreatorID);
+        if (quizQuery.AchievementID != null) finalQuery = finalQuery.Match("(q)-[:AWARD]->(ac:Achievement)").Where((Achievement ac) => ac.ID == quizQuery.AchievementID);
+        if (quizQuery.CategoryID != null) finalQuery = finalQuery.Match("(q)-[:IS_TYPE]->(c:Category)").Where((Category c) => c.ID == quizQuery.CategoryID);
+
+        IEnumerable<QuizPoco> result = await finalQuery.Return(q => q.As<QuizPoco>()).ResultsAsync;
+        return null;
+    }
+
     public async Task<Quiz> CreateQuizAsync(Quiz newQuiz) {
         if (newQuiz.Category != null) {
             Category? categoryCheck = await _category.GetCategoryAsync(newQuiz.Category.ID);
@@ -32,7 +55,7 @@ public class QuizService: IQuizService
             await CreateQuizQueryAsync(newQuiz);
         }
 
-        if (newQuiz.AchievementID != null)
+        if (newQuiz.AchievementID != null && _util.CallerAccountExists().isAdmin)
             await ConnectQuizAchievementQueryAsync(newQuiz.ID, newQuiz.AchievementID);
 
         return newQuiz;
@@ -41,17 +64,16 @@ public class QuizService: IQuizService
 
     #region Helper Functions
     public async Task<Quiz> CreateQuizQueryAsync(Quiz newQuiz) {
-        if (_context.AccountCaller != null && newQuiz.Category != null) {
-            QuizPoco newQuizPoco = new QuizPoco(newQuiz);
+        if (_context.AccountCaller != null && newQuiz.CategoryID != null) {
             await _neo.Cypher
                 .Match("(a:Account)")
                 .Where((Account a) => a.ID == _context.AccountCaller.ID)
                 .Merge("(a)-[:CREATOR]->(q:Quiz { ID: $id, Name: $name})")
-                .WithParams(new { id = newQuizPoco.ID, name = newQuizPoco.Name})
+                .WithParams(new { id = newQuiz.ID, name = newQuiz.Name})
                 .With("q")
                 .Match("(c:Category)")
-                .Where((Category c) => c.ID == newQuiz.Category.ID)                
-                .Merge("(q)-[:HAS_QUESTIONS]->(qs:Questions { ID: $idQS, List: $propQS})")
+                .Where((Category c) => c.ID == newQuiz.CategoryID)                
+                .Merge("(q)-[:HAS_QUESTIONS]->(qs:Questions { ID: $idQS, Info: $propQS})")
                 .WithParams( new {idQS = newQuiz.QuestionsID, propQS = newQuiz.QuestionsToJsonString()})
                 .Merge("(q)-[:IS_TYPE]->(c)")
                 .ExecuteWithoutResultsAsync();
@@ -70,5 +92,24 @@ public class QuizService: IQuizService
             .ExecuteWithoutResultsAsync();
         return true;
     }
+
+    public async Task<Quiz?> GetQuizQueryAsync(Guid uID) {
+        var query = await _neo.Cypher
+            .OptionalMatch("(q:Quiz)")
+            .Where((Quiz q) => q.ID == uID)
+            .Match("(q)-[:HAS_QUESTIONS]->(qs:Questions)")
+            .Return((q, qs) => new {
+                    Quiz = q.As<Quiz>(),
+                    Questions = qs.As<QuestionPoco>()
+                })
+            .ResultsAsync;
+        var result = query.Single();
+        result.Quiz.Questions = result.Questions.DeserializeInfo();
+        return result.Quiz;
+    }
+
+    // public async Task<List<QuestionDto>> GetQuestionsQueryAsync(Guid quID) {
+        
+    // }
     #endregion
 }

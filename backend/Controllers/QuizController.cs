@@ -12,6 +12,15 @@ public class QuizController : ControllerBase
     }
 
     #region GET Methods
+    [HttpGet]
+    public async Task<ActionResult<Quiz>> GetQuiz(Guid uID) {
+        return Ok(await _kviziram.GetQuizAsync(uID));
+    }
+
+    [HttpGet("search")]
+    public async Task<ActionResult<List<QuizPoco>>> SearchQuizzes([FromQuery] QuizQuery quizQuery) {
+        return Ok(await _kviziram.SearchQuizzesAsync(quizQuery));
+    }
     #endregion
 
     #region POST Methods

@@ -16,8 +16,11 @@ public class AchievementService: IAchievementService
     }
 
     #region Main Functions
-    public async Task<Achievement> GetAchievementAsync(Guid uID) {
-        return await GetAchievementQueryAsync(uID);
+    public async Task<Achievement> GetAchievementAsync(Guid? uID) {
+        Achievement? achievement = await GetAchievementQueryAsync(uID);
+        if (achievement == null)
+            throw new KviziramException(Msg.NoAchievement);
+        return achievement;
     }
 
     public async Task<List<Achievement>> GetAllAchievementsAsync() {
@@ -48,9 +51,9 @@ public class AchievementService: IAchievementService
     #endregion
 
     #region Helper Functions
-    public async Task<Achievement> GetAchievementQueryAsync(Guid uID) {
+    public async Task<Achievement?> GetAchievementQueryAsync(Guid? uID) {
         var query = await _neo.Cypher
-            .Match("(a:Achievement)")
+            .OptionalMatch("(a:Achievement)")
             .Where((Achievement a) => a.ID == uID)
             .Return(a => a.As<Achievement>())
             .ResultsAsync;

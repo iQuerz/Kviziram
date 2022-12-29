@@ -16,7 +16,7 @@ namespace backend.Controllers
         #region GET Methods
         [HttpGet]
         public async Task<ActionResult<AccountPoco>> GetAccountView(Guid uID) {
-            return Ok(await _kviziram.GetAccountViewAsync(uID));
+            return Ok(await _kviziram.GetAccountAsync(uID));
         }
 
         [HttpGet("me/friends/all/{rState}")]

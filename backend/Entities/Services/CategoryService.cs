@@ -17,9 +17,10 @@ public class CategoryService: ICategoryService
 
     #region Main Functions
     public async Task<Category?> GetCategoryAsync(Guid? uID) {
-        if (uID != null)
-            return await GetCategoryQueryAsync(uID);
-        throw new KviziramException(Msg.NoCategory);
+        Category? category = await GetCategoryQueryAsync(uID);
+        if (category == null)
+            throw new KviziramException(Msg.NoCategory);
+        return category;
     }
 
     public async Task<List<Category>> GetAllCategoriesAsync() {
