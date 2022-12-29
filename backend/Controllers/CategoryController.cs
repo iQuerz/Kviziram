@@ -14,7 +14,7 @@ public class CategoryController : ControllerBase
 
     #region GET Methods
     [HttpGet]
-    public async Task<ActionResult<Category>> GetCategory(Guid uID) {
+    public async Task<ActionResult<Category?>> GetCategory(Guid uID) {
         return Ok(await _kviziram.GetCategoryAsync(uID));
     }
 

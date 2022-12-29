@@ -37,5 +37,11 @@ public static class Msg
     public const string NoAchievement = "Achievement not found";
     #endregion
 
+    #region Achievement messages
+    public const string QuizNoCategory = "Category for this quiz has not been set";
+    #endregion
+
+    
+
 
 }

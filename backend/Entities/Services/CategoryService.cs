@@ -16,8 +16,10 @@ public class CategoryService: ICategoryService
     }
 
     #region Main Functions
-    public async Task<Category> GetCategoryAsync(Guid uID) {
-        return await GetCategoryQueryAsync(uID);
+    public async Task<Category?> GetCategoryAsync(Guid? uID) {
+        if (uID != null)
+            return await GetCategoryQueryAsync(uID);
+        throw new KviziramException(Msg.NoCategory);
     }
 
     public async Task<List<Category>> GetAllCategoriesAsync() {
@@ -31,7 +33,7 @@ public class CategoryService: ICategoryService
     }
 
     public async Task<Category> UpdateCategoryAsync(Category updatedCategory) {
-        Category categoryExists = await GetCategoryAsync(updatedCategory.ID);
+        Category? categoryExists = await GetCategoryAsync(updatedCategory.ID);
         if (categoryExists == null)
             throw new KviziramException(Msg.NoCategory);
         await UpdateCategoryQueryAsync(updatedCategory);
@@ -39,7 +41,7 @@ public class CategoryService: ICategoryService
     }
 
     public async Task<string> DeleteCategoryAsync(Guid uID) {
-        Category categoryExists = await GetCategoryAsync(uID);
+        Category? categoryExists = await GetCategoryAsync(uID);
         if (categoryExists == null)
             throw new KviziramException(Msg.NoCategory);
         await DeleteCategoryQueryAsync(uID);
@@ -48,9 +50,9 @@ public class CategoryService: ICategoryService
     #endregion
 
     #region Helper Functions
-    public async Task<Category> GetCategoryQueryAsync(Guid uID) {
+    public async Task<Category?> GetCategoryQueryAsync(Guid? uID) {
         var query = await _neo.Cypher
-            .Match("(c:Category)")
+            .OptionalMatch("(c:Category)")
             .Where((Category c) => c.ID == uID)
             .Return(c => c.As<Category>())
             .ResultsAsync;

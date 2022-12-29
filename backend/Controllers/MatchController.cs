@@ -15,6 +15,7 @@ public class MatchController : ControllerBase
     #endregion
 
     #region POST Methods
+    // [HttpPost]
     #endregion
 
     #region PUT Methods

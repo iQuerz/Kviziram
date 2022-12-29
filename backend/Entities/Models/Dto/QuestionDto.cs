@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-
-public class Question
+public class QuestionDto
 {
     public string? Description { get; set; }
 

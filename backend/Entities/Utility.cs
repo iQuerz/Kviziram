@@ -61,9 +61,13 @@ public class Utility
     }
     #endregion
 
-    #region Redis Key Functions
+    #region Key Functions
+    public string CreateGameKey(Guid key) { return Guid.NewGuid().ToString().Split('-', 2)[0]; }
+
     public string RedisKeyGuest(string key) { return "guest:" + key + ":id"; }
     public string RedisKeyAccount(string key) { return "account:" + key + ":id"; }
+    public string RedisKeyGame(string key) { return "game:" + key + ":id"; }
+
     #endregion
 
     

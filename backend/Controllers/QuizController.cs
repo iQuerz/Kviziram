@@ -15,6 +15,10 @@ public class QuizController : ControllerBase
     #endregion
 
     #region POST Methods
+    [HttpPost]
+    public async Task<ActionResult<Quiz>> CreateQuiz(Quiz newQuiz) {
+        return Ok(await _kviziram.CreateQuizAsync(newQuiz));
+    }
     #endregion
 
     #region PUT Methods
