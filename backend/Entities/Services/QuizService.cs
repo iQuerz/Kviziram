@@ -25,10 +25,14 @@ public class QuizService: IQuizService
     }
 
     #region Main Functions
-    public async Task<Quiz?> GetQuizAsync(Guid uID) {
-        var query = await GetQuizQueryAsync(uID);
-        return query;
+    public async Task<Quiz?> GetQuizAsync(Guid quID) {
+        return await GetQuizQueryAsync(quID);
     }
+
+    public async Task<List<AccountQuizRatingDto>?> GetQuizRatingsAsync(Guid quID) {
+        return await GetQuizRatingsQueryAsync(quID);
+    }
+
 
     public async Task<List<QuizDto>?> SearchQuizzesAsync(QuizQuery quizQuery) {
         var finalQuery = _neo.Cypher.OptionalMatch("(q:Quiz)");
@@ -40,7 +44,7 @@ public class QuizService: IQuizService
             .OptionalMatch("(q)<-[r:RATING]-(:Account)")
             .With("q, avg(r.Rating) as rating")
             .Return((q, rating) => new {
-                Quizzes = q.CollectAsDistinct<QuizDto>(),
+                Quizzes = q.CollectAs<QuizDto>(),
                 Ratings = rating.CollectAs<float>()
             });
         var result = (await query.ResultsAsync).Single();
@@ -112,23 +116,53 @@ public class QuizService: IQuizService
         return true;
     }
 
-    public async Task<Quiz?> GetQuizQueryAsync(Guid uID) {
+    public async Task<Quiz?> GetQuizQueryAsync(Guid quID) {
         var query = await _neo.Cypher
             .OptionalMatch("(q:Quiz)")
-            .Where((Quiz q) => q.ID == uID)
+            .Where((Quiz q) => q.ID == quID)
             .Match("(q)-[:HAS_QUESTIONS]->(qs:Questions)")
-            .Return((q, qs) => new {
+            .Match("(q)-[:IS_TYPE]->(c:Category)")
+            .Match("(q)<-[:CREATOR]-(a:Account)")
+            .OptionalMatch("(q)-[:AWARD]->(ac:Achievement)")
+            .Return((q, qs, c, a, ac) => new {
                     Quiz = q.As<Quiz>(),
-                    Questions = qs.As<QuestionPoco>()
+                    Questions = qs.As<QuestionPoco>(),
+                    Category = c.As<Category>(),
+                    Creator = a.As<AccountPoco>(),
+                    Achievement = ac.As<Achievement>()
                 })
             .ResultsAsync;
         var result = query.Single();
         result.Quiz.Questions = result.Questions.DeserializeInfo();
+        result.Quiz.Category = result.Category;
+        result.Quiz.Creator = result.Creator;
+        result.Quiz.Achievement = result.Achievement;
         return result.Quiz;
     }
 
-    // public async Task<List<QuestionDto>> GetQuestionsQueryAsync(Guid quID) {
-        
-    // }
+    public async Task<List<AccountQuizRatingDto>?> GetQuizRatingsQueryAsync(Guid quID) {
+        var query = await _neo.Cypher
+            .OptionalMatch("(q:Quiz)<-[r:RATING]-(a:Account)")
+            .Where((Quiz q) => q.ID == quID) 
+            .Return((a,r) => new { 
+                Account = a.CollectAs<AccountPoco>(),
+                Ratings = r.CollectAs<QuizRatingDto>()
+            }).ResultsAsync;
+        var result = query.FirstOrDefault();
+
+        if (result != null && result.Account.Count() > 0) {
+            List<AccountQuizRatingDto> resultList = new List<AccountQuizRatingDto>(); 
+            for(int i = 0; i < result.Account.Count(); i++) {
+                AccountQuizRatingDto obj = new AccountQuizRatingDto();
+
+                obj.Account = result.Account.ElementAt(i);
+                obj.Rating = result.Ratings.ElementAt(i);
+
+                resultList.Add(obj);
+            }
+            return resultList;
+        }        
+        return null;
+    }
     #endregion
 }

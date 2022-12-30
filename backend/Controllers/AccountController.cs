@@ -34,15 +34,11 @@ namespace backend.Controllers
             return Ok(await _kviziram.AnswerRelationshipAsync(fuID, answer));
         }
 
-        [HttpGet("me/friend/{fuID}/remove")]
-        public async Task<ActionResult> RemoveRelationship(Guid fuID) {            
-            return Ok(await _kviziram.RemoveRelationshipAsync(fuID));
+        [HttpGet("me/quiz/{quID}/rating")]
+        public async Task<ActionResult<QuizRatingDto>> GetRating(Guid quID) {
+            return Ok(await _kviziram.GetRatingAsync(quID));
         }
 
-        [HttpGet("me/quiz/{quID}/rating/remove")]
-        public async Task<ActionResult<bool>> RemoveRating(Guid quID) {            
-            return Ok(await _kviziram.RemoveRatingAsync(quID));
-        }
         #endregion
         
         #region POST Methods
@@ -53,9 +49,22 @@ namespace backend.Controllers
         #endregion
 
         #region PUT Methods
+        [HttpPut("me/quiz/{quID}/rating/update")]
+        public async Task<ActionResult<bool>> UpdateRating(Guid quID, [FromBody] QuizRatingDto updatedRating) {
+            return Ok(await _kviziram.UpdateRatingAsync(quID, updatedRating));
+        }
         #endregion
 
         #region DELETE Methods
+        [HttpDelete("me/quiz/{quID}/rating/remove")]
+        public async Task<ActionResult<bool>> RemoveRating(Guid quID) {
+            return Ok(await _kviziram.RemoveRatingAsync(quID));
+        }
+
+        [HttpDelete("me/friend/{fuID}/remove")]
+        public async Task<ActionResult> RemoveRelationship(Guid fuID) {            
+            return Ok(await _kviziram.RemoveRelationshipAsync(fuID));
+        }
         #endregion
         
     }

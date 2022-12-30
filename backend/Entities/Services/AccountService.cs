@@ -20,7 +20,9 @@ public class AccountService: IAccountService
         Account? account = await GetAccountQueryAsync(uID);
         if (account == null) 
             throw new KviziramException(Msg.NoAccount);
-        return new AccountPoco(account);
+        AccountPoco accountPoco = new AccountPoco(account);
+        accountPoco.isFriend = await GetRelationshipQueryAsync(uID);
+        return accountPoco;
     }
 
     public async Task<List<AccountPoco>> GetFriendsAsync(RelationshipState rState) {
@@ -67,6 +69,15 @@ public class AccountService: IAccountService
         throw new KviziramException(Msg.NoAccess);
     }
 
+    public async Task<QuizRatingDto?> GetRatingAsync(Guid quID) {
+        if (_util.IsCaller().account) {
+            QuizRatingDto? quizRating = await GetRatingQueryAsync(quID);
+            return quizRating;
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
+
     public async Task<bool> AddRatingAsync(Guid quID, QuizRatingDto newRating) {
         if (_util.IsCaller().account) {
             await AddRatingQueryAsync(quID, newRating);
@@ -74,6 +85,16 @@ public class AccountService: IAccountService
         }
         throw new KviziramException(Msg.NoAccess);
     }
+
+    public async Task<bool> UpdateRatingAsync(Guid quID, QuizRatingDto updatedRating) {
+        if (_util.IsCaller().account) {
+            await UpdateRatingQueryAsync(quID, updatedRating);
+            return true;
+        }
+        throw new KviziramException(Msg.NoAccess);
+
+    }   
+
 
     public async Task<bool> RemoveRatingAsync(Guid quID) {
         if (_util.IsCaller().account) {
@@ -92,6 +113,20 @@ public class AccountService: IAccountService
             .Return(a => a.As<Account>()).ResultsAsync;
 
         return query.SingleOrDefault();
+    }
+
+    public async Task<RelationshipState?> GetRelationshipQueryAsync(Guid? uID) {
+        if (_context.AccountCaller != null) { 
+            var query = await _neo.Cypher
+                .OptionalMatch("(me:Account)-[r:RELATIONSHIP]-(them:Account)")
+                .Where((Account me) => me.ID == _context.AccountCaller.ID)
+                .AndWhere((Account them) => them.ID == uID)
+                .Return(r => r.As<RelationshipDto?>())
+                .ResultsAsync;
+            RelationshipDto? result = query.Single();
+            if (result != null) return result.Status;
+        }
+        return null;
     }
 
     public async Task<List<AccountPoco>?> GetFriendsQueryAsync(RelationshipState rState) {
@@ -151,6 +186,19 @@ public class AccountService: IAccountService
         }        
     }
 
+    public async Task<QuizRatingDto?> GetRatingQueryAsync(Guid quID) {
+        if (_context.AccountCaller != null) {
+            var result = await _neo.Cypher
+                .OptionalMatch("(me:Account)-[r:RATING]->(q:Quiz)")
+                .Where((Account me) => me.ID == _context.AccountCaller.ID)
+                .AndWhere((QuizDto q) => q.ID == quID)
+                .Return(r => r.As<QuizRatingDto?>())
+                .ResultsAsync;
+            return result.SingleOrDefault();
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
     public async Task AddRatingQueryAsync(Guid quID, QuizRatingDto newRating) {
         if (_context.AccountCaller != null) {
             await _neo.Cypher
@@ -163,6 +211,19 @@ public class AccountService: IAccountService
                 .ExecuteWithoutResultsAsync();
         }
     }
+
+    public async Task UpdateRatingQueryAsync(Guid quID, QuizRatingDto updatedRating) {
+        if (_context.AccountCaller != null) {
+            await _neo.Cypher
+                .Match("(me:Account)-[r:RATING]->(q:Quiz)")
+                .Where((Account me) => me.ID == _context.AccountCaller.ID)
+                .AndWhere((QuizDto q) => q.ID == quID)
+                .Set("r.Rating = $rating, r.Comment = $comment")
+                .WithParams( new { rating = updatedRating.Rating, comment = updatedRating.Comment})
+                .ExecuteWithoutResultsAsync();
+        }
+    }
+
 
     public async Task RemoveRatingQueryAsync(Guid quID) {
         if (_context.AccountCaller != null) {
