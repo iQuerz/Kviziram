@@ -67,9 +67,9 @@ public class AccountService: IAccountService
         throw new KviziramException(Msg.NoAccess);
     }
 
-    public async Task<bool> RateQuizAsync(Guid quID, QuizRatingDto newRating) {
+    public async Task<bool> AddRatingAsync(Guid quID, QuizRatingDto newRating) {
         if (_util.IsCaller().account) {
-            await RateQuizQueryAsync(quID, newRating);
+            await AddRatingQueryAsync(quID, newRating);
             return true;
         }
         throw new KviziramException(Msg.NoAccess);
@@ -151,7 +151,7 @@ public class AccountService: IAccountService
         }        
     }
 
-    public async Task RateQuizQueryAsync(Guid quID, QuizRatingDto newRating) {
+    public async Task AddRatingQueryAsync(Guid quID, QuizRatingDto newRating) {
         if (_context.AccountCaller != null) {
             await _neo.Cypher
                 .Match("(me:Account)")

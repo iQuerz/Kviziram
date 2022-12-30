@@ -52,7 +52,7 @@ public class QuizService: IQuizService
         for( i = 0; i < tempFloat.Count(); i++)
             tempList.ElementAt(i).AvgRating = tempFloat.ElementAt(i);
         for( j = i; j < tempList.Count(); j++)
-            tempList.ElementAt(i).AvgRating = 0;
+            tempList.ElementAt(j).AvgRating = 0;
 
         if (quizQuery.OrderAsc)
             return tempList.OrderBy(x => x.AvgRating).ToList();

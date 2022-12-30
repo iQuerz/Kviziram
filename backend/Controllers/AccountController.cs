@@ -47,8 +47,8 @@ namespace backend.Controllers
         
         #region POST Methods
         [HttpPost("me/quiz/{quID}/rating/add")]
-        public async Task<ActionResult<bool>> RateQuiz(Guid quID, [FromBody] QuizRatingDto newRating) {
-            return Ok(await _kviziram.RateQuizAsync(quID, newRating));
+        public async Task<ActionResult<bool>> AddRating(Guid quID, [FromBody] QuizRatingDto newRating) {
+            return Ok(await _kviziram.AddRatingAsync(quID, newRating));
         }
         #endregion
 
