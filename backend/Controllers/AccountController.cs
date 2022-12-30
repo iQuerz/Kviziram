@@ -38,9 +38,18 @@ namespace backend.Controllers
         public async Task<ActionResult> RemoveRelationship(Guid fuID) {            
             return Ok(await _kviziram.RemoveRelationshipAsync(fuID));
         }
+
+        [HttpGet("me/quiz/{quID}/rating/remove")]
+        public async Task<ActionResult<bool>> RemoveRating(Guid quID) {            
+            return Ok(await _kviziram.RemoveRatingAsync(quID));
+        }
         #endregion
         
         #region POST Methods
+        [HttpPost("me/quiz/{quID}/rating/add")]
+        public async Task<ActionResult<bool>> RateQuiz(Guid quID, [FromBody] QuizRatingDto newRating) {
+            return Ok(await _kviziram.RateQuizAsync(quID, newRating));
+        }
         #endregion
 
         #region PUT Methods

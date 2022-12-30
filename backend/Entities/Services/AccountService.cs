@@ -66,8 +66,24 @@ public class AccountService: IAccountService
         }
         throw new KviziramException(Msg.NoAccess);
     }
-    #endregion
 
+    public async Task<bool> RateQuizAsync(Guid quID, QuizRatingDto newRating) {
+        if (_util.IsCaller().account) {
+            await RateQuizQueryAsync(quID, newRating);
+            return true;
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
+    public async Task<bool> RemoveRatingAsync(Guid quID) {
+        if (_util.IsCaller().account) {
+            await RemoveRatingQueryAsync(quID);
+            return true;
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+    #endregion
+    
     #region Helper Functions
     public async Task<Account?> GetAccountQueryAsync(Guid? uID) {
         IEnumerable<Account?> query = await _neo.Cypher
@@ -79,7 +95,7 @@ public class AccountService: IAccountService
     }
 
     public async Task<List<AccountPoco>?> GetFriendsQueryAsync(RelationshipState rState) {
-        if (_context.AccountCaller != null) {            
+        if (_context.AccountCaller != null) {          
             IEnumerable<AccountPoco> listAccounts;
             if (rState == RelationshipState.Blocked) 
                 listAccounts = await _neo.Cypher
@@ -133,6 +149,32 @@ public class AccountService: IAccountService
                 .Delete("(r)")
                 .ExecuteWithoutResultsAsync();
         }        
+    }
+
+    public async Task RateQuizQueryAsync(Guid quID, QuizRatingDto newRating) {
+        if (_context.AccountCaller != null) {
+            await _neo.Cypher
+                .Match("(me:Account)")
+                .Where((Account me) => me.ID == _context.AccountCaller.ID)
+                .Match("(q:Quiz)")
+                .Where((QuizDto q) => q.ID == quID)
+                .Merge("(me)-[:RATING { Rating: $rating, Comment: $comment }]->(q)")
+                .WithParams( new { rating = newRating.Rating, comment = newRating.Comment })
+                .ExecuteWithoutResultsAsync();
+        }
+    }
+
+    public async Task RemoveRatingQueryAsync(Guid quID) {
+        if (_context.AccountCaller != null) {
+            await _neo.Cypher
+                .Match("(me:Account)")
+                .Where((Account me) => me.ID == _context.AccountCaller.ID)
+                .Match("(q:Quiz)")
+                .Where((QuizDto q) => q.ID == quID)
+                .Merge("(me)-[r:RATING]->(q)")
+                .Delete("r")
+                .ExecuteWithoutResultsAsync();
+        }
     }
 
     #endregion

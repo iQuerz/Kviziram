@@ -30,15 +30,34 @@ public class QuizService: IQuizService
         return query;
     }
 
-    public async Task<List<QuizPoco>?> SearchQuizzesAsync(QuizQuery quizQuery) {
-
+    public async Task<List<QuizDto>?> SearchQuizzesAsync(QuizQuery quizQuery) {
         var finalQuery = _neo.Cypher.OptionalMatch("(q:Quiz)");
+
         if (quizQuery.CreatorID != null) finalQuery = finalQuery.Match("(q)<-[:CREATOR]-(a:Account)").Where((Account a) => a.ID == quizQuery.CreatorID);
         if (quizQuery.AchievementID != null) finalQuery = finalQuery.Match("(q)-[:AWARD]->(ac:Achievement)").Where((Achievement ac) => ac.ID == quizQuery.AchievementID);
         if (quizQuery.CategoryID != null) finalQuery = finalQuery.Match("(q)-[:IS_TYPE]->(c:Category)").Where((Category c) => c.ID == quizQuery.CategoryID);
+        var query = finalQuery
+            .OptionalMatch("(q)<-[r:RATING]-(:Account)")
+            .With("q, avg(r.Rating) as rating")
+            .Return((q, rating) => new {
+                Quizzes = q.CollectAsDistinct<QuizDto>(),
+                Ratings = rating.CollectAs<float>()
+            });
+        var result = (await query.ResultsAsync).Single();
 
-        IEnumerable<QuizPoco> result = await finalQuery.Return(q => q.As<QuizPoco>()).ResultsAsync;
-        return null;
+        IEnumerable<QuizDto> tempList = result.Quizzes;
+        IEnumerable<float> tempFloat = result.Ratings;
+        //Ne znam dal ima bolji nacin za ovo
+        int i, j;
+        for( i = 0; i < tempFloat.Count(); i++)
+            tempList.ElementAt(i).AvgRating = tempFloat.ElementAt(i);
+        for( j = i; j < tempList.Count(); j++)
+            tempList.ElementAt(i).AvgRating = 0;
+
+        if (quizQuery.OrderAsc)
+            return tempList.OrderBy(x => x.AvgRating).ToList();
+        else
+            return tempList.OrderByDescending(x => x.AvgRating).ToList();
     }
 
     public async Task<Quiz> CreateQuizAsync(Quiz newQuiz) {

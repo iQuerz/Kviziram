@@ -9,6 +9,9 @@ public class Quiz
     public string? Name { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public float? AvgRating { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Guid? CreatorID { get; set; } = null;
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

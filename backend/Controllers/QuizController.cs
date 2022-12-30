@@ -18,7 +18,7 @@ public class QuizController : ControllerBase
     }
 
     [HttpGet("search")]
-    public async Task<ActionResult<List<QuizPoco>>> SearchQuizzes([FromQuery] QuizQuery quizQuery) {
+    public async Task<ActionResult<List<QuizDto>>> SearchQuizzes([FromQuery] QuizQuery quizQuery) {
         return Ok(await _kviziram.SearchQuizzesAsync(quizQuery));
     }
     #endregion

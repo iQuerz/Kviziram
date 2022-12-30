@@ -4,5 +4,6 @@ public class QuizQuery
     public Guid? AchievementID { get; set; }
     public Guid? CategoryID { get; set; }
     public bool GetQuestions { get; set; } = false;
+    public bool OrderAsc { get; set; } = true;
     
 }
