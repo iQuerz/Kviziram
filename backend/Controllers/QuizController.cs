@@ -19,13 +19,24 @@ public class QuizController : ControllerBase
 
     [HttpGet("{quID}/ratings")]
     public async Task<ActionResult<List<AccountQuizRatingDto>>> GetQuizRatings(Guid quID) {
-        Console.WriteLine("Ej ziv sam");
         return Ok(await _kviziram.GetQuizRatingsAsync(quID));
     }
 
     [HttpGet("search")]
     public async Task<ActionResult<List<QuizDto>>> SearchQuizzes([FromQuery] QuizQuery quizQuery) {
         return Ok(await _kviziram.SearchQuizzesAsync(quizQuery));
+    }
+
+    [HttpGet("{quID}/achievement/set/{acuID}")]
+    public async Task<ActionResult<string>> SetQuizAchievement(Guid quID, Guid acuID) {
+        //Samo admin
+        return Ok(await _kviziram.ConnectQuizAchievementAsync(quID, acuID));
+    }
+
+    [HttpGet("{quID}/achievement/remove/{acuID}")]
+    public async Task<ActionResult<string>> RemoveQuizAchievement(Guid quID, Guid acuID) {
+        //Samo admin
+        return Ok(await _kviziram.DisconnectQuizAchievementAsync(quID, acuID));
     }
     #endregion
 
@@ -37,8 +48,16 @@ public class QuizController : ControllerBase
     #endregion
 
     #region PUT Methods
+    [HttpPut]
+    public async Task<ActionResult<Quiz>> UpdateQuiz(Quiz updatedQuiz) {
+        return Ok(await _kviziram.UpdateQuizAsync(updatedQuiz));
+    }
     #endregion
 
     #region DELETE Methods
+    [HttpDelete]
+    public async Task<ActionResult<string>> DeleteQuizAsync(Guid quID) {
+        return Ok(await _kviziram.DeleteQuizAsync(quID));
+    }
     #endregion
 }

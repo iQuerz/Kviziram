@@ -28,11 +28,44 @@ public class QuizService: IQuizService
     public async Task<Quiz?> GetQuizAsync(Guid quID) {
         return await GetQuizQueryAsync(quID);
     }
+    
+    public async Task<Quiz> UpdateQuizAsync(Quiz updatedQuiz) {
+        //lmao, tho nema smisla da modifikujes kviz nakon sto je neko vec igrao, rate-ovao i dobio trofej za stara pitanja :)
+        await DeleteQuizQueryAsync(updatedQuiz.ID);
+        return await CreateQuizAsync(updatedQuiz);
+    }
+
+    public async Task<Quiz> CreateQuizAsync(Quiz newQuiz) {
+        if (newQuiz.Category != null) {
+            Category? categoryCheck = await _category.GetCategoryAsync(newQuiz.Category.ID);
+            if (categoryCheck == null) throw new KviziramException(Msg.QuizNoCategory);        
+        }
+
+        newQuiz.CreatorID = _util.CallerAccountExists().ID;
+        newQuiz.ID = Guid.NewGuid();
+
+        if (newQuiz.Questions != null) {
+            newQuiz.QuestionsID = Guid.NewGuid();
+            await CreateQuizQueryAsync(newQuiz);
+        }
+
+        if (newQuiz.AchievementID != null && _util.CallerAccountExists().isAdmin)
+            await ConnectQuizAchievementQueryAsync(newQuiz.ID, newQuiz.AchievementID);
+
+        return newQuiz;
+    }
+    
+    public async Task<string> DeleteQuizAsync(Guid quID) {
+        Quiz? quizExists = await GetQuizQueryAsync(quID);
+        if (quizExists == null)
+            throw new KviziramException(Msg.NoCategory);
+        await DeleteQuizQueryAsync(quID);
+        return ("Quiz: " + quID + Msg.Deleted);        
+    }
 
     public async Task<List<AccountQuizRatingDto>?> GetQuizRatingsAsync(Guid quID) {
         return await GetQuizRatingsQueryAsync(quID);
     }
-
 
     public async Task<List<QuizDto>?> SearchQuizzesAsync(QuizQuery quizQuery) {
         var finalQuery = _neo.Cypher.OptionalMatch("(q:Quiz)");
@@ -63,25 +96,15 @@ public class QuizService: IQuizService
         else
             return tempList.OrderByDescending(x => x.AvgRating).ToList();
     }
+    
+    public async Task<string> ConnectQuizAchievementAsync(Guid quID, Guid? acuID) {
+        await ConnectQuizAchievementQueryAsync(quID, acuID);
+        return Msg.ConnectedQuizAchievement;
+    }
 
-    public async Task<Quiz> CreateQuizAsync(Quiz newQuiz) {
-        if (newQuiz.Category != null) {
-            Category? categoryCheck = await _category.GetCategoryAsync(newQuiz.Category.ID);
-            if (categoryCheck == null) throw new KviziramException(Msg.QuizNoCategory);        
-        }
-
-        newQuiz.CreatorID = _util.CallerAccountExists().ID;
-        newQuiz.ID = Guid.NewGuid();
-
-        if (newQuiz.Questions != null) {
-            newQuiz.QuestionsID = Guid.NewGuid();
-            await CreateQuizQueryAsync(newQuiz);
-        }
-
-        if (newQuiz.AchievementID != null && _util.CallerAccountExists().isAdmin)
-            await ConnectQuizAchievementQueryAsync(newQuiz.ID, newQuiz.AchievementID);
-
-        return newQuiz;
+    public async Task<string> DisconnectQuizAchievementAsync(Guid quID, Guid? acuID) {
+        await DisconnectQuizAchievementQueryAsync(quID, acuID);
+        return Msg.DisconnectedQuizAchievement;
     }
     #endregion
 
@@ -105,7 +128,7 @@ public class QuizService: IQuizService
         throw new KviziramException(Msg.NoAccess);
     }
 
-    public async Task<bool> ConnectQuizAchievementQueryAsync(Guid quID, Guid? acuID) {
+    public async Task ConnectQuizAchievementQueryAsync(Guid quID, Guid? acuID) {
         await _neo.Cypher
             .Match("(q:Quiz)")
             .Where((Quiz q) => q.ID == quID)
@@ -113,7 +136,15 @@ public class QuizService: IQuizService
             .Where((Achievement ac) => ac.ID == acuID)
             .Merge("(q)-[:AWARD]->(ac)")
             .ExecuteWithoutResultsAsync();
-        return true;
+    }
+
+    public async Task DisconnectQuizAchievementQueryAsync(Guid quID, Guid? acuID) {
+        await _neo.Cypher
+            .OptionalMatch("(q:Quiz)-[r:AWARD]->(ac:Achievement)")
+            .Where((Quiz q) => q.ID == quID)
+            .AndWhere((Achievement ac) => ac.ID == acuID)
+            .Delete("r")
+            .ExecuteWithoutResultsAsync();
     }
 
     public async Task<Quiz?> GetQuizQueryAsync(Guid quID) {
@@ -164,5 +195,15 @@ public class QuizService: IQuizService
         }        
         return null;
     }
+    
+    public async Task DeleteQuizQueryAsync(Guid quID) {
+        var query = _neo.Cypher
+            .Match("(q:Quiz)-[:HAS_QUESTIONS]->(qs:Questions)")
+            .Where((Quiz q) => q.ID == quID)
+            .DetachDelete("q")
+            .Delete("qs");
+        Console.WriteLine(query.Query.DebugQueryText);
+        await query.ExecuteWithoutResultsAsync();
+    }    
     #endregion
 }

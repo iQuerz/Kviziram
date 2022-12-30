@@ -35,10 +35,15 @@ public static class Msg
 
     #region Achievement messages
     public const string NoAchievement = "Achievement not found";
+    public const string ConnectedQuizAchievement = "Connect has been established";
+    public const string DisconnectedQuizAchievement = "Achievement was removed from the quiz";
+
     #endregion
 
-    #region Achievement messages
+    #region Quiz messages
     public const string QuizNoCategory = "Category for this quiz has not been set";
+    public const string NoQuiz = "Quiz not found";
+
     #endregion
 
     
