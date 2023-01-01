@@ -39,6 +39,16 @@ namespace backend.Controllers
             return Ok(await _kviziram.GetRatingAsync(quID));
         }
 
+        [HttpGet("me/categories/preferred/get")]
+        public async Task<ActionResult<List<Category>>> GetPreferredCategories() {
+            return Ok(await _kviziram.GetPreferredCategoriesAsync());
+        }
+
+        // [HttpPost("{auID}/achievements/get")]
+        // public async Task<ActionResult<List<Achievement>>> GetAccountAchievements(Guid auID) {
+        //     return Ok(await _kviziram.GetAccountAchievementsAsync(auID));
+        // }
+        
         #endregion
         
         #region POST Methods
@@ -46,6 +56,16 @@ namespace backend.Controllers
         public async Task<ActionResult<bool>> AddRating(Guid quID, [FromBody] QuizRatingDto newRating) {
             return Ok(await _kviziram.AddRatingAsync(quID, newRating));
         }
+
+        [HttpPost("me/categories/preferred/set")]
+        public async Task<ActionResult<string>> SetPreferredCategories(List<Guid> categoryGuids) {
+            return Ok(await _kviziram.SetPreferredCategoryAsync(categoryGuids));
+        }
+
+        // [HttpPost("me/achievements/set")]
+        // public async Task<ActionResult<string>> SetUpdateAchievements(<List<Achievement> newAchievement) {
+        //     return Ok(await _kviziram.SetUpdateAchievementAsync(newAchievement));
+        // }
         #endregion
 
         #region PUT Methods
@@ -64,6 +84,11 @@ namespace backend.Controllers
         [HttpDelete("me/friend/{fuID}/remove")]
         public async Task<ActionResult> RemoveRelationship(Guid fuID) {            
             return Ok(await _kviziram.RemoveRelationshipAsync(fuID));
+        }
+
+        [HttpDelete("me/categories/preferred/{cuID}/remove")]
+        public async Task<ActionResult<string>> RemovePreferredCategory(Guid cuID) {
+            return Ok(await _kviziram.RemovePreferredCategoryAsync(cuID));
         }
         #endregion
         

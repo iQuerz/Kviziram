@@ -70,8 +70,9 @@ public class Utility
 
     #endregion
 
-    
-
-
-
+    #region Convert Functions
+    public string ListOfCategoryIDsToString (List<Guid> categoryGuids) {
+        return "['" + string.Join("','", categoryGuids) + "']";
+    }
+    #endregion
 }

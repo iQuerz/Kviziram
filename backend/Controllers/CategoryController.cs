@@ -22,6 +22,7 @@ public class CategoryController : ControllerBase
     public async Task<ActionResult<List<Category>>> GetAllCategories() {
         return Ok(await _kviziram.GetAllCategoriesAsync());
     }
+
     #endregion
 
     #region POST Methods

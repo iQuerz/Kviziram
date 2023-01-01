@@ -31,6 +31,8 @@ public static class Msg
 
     #region Category messages
     public const string NoCategory = "Category not found";
+    public const string PreferredCategoriesSet = "Preferred categories updated";
+    public const string PreferredCategoryRemove = "Preferred categories remove";
     #endregion
 
     #region Achievement messages

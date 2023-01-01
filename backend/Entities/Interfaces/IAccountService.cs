@@ -13,4 +13,8 @@ public interface IAccountService
     public Task<bool> UpdateRatingAsync(Guid quID, QuizRatingDto updatedRating);    
     public Task<bool> RemoveRatingAsync(Guid quID);
 
+    public Task<List<Category>?> GetPreferredCategoriesAsync();
+    public Task<string> SetPreferredCategoryAsync (List<Guid> categoryGuids);
+    public Task<string> RemovePreferredCategoryAsync(Guid cuID);
+
 }

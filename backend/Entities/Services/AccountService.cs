@@ -103,8 +103,33 @@ public class AccountService: IAccountService
         }
         throw new KviziramException(Msg.NoAccess);
     }
+
+    public async Task<List<Category>?> GetPreferredCategoriesAsync() {
+        if (_util.IsCaller().account) {
+            return await GetPreferredCategoriesQueryAsync();
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
+
+    public async Task<string> SetPreferredCategoryAsync (List<Guid> categoryGuids) {
+        if (_util.IsCaller().account) {
+            await SetPreferredCategoryQueryAsync(categoryGuids);
+            return Msg.PreferredCategoriesSet;
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
+    public async Task<string> RemovePreferredCategoryAsync(Guid cuID) {
+        if (_util.IsCaller().account) {
+            await RemovePreferredCategoryQueryAsync(cuID);
+            return Msg.PreferredCategoriesSet;
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
     #endregion
-    
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     #region Helper Functions
     public async Task<Account?> GetAccountQueryAsync(Guid? uID) {
         IEnumerable<Account?> query = await _neo.Cypher
@@ -237,6 +262,45 @@ public class AccountService: IAccountService
                 .ExecuteWithoutResultsAsync();
         }
     }
+
+    public async Task<List<Category>?> GetPreferredCategoriesQueryAsync() {
+        if (_context.AccountCaller != null) {
+            var query = await _neo.Cypher
+                .OptionalMatch("(a:Account)-[r:PREFERS]->(c:Category)")
+                .Where((Account a) => a.ID == _context.AccountCaller.ID)
+                .Return( c => c.As<Category>())
+                .ResultsAsync;
+            return query.ToList();
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
+    public async Task SetPreferredCategoryQueryAsync (List<Guid> categoryGuids) {
+        if (_context.AccountCaller != null) {
+            string categoryList = _util.ListOfCategoryIDsToString(categoryGuids);
+            var query = _neo.Cypher
+                .Match("(a:Account)") 
+                .Where((Account a) => a.ID == _context.AccountCaller.ID)
+                .Unwind(categoryGuids, "categoryID")
+                .OptionalMatch("(c:Category)")
+                .Where("c.ID = categoryID")
+                .With("Collect(c) AS categories, a AS account")
+                .ForEach("(category IN categories| MERGE (account)-[r:PREFERS]->(category) ON CREATE SET r.Weight = 1 ON MATCH SET r.Weight = r.Weight + 1)");
+            await query.ExecuteWithoutResultsAsync();
+        }
+    }
+
+    public async Task RemovePreferredCategoryQueryAsync(Guid cuID) {
+        if (_context.AccountCaller != null) {
+            await _neo.Cypher
+                .Match("(me:Account)-[r:PREFERS]->(c:Category)")
+                .Where((Account me) => me.ID == _context.AccountCaller.ID)
+                .AndWhere((Category c) => c.ID == cuID)
+                .Delete("(r)")
+                .ExecuteWithoutResultsAsync();
+        }
+    }
+
 
     #endregion
 
