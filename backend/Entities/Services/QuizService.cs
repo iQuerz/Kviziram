@@ -29,30 +29,31 @@ public class QuizService: IQuizService
         return await GetQuizQueryAsync(quID);
     }
     
-    public async Task<Quiz> UpdateQuizAsync(Quiz updatedQuiz) {
+    public async Task<Quiz?> UpdateQuizAsync(Quiz updatedQuiz) {
         //lmao, tho nema smisla da modifikujes kviz nakon sto je neko vec igrao, rate-ovao i dobio trofej za stara pitanja :)
         await DeleteQuizQueryAsync(updatedQuiz.ID);
         return await CreateQuizAsync(updatedQuiz);
     }
 
-    public async Task<Quiz> CreateQuizAsync(Quiz newQuiz) {
-        if (newQuiz.Category != null) {
-            Category? categoryCheck = await _category.GetCategoryAsync(newQuiz.Category.ID);
-            if (categoryCheck == null) throw new KviziramException(Msg.QuizNoCategory);        
-        }
-
-        newQuiz.CreatorID = _util.CallerAccountExists().ID;
-        newQuiz.ID = Guid.NewGuid();
-
+    public async Task<Quiz?> CreateQuizAsync(Quiz newQuiz) {
         if (newQuiz.Questions != null) {
+            newQuiz.ID = Guid.NewGuid();
+            newQuiz.CreatorID = _util.CallerAccountExists().ID;
+            newQuiz.Achievement = null;
+            newQuiz.Creator = null;
+            newQuiz.Category = null;
+            newQuiz.AvgRating = null;
             newQuiz.QuestionsID = Guid.NewGuid();
-            await CreateQuizQueryAsync(newQuiz);
+
+            if (newQuiz.CategoryID != null) {
+                Category? categoryCheck = await _category.GetCategoryAsync(newQuiz.CategoryID);
+            if (categoryCheck == null) 
+                throw new KviziramException(Msg.QuizNoCategory);        
+            }           
+            
+            return await CreateQuizQueryAsync(newQuiz);
         }
-
-        if (newQuiz.AchievementID != null && _util.CallerAccountExists().isAdmin)
-            await ConnectQuizAchievementQueryAsync(newQuiz.ID, newQuiz.AchievementID);
-
-        return newQuiz;
+        throw new KviziramException(Msg.NoQuestions);
     }
     
     public async Task<string> DeleteQuizAsync(Guid quID) {
@@ -109,7 +110,7 @@ public class QuizService: IQuizService
     #endregion
 
     #region Helper Functions
-    public async Task<Quiz> CreateQuizQueryAsync(Quiz newQuiz) {
+    public async Task<Quiz?> CreateQuizQueryAsync(Quiz newQuiz) {
         if (_context.AccountCaller != null && newQuiz.CategoryID != null) {
             await _neo.Cypher
                 .Match("(a:Account)")
@@ -123,7 +124,11 @@ public class QuizService: IQuizService
                 .WithParams( new {idQS = newQuiz.QuestionsID, propQS = newQuiz.QuestionsToJsonString()})
                 .Merge("(q)-[:IS_TYPE]->(c)")
                 .ExecuteWithoutResultsAsync();
-            return newQuiz;            
+
+            if (newQuiz.AchievementID != null && _util.CallerAccountExists().isAdmin)
+                await ConnectQuizAchievementQueryAsync(newQuiz.ID, newQuiz.AchievementID);
+
+            return await GetQuizAsync(newQuiz.ID);            
         }
         throw new KviziramException(Msg.NoAccess);
     }
@@ -168,6 +173,13 @@ public class QuizService: IQuizService
         result.Quiz.Category = result.Category;
         result.Quiz.Creator = result.Creator;
         result.Quiz.Achievement = result.Achievement;
+
+        result.Quiz.QuestionsID = result.Questions.ID;
+        result.Quiz.CategoryID = result.Category.ID;
+        result.Quiz.CreatorID = result.Creator.ID;
+        result.Quiz.AchievementID = result.Achievement.ID;
+
+
         return result.Quiz;
     }
 

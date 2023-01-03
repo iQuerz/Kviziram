@@ -5,4 +5,7 @@ public interface IAchievementService
     public Task<Achievement> CreateAchievementAsync(Achievement newAchievementy);
     public Task<Achievement> UpdateAchievementAsync(Achievement updatedAchievement);
     public Task<string> DeleteAchievementAsync(Guid uID);
+
+    public Task<List<AchievedDto>?> GetAchievementScoreboardAsync(Guid acuID);
+
 }

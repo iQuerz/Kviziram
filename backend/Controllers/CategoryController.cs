@@ -9,7 +9,7 @@ public class CategoryController : ControllerBase
     public CategoryController(ICategoryService kviziram, Utility utility): base()
     {
         _kviziram = kviziram;
-        utility.IsCallerAccountAdmin();       
+        // utility.IsCallerAccountAdmin();       
     }
 
     #region GET Methods
@@ -22,7 +22,6 @@ public class CategoryController : ControllerBase
     public async Task<ActionResult<List<Category>>> GetAllCategories() {
         return Ok(await _kviziram.GetAllCategoriesAsync());
     }
-
     #endregion
 
     #region POST Methods

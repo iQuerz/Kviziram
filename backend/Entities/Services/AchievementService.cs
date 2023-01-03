@@ -29,6 +29,7 @@ public class AchievementService: IAchievementService
 
     public async Task<Achievement> CreateAchievementAsync(Achievement newAchievement) {
         newAchievement.ID = Guid.NewGuid();
+        newAchievement.Progress = null;
         await CreateAchievementQueryAsync(newAchievement);
         return newAchievement;
     }
@@ -37,6 +38,7 @@ public class AchievementService: IAchievementService
         Achievement achievementExists = await GetAchievementAsync(updatedAchievement.ID);
         if (achievementExists == null)
             throw new KviziramException(Msg.NoAchievement);
+        updatedAchievement.Progress = null;
         await UpdateAchievementQueryAsync(updatedAchievement);
         return updatedAchievement;
     }
@@ -47,6 +49,13 @@ public class AchievementService: IAchievementService
             throw new KviziramException(Msg.NoAchievement);
         await DeleteAchievementQueryAsync(uID);
         return ("Achievement: " + uID + Msg.Deleted);
+    }
+
+    public async Task<List<AchievedDto>?> GetAchievementScoreboardAsync(Guid acuID) {
+        Achievement? categoryExists = await GetAchievementAsync(acuID);
+        if (categoryExists == null)
+            throw new KviziramException(Msg.NoAchievement);
+        return await GetAchievementScoreboardQueryAsync(acuID);
     }
     #endregion
 
@@ -91,6 +100,25 @@ public class AchievementService: IAchievementService
             .DetachDelete("a")
             .ExecuteWithoutResultsAsync();
     }
-    #endregion
+
+    public async Task<List<AchievedDto>?> GetAchievementScoreboardQueryAsync(Guid acuID) {
+        var query = _neo.Cypher
+            .OptionalMatch("(ac:Achievement)<-[r:ACHIEVED]-(a:Account)")
+            .Where((Achievement ac) => ac.ID == acuID)
+            .Return((a, r) => new {
+                Accounts = a.CollectAs<AccountPoco>(),
+                AchievementProgress = r.CollectAs<AchievedDto>()
+            });
+        Console.WriteLine(query.Query.DebugQueryText);
+        var result = (await query.ResultsAsync).Single();
+        if (result.AchievementProgress.Count() != 0) {
+            for(int i = 0; i < result.AchievementProgress.Count(); i++)
+                result.AchievementProgress.ElementAt(i).AccountPoco = result.Accounts.ElementAt(i);
+            return result.AchievementProgress.OrderByDescending(p => p.Progress).ToList();
+        }
+
+        return null;
+    }
+    #endregion   
     
 }

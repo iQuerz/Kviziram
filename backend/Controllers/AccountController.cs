@@ -34,6 +34,11 @@ namespace backend.Controllers
             return Ok(await _kviziram.AnswerRelationshipAsync(fuID, answer));
         }
 
+        [HttpGet("me/friend/{fuID}/block")]
+        public async Task<ActionResult> BlockRelationship(Guid fuID) {
+            return Ok(await _kviziram.BlockRelationshipAsync(fuID));
+        }
+
         [HttpGet("me/quiz/{quID}/rating")]
         public async Task<ActionResult<QuizRatingDto>> GetRating(Guid quID) {
             return Ok(await _kviziram.GetRatingAsync(quID));
@@ -44,10 +49,15 @@ namespace backend.Controllers
             return Ok(await _kviziram.GetPreferredCategoriesAsync());
         }
 
-        // [HttpPost("{auID}/achievements/get")]
-        // public async Task<ActionResult<List<Achievement>>> GetAccountAchievements(Guid auID) {
-        //     return Ok(await _kviziram.GetAccountAchievementsAsync(auID));
-        // }
+        [HttpGet("{auID}/achievements/{acuID}/set")]
+        public async Task<ActionResult<string>> SetUpdateAchievements(Guid auID, Guid acuID) {
+            return Ok(await _kviziram.SetUpdateAchievementAsync(auID, acuID));
+        }
+
+        [HttpGet("{auID}/achievements/get")]
+        public async Task<ActionResult<List<Achievement>>> GetAccountAchievements(Guid auID) {
+            return Ok(await _kviziram.GetAccountAchievementsAsync(auID));
+        }
         
         #endregion
         
@@ -61,11 +71,6 @@ namespace backend.Controllers
         public async Task<ActionResult<string>> SetPreferredCategories(List<Guid> categoryGuids) {
             return Ok(await _kviziram.SetPreferredCategoryAsync(categoryGuids));
         }
-
-        // [HttpPost("me/achievements/set")]
-        // public async Task<ActionResult<string>> SetUpdateAchievements(<List<Achievement> newAchievement) {
-        //     return Ok(await _kviziram.SetUpdateAchievementAsync(newAchievement));
-        // }
         #endregion
 
         #region PUT Methods

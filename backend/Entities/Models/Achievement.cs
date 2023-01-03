@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 public class Achievement
 {
@@ -11,4 +12,7 @@ public class Achievement
     public string? Description { get; set; }
 
     public string Picture { get; set; } = "";
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public int? Progress { get; set; }
 }

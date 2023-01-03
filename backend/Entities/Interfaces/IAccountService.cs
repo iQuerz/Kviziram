@@ -7,6 +7,7 @@ public interface IAccountService
     public Task<string> RequestRelationshipAsync(Guid fuid);
     public Task<string> AnswerRelationshipAsync(Guid fuID, RelationshipState answer);
     public Task<string> RemoveRelationshipAsync(Guid fuID);
+    public Task<string> BlockRelationshipAsync(Guid fuID);
 
     public Task<QuizRatingDto?> GetRatingAsync(Guid quID);
     public Task<bool> AddRatingAsync(Guid quID, QuizRatingDto newRating);
@@ -16,5 +17,8 @@ public interface IAccountService
     public Task<List<Category>?> GetPreferredCategoriesAsync();
     public Task<string> SetPreferredCategoryAsync (List<Guid> categoryGuids);
     public Task<string> RemovePreferredCategoryAsync(Guid cuID);
+
+    public Task<string> SetUpdateAchievementAsync(Guid auID, Guid acuID);
+    public Task<List<Achievement>?> GetAccountAchievementsAsync(Guid auID);
 
 }

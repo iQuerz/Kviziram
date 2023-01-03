@@ -21,6 +21,11 @@ public class AchievementController : ControllerBase
     public async Task<ActionResult<List<Achievement>>> GetAllAchievements() {
         return Ok(await _kviziram.GetAllAchievementsAsync());
     }
+    
+    [HttpGet("{acuID}/scoreboard")]
+    public async Task<ActionResult<List<AchievedDto>>> GetAchievementScoreboard(Guid acuID) {
+        return Ok(await _kviziram.GetAchievementScoreboardAsync(acuID));
+    }
     #endregion
 
     #region POST Methods

@@ -24,6 +24,7 @@ public static class Msg
     public const string NoFriends = "You have no friends lmao";
     public const string RequestSent = "Friendship request has been sent";
     public const string RequestAnswer = "Relationship status set to: ";
+    public const string AccountBlocked = "Account has been blocked";
     public const string RequestFailed = "Request failed";
     public const string RelationshipRemove = "The relationship has been removed";
     public const string WrongRelationshipState = "What fuckin' relationship did you ask for?";
@@ -39,12 +40,13 @@ public static class Msg
     public const string NoAchievement = "Achievement not found";
     public const string ConnectedQuizAchievement = "Connect has been established";
     public const string DisconnectedQuizAchievement = "Achievement was removed from the quiz";
-
+    public const string AchievementSetUpdated = "Achievement given";
     #endregion
 
     #region Quiz messages
     public const string QuizNoCategory = "Category for this quiz has not been set";
     public const string NoQuiz = "Quiz not found";
+    public const string NoQuestions = "You didn't enter any questions for your quiz";
 
     #endregion
 

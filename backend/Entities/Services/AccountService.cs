@@ -55,7 +55,10 @@ public class AccountService: IAccountService
 
     public async Task<string> AnswerRelationshipAsync(Guid fuID, RelationshipState answer) {
         if (_util.IsCaller().account) {
-            await AnswerRelationshipQueryAsync(fuID, answer);
+            if (answer == RelationshipState.Blocked)
+                await BlockRelationshipAsync(fuID);
+            else
+                await AnswerRelationshipQueryAsync(fuID, answer);
             return (Msg.RequestAnswer + answer);
         }
         throw new KviziramException(Msg.NoAccess);
@@ -65,6 +68,15 @@ public class AccountService: IAccountService
         if (_util.IsCaller().account) {
             await RemoveRelationshipQueryAsync(fuID);
             return Msg.RelationshipRemove;
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
+    public async Task<string> BlockRelationshipAsync(Guid fuID) {
+        if (_util.IsCaller().account) {
+            await RemoveRelationshipAsync(fuID);
+            await BlockRelationshipQueryAsync(fuID);
+            return Msg.AccountBlocked;
         }
         throw new KviziramException(Msg.NoAccess);
     }
@@ -128,6 +140,20 @@ public class AccountService: IAccountService
         throw new KviziramException(Msg.NoAccess);
     }
 
+    public async Task<string> SetUpdateAchievementAsync(Guid auID, Guid acuID) {
+        await SetUpdateAchievementQueryAsync(auID, acuID);
+        return Msg.AchievementSetUpdated;
+    }
+
+    public async Task<List<Achievement>?> GetAccountAchievementsAsync(Guid auID) {
+        if (_util.IsCaller().account) {
+            return await GetAccountAchievementsQueryAsync(auID);;
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
+
+
     #endregion
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     #region Helper Functions
@@ -157,7 +183,7 @@ public class AccountService: IAccountService
     public async Task<List<AccountPoco>?> GetFriendsQueryAsync(RelationshipState rState) {
         if (_context.AccountCaller != null) {          
             IEnumerable<AccountPoco> listAccounts;
-            if (rState == RelationshipState.Blocked) 
+            if (rState == RelationshipState.Blocked)                
                 listAccounts = await _neo.Cypher
                     .Match("(me:Account)-[r:RELATIONSHIP]->(a:Account)")
                     .Where((Account me) => me.ID == _context.AccountCaller.ID)
@@ -203,12 +229,26 @@ public class AccountService: IAccountService
     public async Task RemoveRelationshipQueryAsync(Guid fuID) {
         if (_context.AccountCaller != null) {
             await _neo.Cypher
-                .Match("(me:Account)-[r:RELATIONSHIP]-(them:Account)")
+                .OptionalMatch("(me:Account)-[r:RELATIONSHIP]-(them:Account)")
                 .Where((Account me) => me.ID == _context.AccountCaller.ID)
                 .AndWhere((Account them) => them.ID == fuID)
                 .Delete("(r)")
                 .ExecuteWithoutResultsAsync();
         }        
+    }
+
+    public async Task BlockRelationshipQueryAsync(Guid fuID) {
+        if (_context.AccountCaller != null) {
+            await _neo.Cypher
+                .Match("(me:Account)")
+                .Where((Account me) => me.ID == _context.AccountCaller.ID)
+                .Match("(them:Account)")
+                .Where((Account them) => them.ID == fuID)
+                .Merge("(me)-[r:RELATIONSHIP]->(them)")
+                .Set("r.Status = $prop")
+                .WithParam("prop", RelationshipState.Blocked.ToString())
+                .ExecuteWithoutResultsAsync(); 
+        }
     }
 
     public async Task<QuizRatingDto?> GetRatingQueryAsync(Guid quID) {
@@ -299,6 +339,40 @@ public class AccountService: IAccountService
                 .Delete("(r)")
                 .ExecuteWithoutResultsAsync();
         }
+    }
+
+    public async Task SetUpdateAchievementQueryAsync(Guid auID, Guid acuID) {
+            var query = _neo.Cypher
+                .Match("(a:Account)") 
+                .Where((Account a) => a.ID == auID)
+                .Match("(ac:Achievement)")
+                .Where((Achievement ac) => ac.ID == acuID)
+                .Merge("(a)-[r:ACHIEVED]->(ac)")
+                .OnCreate()
+                .Set("r.Progress = 1")
+                .OnMatch()
+                .Set("r.Progress = r.Progress + 1");
+            await query.ExecuteWithoutResultsAsync();
+    }
+
+    public async Task<List<Achievement>?> GetAccountAchievementsQueryAsync(Guid auID) {
+        var query = _neo.Cypher
+            .Match("(a:Account)") 
+            .Where((Account a) => a.ID == auID)
+            .OptionalMatch("(a)-[r:ACHIEVED]->(ac:Achievement)")
+            .Return((ac,r) => new {
+                Achievements = ac.CollectAs<Achievement>(),
+                AchievementProgress = r.CollectAs<AchievedDto>()
+            });
+        var result = (await query.ResultsAsync).Single();
+        if (result.Achievements.Count() != 0) {
+            for(int i = 0; i < result.Achievements.Count(); i++) {
+                result.Achievements.ElementAt(i).Progress = result.AchievementProgress.ElementAt(i).Progress;
+                Console.WriteLine(result.Achievements.ElementAt(i).ID + " : " + result.AchievementProgress.ElementAt(i).Progress);
+            }
+            return result.Achievements.ToList();
+        }
+        return null;
     }
 
 

@@ -12,7 +12,7 @@ public class Quiz
     public float? AvgRating { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Guid? CreatorID { get; set; } = null;
+    public Guid? CreatorID { get; set; } 
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Guid? AchievementID { get; set; }
