@@ -7,12 +7,17 @@ public class AccountService: IAccountService
     private IDatabase _redis;
     private IGraphClient _neo;
     private Utility _util;
+
+    private IAdService _ad;
+    private ICategoryService _category;
     
-    public AccountService(KviziramContext context, Utility utility) {
+    public AccountService(KviziramContext context, IAdService ad, ICategoryService category, Utility utility) {
         _context = context;
         _redis = context.Redis.GetDatabase();
         _neo = context.Neo;
         _util = utility;
+        _ad = ad;
+        _category = category;
     }
 
     #region Main Functions
@@ -125,8 +130,20 @@ public class AccountService: IAccountService
 
 
     public async Task<string> SetPreferredCategoryAsync (List<Guid> categoryGuids) {
-        if (_util.IsCaller().account) {
+        if (_context.AccountCaller != null) {
             await SetPreferredCategoryQueryAsync(categoryGuids);
+
+            List<Ad>? adsList = new List<Ad>();
+            foreach(Guid categoryuID in categoryGuids) {
+                List<Ad>? tempList = await _category.GetCategoryAdsAsync(categoryuID);
+                if (tempList != null)
+                    adsList.AddRange(tempList);
+            }
+            adsList = adsList.DistinctBy(ad => ad.ID).ToList();
+
+            foreach(Ad ad in adsList)
+                await _ad.ConnectAdAccountAsync(ad.ID, _context.AccountCaller.ID);
+
             return Msg.PreferredCategoriesSet;
         }
         throw new KviziramException(Msg.NoAccess);
@@ -368,7 +385,6 @@ public class AccountService: IAccountService
         if (result.Achievements.Count() != 0) {
             for(int i = 0; i < result.Achievements.Count(); i++) {
                 result.Achievements.ElementAt(i).Progress = result.AchievementProgress.ElementAt(i).Progress;
-                Console.WriteLine(result.Achievements.ElementAt(i).ID + " : " + result.AchievementProgress.ElementAt(i).Progress);
             }
             return result.Achievements.ToList();
         }

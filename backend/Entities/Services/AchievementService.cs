@@ -109,7 +109,7 @@ public class AchievementService: IAchievementService
                 Accounts = a.CollectAs<AccountPoco>(),
                 AchievementProgress = r.CollectAs<AchievedDto>()
             });
-        Console.WriteLine(query.Query.DebugQueryText);
+
         var result = (await query.ResultsAsync).Single();
         if (result.AchievementProgress.Count() != 0) {
             for(int i = 0; i < result.AchievementProgress.Count(); i++)

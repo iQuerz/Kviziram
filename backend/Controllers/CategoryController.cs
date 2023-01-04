@@ -22,6 +22,12 @@ public class CategoryController : ControllerBase
     public async Task<ActionResult<List<Category>>> GetAllCategories() {
         return Ok(await _kviziram.GetAllCategoriesAsync());
     }
+
+    [HttpGet("{cuID}/ads/all")]
+    public async Task<ActionResult<List<Ad>>> GetCategoryAds(Guid cuID) {
+        return Ok(await _kviziram.GetCategoryAdsAsync(cuID));
+    }
+
     #endregion
 
     #region POST Methods

@@ -58,6 +58,12 @@ namespace backend.Controllers
         public async Task<ActionResult<List<Achievement>>> GetAccountAchievements(Guid auID) {
             return Ok(await _kviziram.GetAccountAchievementsAsync(auID));
         }
+
+        // [HttpGet("me/ads/get")]
+        // public async Task<ActionResult<Ad>> GetAd(Guid auID) {
+        //     // return Ok(await _kviziram.GetAccountAchievementsAsync(auID));
+        //     return Ok(null);
+        // }
         
         #endregion
         

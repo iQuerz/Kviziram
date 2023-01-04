@@ -46,7 +46,7 @@ public class QuizService: IQuizService
             newQuiz.QuestionsID = Guid.NewGuid();
 
             if (newQuiz.CategoryID != null) {
-                Category? categoryCheck = await _category.GetCategoryAsync(newQuiz.CategoryID);
+                Category? categoryCheck = await _category.GetCategoryAsync((Guid) newQuiz.CategoryID);
             if (categoryCheck == null) 
                 throw new KviziramException(Msg.QuizNoCategory);        
             }           

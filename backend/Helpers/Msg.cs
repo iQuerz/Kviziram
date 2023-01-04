@@ -7,6 +7,7 @@ public static class Msg
     public const string Deleted = " has been deleted";
     public const string NoAccess = "You don't have access";
     public const string NoAnything = "Could not find anything";
+    public const string OperationDone = "Operation done";
     #endregion
 
     #region Login/Register messages
@@ -47,6 +48,11 @@ public static class Msg
     public const string QuizNoCategory = "Category for this quiz has not been set";
     public const string NoQuiz = "Quiz not found";
     public const string NoQuestions = "You didn't enter any questions for your quiz";
+    #endregion
+
+    #region Ad messages
+    public const string NoAd = "Category not found";
+    public const string AdBlocked = "The ad has been blocked";
 
     #endregion
 
