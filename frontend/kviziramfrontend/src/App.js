@@ -15,7 +15,6 @@ function App() {
         <Route path="/Play-Page" element={<PlayPage />} />
         <Route path="/Create-Page" element={<CreatePage />} />
         <Route path="/Profile-Page" element={<ProfilePage />} />
-        <Route path="/Play-Page/join-code" element={<CodeOverlay />} />
       </Routes>
     </div>
   );

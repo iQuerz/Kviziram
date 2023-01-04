@@ -1,0 +1,28 @@
+.chat {
+    width: 500px;
+    margin: 0 auto;
+  }
+  
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  li {
+    margin: 10px 0;
+  }
+  
+  form {
+    display: flex;
+  }
+  
+  input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+  }
+  
+  

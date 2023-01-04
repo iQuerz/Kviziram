@@ -1,5 +1,4 @@
 import React from 'react';
-import Achievements from '../components/Achievements';
 import './ProfilePage.modul.css';
 
 function ProfilePage() {
