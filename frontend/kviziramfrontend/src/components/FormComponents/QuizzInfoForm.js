@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import Card from "../Card";
 
-function QuizzInfoForm() {
-  const [quizzName, setQuizzName] = useState("");
-  const [quizzCategory, setQuizzCategory] = useState("");
+function QuizzInfoForm({ quizzInfo, setQuizzInfo }) {
+  const [Name, setQuizzName] = useState(quizzInfo.name);
+  const [Category, setQuizzCategory] = useState(quizzInfo.category);
 
   function handleQuizzNameChange(event) {
     setQuizzName(event.target.value);
+    setQuizzInfo({ ...quizzInfo, name: event.target.value });
   }
 
   function handleQuizzCategoryChange(event) {
     setQuizzCategory(event.target.value);
+    setQuizzInfo({ ...quizzInfo, category: event.target.value });
   }
 
   return (
@@ -20,7 +22,7 @@ function QuizzInfoForm() {
           Quizz Name:
           <input
             type="text"
-            value={quizzName}
+            value={Name}
             onChange={handleQuizzNameChange}
           />
         </label>
@@ -29,7 +31,7 @@ function QuizzInfoForm() {
           Quizz Category:
           <input
             type="text"
-            value={quizzCategory}
+            value={Category}
             onChange={handleQuizzCategoryChange}
           />
         </label>
