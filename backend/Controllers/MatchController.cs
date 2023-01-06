@@ -15,7 +15,10 @@ public class MatchController : ControllerBase
     #endregion
 
     #region POST Methods
-    // [HttpPost]
+    [HttpPost("save")]
+    public async Task<ActionResult<string>> SaveMatch(Match match) {
+        return Ok(await _kviziram.SaveMatchAsync(match));
+    }
     #endregion
 
     #region PUT Methods

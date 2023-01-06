@@ -59,20 +59,24 @@ public class Utility
             throw new KviziramException(Msg.AlreadyLoggedIn);
         return false;
     }
+
+    public string CreateInviteCode() {
+        return Guid.NewGuid().ToString("n").Substring(0, 6);
+    }
     #endregion
 
     #region Key Functions
-    public string CreateGameKey(Guid key) { return Guid.NewGuid().ToString().Split('-', 2)[0]; }
-
     public string RedisKeyGuest(string key) { return "guest:" + key + ":id"; }
     public string RedisKeyAccount(string key) { return "account:" + key + ":id"; }
     public string RedisKeyGame(string key) { return "game:" + key + ":id"; }
-
+    public string RedisKeyInvite(string key) { return "invite:" + key + ":id"; }
+    public string RedisKeyChat(string key) { return "lobby:" + key + ":id"; }
+    public string RedisKeyQuestions(string key) { return "questions:" + key + ":id"; }
     #endregion
 
     #region Convert Functions
-    public string ListOfCategoryIDsToString (List<Guid> categoryGuids) {
-        return "['" + string.Join("','", categoryGuids) + "']";
+    public string ListOfGuidsToString (List<Guid> listGuids) {
+        return "['" + string.Join("','", listGuids) + "']";
     }
     #endregion
 }

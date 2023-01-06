@@ -11,13 +11,12 @@ public interface IAdService
     public Task<AdCategoryDto?> ConnectAdCategoryAsync(Guid aduID, Guid cuID, int paid);  
     public Task<string> RemoveAdCategoryAsync(Guid aduID, Guid cuID);
 
-    public Task<AdAccountDto?> GetAdAccountAsync(Guid aduID, Guid auID);
+    public Task<List<AdAccountDto>?> GetAdAccountAsync(Guid aduID, List<Guid> accountGuids);
     public Task<List<AdAccountDto>?> GetAdAccountsAsync(Guid aduID);
-    public Task<AdAccountDto?> ConnectAdAccountAsync(Guid aduID, Guid auID);  
+    public Task<List<AdAccountDto>?> ConnectAdAccountAsync(Guid aduID, List<Guid> accountGuids);  
     public Task<string> RemoveAdAccountAsync(Guid aduID, Guid auID);
 
     public Task<string> BlockAdAccountAsync(Guid aduID, Guid auID);
     public Task<string> IncrementViewedAdAccountAsync(Guid aduID, Guid auID);
     public Task<string> IncrementClickedAdAccountAsync(Guid aduID, Guid auID);
-
 }

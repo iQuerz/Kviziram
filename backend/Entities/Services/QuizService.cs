@@ -124,10 +124,12 @@ public class QuizService: IQuizService
                 .WithParams( new {idQS = newQuiz.QuestionsID, propQS = newQuiz.QuestionsToJsonString()})
                 .Merge("(q)-[:IS_TYPE]->(c)")
                 .ExecuteWithoutResultsAsync();
-
-            if (newQuiz.AchievementID != null && _util.CallerAccountExists().isAdmin)
+            Console.WriteLine("Iznad sam");
+            if (newQuiz.AchievementID != null && _util.CallerAccountExists().isAdmin) {
+                Console.WriteLine("Ovde sam");
                 await ConnectQuizAchievementQueryAsync(newQuiz.ID, newQuiz.AchievementID);
-
+            }
+            Console.WriteLine("Preskocio sam IF");
             return await GetQuizAsync(newQuiz.ID);            
         }
         throw new KviziramException(Msg.NoAccess);
@@ -165,19 +167,24 @@ public class QuizService: IQuizService
                     Questions = qs.As<QuestionPoco>(),
                     Category = c.As<Category>(),
                     Creator = a.As<AccountPoco>(),
-                    Achievement = ac.As<Achievement>()
+                    Achievement = ac.As<Achievement?>()
                 })
             .ResultsAsync;
         var result = query.Single();
         result.Quiz.Questions = result.Questions.DeserializeInfo();
-        result.Quiz.Category = result.Category;
-        result.Quiz.Creator = result.Creator;
-        result.Quiz.Achievement = result.Achievement;
+        if (result.Category != null)
+            result.Quiz.Category = result.Category;
+        
+        if (result.Creator != null)
+            result.Quiz.Creator = result.Creator;
+
+        if (result.Achievement != null)
+            result.Quiz.Achievement = result.Achievement;
 
         result.Quiz.QuestionsID = result.Questions.ID;
-        result.Quiz.CategoryID = result.Category.ID;
-        result.Quiz.CreatorID = result.Creator.ID;
-        result.Quiz.AchievementID = result.Achievement.ID;
+        result.Quiz.CategoryID = null;
+        result.Quiz.CreatorID = null;
+        result.Quiz.AchievementID = null;
 
 
         return result.Quiz;

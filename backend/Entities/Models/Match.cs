@@ -3,17 +3,26 @@ using System.Text.Json.Serialization;
 public class Match
 {
     public Guid ID { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public GameState? GameState { get; set; }
     
-    public Guid HostID { get; set; }
-
-    public Guid WinnerID { get; set; }
-
-    public Guid QuizID { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public DateTime? Created { get; set; }
+    
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Guid? HostID { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<ParticipatedInDto>? Participated { get; set; }
+    public Guid? WinnerID { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<Guest>? GuestNames { get; set; }
+    public Guid? QuizID { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<Guid, int>? PlayerIDsScores { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, int>? Guests { get; set; }
     
 }

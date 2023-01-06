@@ -53,9 +53,12 @@ public static class Msg
     #region Ad messages
     public const string NoAd = "Category not found";
     public const string AdBlocked = "The ad has been blocked";
-
     #endregion
 
+    #region Match messages
+    public const string NoMatch = "Match not found";
+    public const string SavedMatch = "Match has been saved";
+    #endregion
     
 
 

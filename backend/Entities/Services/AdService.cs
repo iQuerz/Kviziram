@@ -7,12 +7,14 @@ public class AdService: IAdService
     private IDatabase _redis;
     private IGraphClient _neo;
     private Utility _util;
+    private ICategoryService _category;
     
-    public AdService(KviziramContext context, Utility utility) {
+    public AdService(KviziramContext context, ICategoryService category, Utility utility) {
         _context = context;
         _redis = context.Redis.GetDatabase();
         _neo = context.Neo;
         _util = utility;
+        _category = category;
     }
 
     #region Main Functions
@@ -62,9 +64,9 @@ public class AdService: IAdService
         return await GetAdCategoriesQueryAsync(aduID);
     }
 
-    public async Task<AdAccountDto?> ConnectAdAccountAsync(Guid aduID, Guid auID) {
-        await ConnectAdAccountQueryAsync(aduID, auID);
-        return await GetAdAccountAsync(aduID, auID);
+    public async Task<List<AdAccountDto>?> ConnectAdAccountAsync(Guid aduID, List<Guid> accountGuids) {
+        await ConnectAdAccountQueryAsync(aduID, accountGuids);
+        return await GetAdAccountAsync(aduID, accountGuids);
     }
 
     public async Task<string> RemoveAdAccountAsync(Guid aduID, Guid auID) {
@@ -72,8 +74,8 @@ public class AdService: IAdService
         return ("Connection" + Msg.Deleted);
     }
 
-    public async Task<AdAccountDto?> GetAdAccountAsync(Guid aduID, Guid auID) {
-        return await GetAdAccountQueryAsync(aduID, auID);
+    public async Task<List<AdAccountDto>?> GetAdAccountAsync(Guid aduID, List<Guid> accountGuids) {
+        return await GetAdAccountQueryAsync(aduID, accountGuids);
     }
 
     public async Task<List<AdAccountDto>?> GetAdAccountsAsync(Guid aduID) {
@@ -199,31 +201,37 @@ public class AdService: IAdService
         return null;
     }
 
-    public async Task ConnectAdAccountQueryAsync(Guid aduID, Guid auID) {
+    public async Task ConnectAdAccountQueryAsync(Guid aduID, List<Guid> accountGuids) {
         await _neo.Cypher
-            .Match("(ad:Ad)")
-            .Where((Ad ad) => ad.ID == aduID)
+            .Match("(adertisment:Ad)")
+            .Where((Ad advertisment) => advertisment.ID == aduID)
+            .With("advertisment AS ad")
+            .Unwind(accountGuids, "auID")
             .Match("(a:Account)")
-            .Where((Account a) => a.ID == auID)
+            .Where("a.ID == auID")
+            .AndWhere("NOT (ad)-[:AD_ACCOUNT]->(a)")
             .Merge("(ad)-[r:AD_ACCOUNT { Blocked: false, Viewed: 0, Clicked: 0 }]->(a)")
             .ExecuteWithoutResultsAsync();
     }
 
-    public async Task<AdAccountDto?> GetAdAccountQueryAsync(Guid aduID, Guid auID) {
+    public async Task<List<AdAccountDto>?> GetAdAccountQueryAsync(Guid aduID, List<Guid> accountGuids) {
         var query = _neo.Cypher
+            .Unwind(accountGuids, "auID")
             .OptionalMatch("(ad:Ad)-[r:AD_ACCOUNT]->(a:Account)")
             .Where((Ad ad) => ad.ID == aduID)
-            .AndWhere((Account a) => a.ID == auID)
+            .AndWhere("a.ID == auID")
             .Return((ad,a,r) => new {
                 Ad = ad.As<Ad>(),
-                AccountPoco = a.As<AccountPoco>(),
-                AdAccount = r.As<AdAccountDto>()
+                AccountPoco = a.CollectAs<AccountPoco>(),
+                AdAccount = r.CollectAs<AdAccountDto>()
             });
-        var result = (await query.ResultsAsync).SingleOrDefault();
-        if (result != null) {
-            result.AdAccount.Ad = result.Ad;
-            result.AdAccount.AccountPoco = result.AccountPoco;
-            return result.AdAccount;
+        var result = (await query.ResultsAsync).FirstOrDefault();
+        if (result != null && result.AdAccount != null) {
+            for(int i = 0; i < result.AdAccount.Count(); i++) {
+                result.AdAccount.ElementAt(i).Ad = result.Ad;
+                result.AdAccount.ElementAt(i).AccountPoco = result.AccountPoco.ElementAt(i);
+            }                
+            return result.AdAccount.ToList();
         }
         return null;
     }

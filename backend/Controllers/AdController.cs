@@ -33,7 +33,7 @@ public class AdController : ControllerBase
     }
 
     [HttpGet("{aduID}/account/{auID}")]
-    public async Task<ActionResult<AdAccountDto>> GetAdAccount(Guid aduID, Guid auID) {
+    public async Task<ActionResult<AdAccountDto>> GetAdAccount(Guid aduID, List<Guid> auID) {
         return Ok(await _kviziram.GetAdAccountAsync(aduID, auID));
     }
 
@@ -42,8 +42,8 @@ public class AdController : ControllerBase
         return Ok(await _kviziram.GetAdAccountsAsync(aduID));
     }
 
-    [HttpGet("{aduID}/connect/account/{auID}")]
-    public async Task<ActionResult<AdAccountDto>> ConnectAdAccount(Guid aduID, Guid auID) {
+    [HttpGet("{aduID}/connect/accounts")]
+    public async Task<ActionResult<AdAccountDto>> ConnectAdAccount(Guid aduID, List<Guid> auID) {
         return Ok(await _kviziram.ConnectAdAccountAsync(aduID, auID));
     }
 
@@ -80,6 +80,11 @@ public class AdController : ControllerBase
     public async Task<ActionResult<Ad>> UpdateAd(Ad updatedAd) {
         return Ok(await _kviziram.UpdateAdAsync(updatedAd));
     }
+
+    // [HttpPut]
+    // public async Task<ActionResult<string>> UpdateAdAccount(List<Guid> guidList) {
+       
+    // }
     #endregion
 
     #region DELETE Methods

@@ -132,17 +132,17 @@ public class AccountService: IAccountService
     public async Task<string> SetPreferredCategoryAsync (List<Guid> categoryGuids) {
         if (_context.AccountCaller != null) {
             await SetPreferredCategoryQueryAsync(categoryGuids);
-
-            List<Ad>? adsList = new List<Ad>();
-            foreach(Guid categoryuID in categoryGuids) {
-                List<Ad>? tempList = await _category.GetCategoryAdsAsync(categoryuID);
-                if (tempList != null)
-                    adsList.AddRange(tempList);
-            }
-            adsList = adsList.DistinctBy(ad => ad.ID).ToList();
-
-            foreach(Ad ad in adsList)
-                await _ad.ConnectAdAccountAsync(ad.ID, _context.AccountCaller.ID);
+            // List<Ad>? adsList = new List<Ad>();
+            // foreach(Guid categoryuID in categoryGuids) {
+            //     List<Ad>? tempList = await _category.GetCategoryAdsAsync(categoryuID);
+            //     if (tempList != null)
+            //         adsList.AddRange(tempList);
+            // }
+            // adsList = adsList.DistinctBy(ad => ad.ID).ToList();
+            // List<Guid> account = new List<Guid>();
+            // account.Add(_context.AccountCaller.ID);
+            // foreach(Ad ad in adsList)
+            //     await _ad.ConnectAdAccountAsync(ad.ID, account);
 
             return Msg.PreferredCategoriesSet;
         }
@@ -334,7 +334,7 @@ public class AccountService: IAccountService
 
     public async Task SetPreferredCategoryQueryAsync (List<Guid> categoryGuids) {
         if (_context.AccountCaller != null) {
-            string categoryList = _util.ListOfCategoryIDsToString(categoryGuids);
+            string categoryList = _util.ListOfGuidsToString(categoryGuids);
             var query = _neo.Cypher
                 .Match("(a:Account)") 
                 .Where((Account a) => a.ID == _context.AccountCaller.ID)
