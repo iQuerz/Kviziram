@@ -78,5 +78,9 @@ public class Utility
     public string ListOfGuidsToString (List<Guid> listGuids) {
         return "['" + string.Join("','", listGuids) + "']";
     }
+
+    public string ListOfIntToString (List<int> listInt) {
+        return "['" + string.Join("','", listInt) + "']";
+    }
     #endregion
 }

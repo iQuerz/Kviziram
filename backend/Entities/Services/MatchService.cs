@@ -38,32 +38,34 @@ public class MatchService: IMatchService
     #endregion
 
     #region Helper Functions
-    public async Task<string> SaveMatchQueryAsync(Match match) {
+    public async Task SaveMatchQueryAsync(Match match) {
         MatchPoco matchPoco = new MatchPoco(match);
         
-        List<Guid> accountGuids;
-        List<int> gameScores;
-
         if (match.PlayerIDsScores != null) {
-            accountGuids = match.PlayerIDsScores.Keys.ToList();
-            gameScores = match.PlayerIDsScores.Values.ToList();
-
+            var accountGuids = match.PlayerIDsScores.Keys.ToArray();
+            var gameScores = match.PlayerIDsScores.Values.ToArray();
             var query = _neo.Cypher
-            .Match("(q:Quiz)")
-            .Where((Quiz q) => q.ID == match.QuizID)
-            .Merge("(m:Match $prop)-[u:USED]->(q)")
-            .WithParams( new { prop = matchPoco})
-            .With("m")
-            .Unwind(accountGuids, "accountID")
-            .Unwind(gameScores, "score")
-            .OptionalMatch("(a:Account)")
-            .Where("a.ID = accountID")
-            .Merge("(a)-[p:PARTICIPATED_IN]->(m)")
-            .Set("r.GameScore = score");
-
-            Console.WriteLine(query.Query.DebugQueryText);
+                .Match("(q:Quiz)")
+                .Where((Quiz q) => q.ID == match.QuizID)
+                .Merge("(m:Match { ID: $mID, Created: $mCreated, InviteCode: $mInviteCode, GameState: $mGameState, HostID: $mHostID , WinnerID: $mWinnerID, Guests: $mGuests})-[u:USED]->(q)")
+                .WithParams( new { 
+                    mID = matchPoco.ID,
+                    mCreated = matchPoco.Created,
+                    mInviteCode = matchPoco.InviteCode,
+                    mGameState = matchPoco.GameState,
+                    mHostID = matchPoco.HostID,
+                    mWinnerID = matchPoco.WinnerID,
+                    mGuests = matchPoco.Guests 
+                    })
+                .With("m, $propac AS accounts, $propscore AS scores")
+                .WithParams( new { propac = accountGuids, propscore = gameScores})
+                .Unwind("range(0,size(accounts)-1)", "index")
+                .OptionalMatch("(a:Account)")
+                .Where("a.ID = accounts[index]")
+                .Merge("(a)-[p:PARTICIPATED_IN]->(m)")
+                .Set("p.GameScore = scores[index]");
+            await query.ExecuteWithoutResultsAsync();
         }
-        return "";
     }
     #endregion
 }
