@@ -1,8 +1,11 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 public class Match
 {
     public Guid ID { get; set; }
+
+    public bool IsSearchable { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? InviteCode { get; set; }
@@ -23,9 +26,11 @@ public class Match
     public Guid? QuizID { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<Guid, int>? PlayerIDsScores { get; set; }
+    public Dictionary<Guid, int>? SetPlayerIDsScores { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public Dictionary<string, int>? Guests { get; set; }
-    
+    public List<ParticipatedInDto>? GetPlayerIDsScores { get; set; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Dictionary<string, int>? Guests { get; set; }    
 }

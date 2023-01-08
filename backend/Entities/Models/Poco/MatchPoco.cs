@@ -4,6 +4,8 @@ public class MatchPoco
 {
     public Guid ID { get; set; } 
 
+    public bool IsSearchable { get; set; }
+
     public string? Created { get; set; }
 
     public string? InviteCode { get; set; }
@@ -18,6 +20,7 @@ public class MatchPoco
 
     public MatchPoco(Match match) {
         this.ID = match.ID;
+        this.IsSearchable = match.IsSearchable;
         this.Created = JsonSerializer.Serialize<DateTime?>(match.Created);
         this.GameState = match.GameState;
         this.InviteCode = match.InviteCode;

@@ -12,6 +12,10 @@ public class MatchController : ControllerBase
     }
 
     #region GET Methods
+    [HttpGet]
+    public async Task<ActionResult<Match>> SaveMatch(Guid muID) {
+        return Ok(await _kviziram.GetMatchAsync(muID));
+    }
     #endregion
 
     #region POST Methods
