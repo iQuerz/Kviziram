@@ -7,4 +7,5 @@ public interface ICategoryService
     public Task<string> DeleteCategoryAsync(Guid uID);
 
     public Task<List<Ad>?> GetCategoryAdsAsync(Guid cuID);
+    public Task<List<AccountPoco>?> GetCategoryAccountsAsync(Guid cuID);
 }

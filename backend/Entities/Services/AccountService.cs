@@ -39,17 +39,6 @@ public class AccountService: IAccountService
         throw new KviziramException(Msg.NoAccess);
     }
 
-    public async Task<List<AccountPoco>> GetMutualFriendsAsync(RelationshipState rState) {
-        if (_util.IsCaller().account) {
-            List<AccountPoco>? listRecommendedFriends = await GetFriendsQueryAsync(rState);
-
-            //Friends of Friends Query + Non Friend Accounts from played Games
-            if (listRecommendedFriends == null) throw new KviziramException(Msg.NoAnything);
-            return listRecommendedFriends;
-        } 
-        throw new KviziramException(Msg.NoAccess);
-    }
-
     public async Task<string> RequestRelationshipAsync(Guid fuID) {
         if (_util.IsCaller().account) {
                 await RequestRelationshipQueryAsync(fuID);
@@ -132,17 +121,18 @@ public class AccountService: IAccountService
     public async Task<string> SetPreferredCategoryAsync (List<Guid> categoryGuids) {
         if (_context.AccountCaller != null) {
             await SetPreferredCategoryQueryAsync(categoryGuids);
-            // List<Ad>? adsList = new List<Ad>();
-            // foreach(Guid categoryuID in categoryGuids) {
-            //     List<Ad>? tempList = await _category.GetCategoryAdsAsync(categoryuID);
-            //     if (tempList != null)
-            //         adsList.AddRange(tempList);
-            // }
-            // adsList = adsList.DistinctBy(ad => ad.ID).ToList();
-            // List<Guid> account = new List<Guid>();
-            // account.Add(_context.AccountCaller.ID);
-            // foreach(Ad ad in adsList)
-            //     await _ad.ConnectAdAccountAsync(ad.ID, account);
+            //Moze bolje but this will do za postavljanje ads
+            List<Ad>? adsList = new List<Ad>();
+            foreach(Guid categoryuID in categoryGuids) {
+                List<Ad>? tempList = await _category.GetCategoryAdsAsync(categoryuID);
+                if (tempList != null)
+                    adsList.AddRange(tempList);
+            }
+            adsList = adsList.DistinctBy(ad => ad.ID).ToList();
+            List<Guid> account = new List<Guid>();
+            account.Add(_context.AccountCaller.ID);
+            foreach(Ad ad in adsList)
+                await _ad.ConnectAdAccountAsync(ad.ID, account);
 
             return Msg.PreferredCategoriesSet;
         }
@@ -169,6 +159,32 @@ public class AccountService: IAccountService
         throw new KviziramException(Msg.NoAccess);
     }
 
+    public async Task<Ad?> GetRecommendedAdsAsync() {
+        return await GetRecommendedAdsQueryAsync();
+    }
+
+    public async Task<List<AccountPoco>?> GetRecommendedFriendsAsync(Guid auID) {
+        List<AccountPoco> recommended = new List<AccountPoco>();
+        var fof = await GetFriendsOfFriendsAsync(auID);
+        var players = await RecommendedPlayersFromMatchAsync(auID);
+
+        if (fof != null) recommended.AddRange(fof);
+        if (players != null) recommended.AddRange(players);
+
+        return recommended.DistinctBy(a => a.ID).ToList();
+    }
+
+    public async Task<List<AccountPoco>?> GetFriendsOfFriendsAsync(Guid auID) {
+        return await GetFriendsOfFriendsQueryAsync(auID);
+    }
+
+    public async Task<List<AccountPoco>?> RecommendedPlayersFromMatchAsync(Guid auID) {
+        return await RecommendedPlayersFromMatchQueryAsync(auID);
+    }
+
+    public async Task<List<Quiz>?> GetRecommendedQuizzesAsync() {
+        return await GetRecommendedQuizzesQueryAsync();
+    }
 
 
     #endregion
@@ -391,6 +407,70 @@ public class AccountService: IAccountService
         return null;
     }
 
+    public async Task<Ad?> GetRecommendedAdsQueryAsync() {
+        if (_context.AccountCaller != null) {
+            var query = _neo.Cypher
+                .Match("(a:Account)<-[r:AD_ACCOUNT]-(ad:Ad)-[p:AD_CATEGORY]->(c:Category)")
+                .Where((Account a) => a.ID == _context.AccountCaller.ID)
+                .AndWhere("r.Blocked = $prop").WithParam("prop", false)
+                .With("ad, p")
+                .OrderByDescending("p.Paid")
+                .ReturnDistinct((ad) => ad.As<Ad>())
+                .Limit(1);
+            Console.WriteLine(query.Query.DebugQueryText);
+            return (await query.ResultsAsync).SingleOrDefault();
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
+    public async Task<List<AccountPoco>?> GetFriendsOfFriendsQueryAsync(Guid auID) {
+        if (_context.AccountCaller != null) {
+            var query = _neo.Cypher
+                .Match("(a:Account)-[r:RELATIONSHIP]-(f:Account)-[p:RELATIONSHIP]-(fof:Account)")
+                .Where((AccountPoco a) => a.ID == auID)
+                .AndWhere("NOT (a:Account)-[:RELATIONSHIP]-(fof:Account)")
+                .AndWhere("r.Status = 'Friend'")
+                .ReturnDistinct( fof => fof.As<AccountPoco>());
+            Console.WriteLine(query.Query.DebugQueryText);
+            return (await query.ResultsAsync).ToList();
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
+    public async Task<List<AccountPoco>?> RecommendedPlayersFromMatchQueryAsync(Guid auID) {
+        if (_context.AccountCaller != null) {
+            var query = _neo.Cypher
+                .Match("(a:Account)-[:PARTICIPATED_IN*2]-(player:Account)")
+                .Where((AccountPoco a) => a.ID == auID)
+                .AndWhere("NOT (a:Account)-[:RELATIONSHIP]-(player:Account)")
+                .ReturnDistinct( player => player.As<AccountPoco>());
+            Console.WriteLine(query.Query.DebugQueryText);
+            return (await query.ResultsAsync).ToList();
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
+
+    public async Task<List<Quiz>?> GetRecommendedQuizzesQueryAsync() {
+        if (_context.AccountCaller != null) {
+            List<Category>? categories = await GetPreferredCategoriesAsync();
+            if (categories != null) {
+                List<Guid> categoryGuids = categories.Select(c => c.ID).ToList();
+                var query = _neo.Cypher
+                    .Match("(a:Account)")
+                    .Where((Account a) => a.ID == _context.AccountCaller.ID)
+                    .With("a")
+                    .Unwind(categoryGuids, "cuID")
+                    .Match("(c:Category)<-[r:IS_TYPE]-(q:Quiz)")
+                    .Where("c.ID = cuID")
+                    .AndWhere("NOT (a)-[:PARTICIPATED_IN]->(:Match)-[:USED]->(q)")
+                    .Return( q => q.As<Quiz>());
+                Console.WriteLine(query.Query.DebugQueryText);
+                return (await query.ResultsAsync).ToList();
+            }
+            return null;
+        }
+        throw new KviziramException(Msg.NoAccess);
+    }
 
     #endregion
 

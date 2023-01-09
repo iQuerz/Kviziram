@@ -68,7 +68,7 @@ public class QuizService: IQuizService
         return await GetQuizRatingsQueryAsync(quID);
     }
 
-    public async Task<List<QuizDto>?> SearchQuizzesAsync(QuizQuery quizQuery) {
+    public async Task<List<QuizDto>?> SearchQuizzesAsync(QuizQuery quizQuery, int skip, int limit) {
         var finalQuery = _neo.Cypher.OptionalMatch("(q:Quiz)");
 
         if (quizQuery.CreatorID != null) finalQuery = finalQuery.Match("(q)<-[:CREATOR]-(a:Account)").Where((Account a) => a.ID == quizQuery.CreatorID);
@@ -81,6 +81,7 @@ public class QuizService: IQuizService
                 Quizzes = q.CollectAs<QuizDto>(),
                 Ratings = rating.CollectAs<float>()
             });
+        Console.WriteLine(query.Query.DebugQueryText);
         var result = (await query.ResultsAsync).Single();
 
         IEnumerable<QuizDto> tempList = result.Quizzes;
@@ -93,9 +94,9 @@ public class QuizService: IQuizService
             tempList.ElementAt(j).AvgRating = 0;
 
         if (quizQuery.OrderAsc)
-            return tempList.OrderBy(x => x.AvgRating).ToList();
+            return tempList.OrderBy(x => x.AvgRating).Skip(skip).Take(limit).ToList();
         else
-            return tempList.OrderByDescending(x => x.AvgRating).ToList();
+            return tempList.OrderByDescending(x => x.AvgRating).Skip(skip).Take(limit).ToList();
     }
     
     public async Task<string> ConnectQuizAchievementAsync(Guid quID, Guid? acuID) {

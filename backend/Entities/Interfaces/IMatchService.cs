@@ -6,4 +6,6 @@ public interface IMatchService
     public Task<Match?> PutMatchAsync(Match match);
     public Task<Match?> DeleteMatchAsync(string matchID);
 
+    public Task<List<Match>?> SearchMatchesHistoryAsync(MatchQuery matchQuery, FromToDate? fromToDate, int skip, int limit);
+
 }

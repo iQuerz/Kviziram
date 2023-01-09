@@ -22,31 +22,6 @@ public class AdController : ControllerBase
         return Ok(await _kviziram.GetAllAdsAsync());
     }
 
-    [HttpGet("{aduID}/category/all")]
-    public async Task<ActionResult<List<AdCategoryDto>>> GetAdCategories(Guid aduID) {
-        return Ok(await _kviziram.GetAdCategoriesAsync(aduID));
-    }
-    
-    [HttpGet("{aduID}/category/{cuID}")]
-    public async Task<ActionResult<AdCategoryDto>> GetAdCategory(Guid aduID, Guid cuID) {
-        return Ok(await _kviziram.GetAdCategoryAsync(aduID, cuID));
-    }
-
-    [HttpGet("{aduID}/account/{auID}")]
-    public async Task<ActionResult<AdAccountDto>> GetAdAccount(Guid aduID, List<Guid> auID) {
-        return Ok(await _kviziram.GetAdAccountAsync(aduID, auID));
-    }
-
-    [HttpGet("{aduID}/account/all")]
-    public async Task<ActionResult<List<AdAccountDto>>> GetAdAccounts(Guid aduID) {
-        return Ok(await _kviziram.GetAdAccountsAsync(aduID));
-    }
-
-    [HttpGet("{aduID}/connect/accounts")]
-    public async Task<ActionResult<AdAccountDto>> ConnectAdAccount(Guid aduID, List<Guid> auID) {
-        return Ok(await _kviziram.ConnectAdAccountAsync(aduID, auID));
-    }
-
     [HttpGet("{aduID}/account/{auID}/block")]
     public async Task<ActionResult<string>> BlockAdAccount(Guid aduID, Guid auID) {
         return Ok(await _kviziram.BlockAdAccountAsync(aduID, auID));
@@ -73,6 +48,21 @@ public class AdController : ControllerBase
     public async Task<ActionResult<AdCategoryDto>> ConnectAdCategory(Guid aduID, Guid cuID, [FromBody] int paid) {
         return Ok(await _kviziram.ConnectAdCategoryAsync(aduID, cuID, paid));
     }
+
+    [HttpPost("{aduID}/connect/accounts")]
+    public async Task<ActionResult<AdAccountDto>> ConnectAdAccount(Guid aduID, List<Guid> auID) {
+        return Ok(await _kviziram.ConnectAdAccountAsync(aduID, auID));
+    }
+
+    [HttpPost("{aduID}/account")]
+    public async Task<ActionResult<AdAccountDto>> GetAdAccount(Guid aduID, List<Guid> auID) {
+        return Ok(await _kviziram.GetAdAccountAsync(aduID, auID));
+    }
+
+    [HttpPost("{aduID}/category")]
+    public async Task<ActionResult<AdCategoryDto>> GetAdCategory(Guid aduID, List<Guid> categoryGuids) {
+        return Ok(await _kviziram.GetAdCategoryAsync(aduID, categoryGuids));
+    }
     #endregion
 
     #region PUT Methods
@@ -80,11 +70,6 @@ public class AdController : ControllerBase
     public async Task<ActionResult<Ad>> UpdateAd(Ad updatedAd) {
         return Ok(await _kviziram.UpdateAdAsync(updatedAd));
     }
-
-    // [HttpPut]
-    // public async Task<ActionResult<string>> UpdateAdAccount(List<Guid> guidList) {
-       
-    // }
     #endregion
 
     #region DELETE Methods

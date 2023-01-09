@@ -27,6 +27,11 @@ public class CategoryService: ICategoryService
         return await GetAllCategoriesQueryAsync();
     }
 
+    public async Task<List<AccountPoco>?> GetCategoryAccountsAsync(Guid cuID) {
+        return await GetCategoryAccountsQueryAsync(cuID);
+    }
+
+
     public async Task<Category> CreateCategoryAsync(Category newCategory) {
         newCategory.ID = Guid.NewGuid();
         await CreateCategoryQueryAsync(newCategory);
@@ -69,6 +74,15 @@ public class CategoryService: ICategoryService
         var query = await _neo.Cypher
             .Match("(c:Category)")
             .Return(c => c.As<Category>())
+            .ResultsAsync;
+        return query.ToList();
+    }
+
+    public async Task<List<AccountPoco>?> GetCategoryAccountsQueryAsync(Guid cuID) {
+        var query = await _neo.Cypher
+            .OptionalMatch("(c:Category)<-[:PREFERS]-(a:Account)")
+            .Where((Category c) => c.ID == cuID)
+            .Return(a => a.As<AccountPoco>())
             .ResultsAsync;
         return query.ToList();
     }

@@ -8,6 +8,8 @@ public static class Msg
     public const string NoAccess = "You don't have access";
     public const string NoAnything = "Could not find anything";
     public const string OperationDone = "Operation done";
+    public const string Empty = "Null as parameter wtf";
+    public const string IndexOutOfRange = "Index out of range";
     #endregion
 
     #region Login/Register messages
