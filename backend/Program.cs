@@ -17,6 +17,7 @@ builder.Services.AddSwaggerGen(c =>
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Kviziram Server", Version = "v1" });
                 c.OperationFilter<CustomHeaderSwaggerAttribute>();
             });
+builder.Services.AddSignalR();
 
 #region Server Connections
 // Redis
@@ -41,6 +42,7 @@ builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IAdService, AdService>();
 builder.Services.AddScoped<IAchievementService, AchievementService>();
 builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IGameService, GameService>();
 
 // Utility for god knows what
 builder.Services.AddScoped<Utility, Utility>();
@@ -63,5 +65,7 @@ app.UseAuthorization();
 app.UseMiddleware<Auth>();
 
 app.MapControllers();
+
+app.MapHub<GameHub>("/hubs/game");
 
 app.Run();

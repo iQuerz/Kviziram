@@ -23,21 +23,14 @@ public class MatchService: IMatchService
         return await GetMatchQueryAsync(muID);
     }
 
-    public Task<Match?> CreateMatchAsync(Match match) {
-        return null;
-    }
-
     public async Task<string> SaveMatchAsync(Match match) {
         await SaveMatchQueryAsync(match);
         return Msg.SavedMatch;
     }
 
-    public Task<Match?> PutMatchAsync(Match match) {
-        return null;
-    }
-    public Task<Match?> DeleteMatchAsync(string matchID) {
-        return null;
-    }
+    // public Task<Match?> DeleteMatchAsync(string matchID) {
+    //     return null;
+    // }
 
     public async Task<List<Match>?> SearchMatchesHistoryAsync(MatchQuery matchQuery, FromToDate? fromToDate, int skip, int limit) {
         return await SearchMatchesHistoryQueryAsync(matchQuery, fromToDate, skip, limit);
@@ -54,7 +47,7 @@ public class MatchService: IMatchService
         if (matchQuery.HostID != null) finalQuery = finalQuery.AndWhere((MatchPoco m) => m.HostID == matchQuery.HostID);
         if (matchQuery.WinnerID != null) finalQuery = finalQuery.AndWhere((MatchPoco m) => m.WinnerID == matchQuery.WinnerID);
         var result = finalQuery.Return( m => m.As<MatchDto>().ID);
-        Console.WriteLine(result.Query.DebugQueryText);   
+        // Console.WriteLine(result.Query.DebugQueryText);   
         IEnumerable<Guid> matchGuids = await result.ResultsAsync;
         //Moze ovo bolje ispod ali to je sto je >_>
         List<Match> matches = new List<Match>();
@@ -91,7 +84,7 @@ public class MatchService: IMatchService
         Match match = new Match();
         match.ID = result.MatchPoco.ID;
         match.IsSearchable = result.MatchPoco.IsSearchable;
-        if (result.MatchPoco.Created != null) match.Created = JsonSerializer.Deserialize<DateTime?>(result.MatchPoco.Created);
+        if (result.MatchPoco.Created != null) match.Created = DateTime.ParseExact(result.MatchPoco.Created, "dd/MM/yyyy", null);
         match.InviteCode = result.MatchPoco.InviteCode;
         match.GameState = result.MatchPoco.GameState;
         match.HostID = result.MatchPoco.HostID;

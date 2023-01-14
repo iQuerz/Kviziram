@@ -21,7 +21,7 @@ public class MatchPoco
     public MatchPoco(Match match) {
         this.ID = match.ID;
         this.IsSearchable = match.IsSearchable;
-        this.Created = JsonSerializer.Serialize<DateTime?>(match.Created);
+        this.Created =  (match.Created == null) ? null : match.Created.Value.ToString("dd/MM/yyyy");
         this.GameState = match.GameState;
         this.InviteCode = match.InviteCode;
         this.HostID = match.HostID;
