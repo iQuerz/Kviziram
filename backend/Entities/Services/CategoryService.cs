@@ -84,7 +84,8 @@ public class CategoryService: ICategoryService
             .Where((Category c) => c.ID == cuID)
             .Return(a => a.As<AccountPoco>())
             .ResultsAsync;
-        return query.ToList();
+        if (query.Count() == 1) return null; 
+        else return query.ToList(); 
     }
 
     public async Task CreateCategoryQueryAsync(Category newCategory) {

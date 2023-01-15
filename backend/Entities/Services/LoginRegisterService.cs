@@ -31,7 +31,7 @@ public class LoginRegisterService: ILoginRegisterService
 
         AccountPoco accountView = new AccountPoco(checkAccount.account);
 
-        await _redis.StringSetAsync(accountKey, accountView.ToJsonString(), new TimeSpan(12,0,0));
+        await _redis.StringSetAsync(accountKey, accountView.ToJsonString(), Duration.AccountLogin);
 
         return newSID;
     }

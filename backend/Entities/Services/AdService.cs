@@ -50,6 +50,7 @@ public class AdService: IAdService
         await ConnectAdCategoryQueryAsync(aduID, cuID, paid);
         IEnumerable<AccountPoco>? accounts = await _category.GetCategoryAccountsAsync(cuID);
         if (accounts != null) {
+            Console.WriteLine(accounts.Count());
             List<Guid>? listGuids = accounts.Select(a => a.ID).ToList();
             await ConnectAdAccountAsync(aduID, listGuids);
         }
