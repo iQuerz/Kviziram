@@ -6,8 +6,16 @@ import { Link, useNavigate } from "react-router-dom";
 
 function LoginPage() {
     const navigate = useNavigate();
+    
+    function tryUserLogin(){
+        navigate('Play')//fali login
+    }
+    function tryGuestLogin(){
+        navigate('Play')//da se zameni sa lobby
+    }
+    
     return(
-        <Box className="flex-down" marginTop={'5em'}>
+        <Box className="flex-down" paddingTop={'5em'}>
             <Typography variant="h1" color="textPrimary" textAlign={'center'}>Kviziram</Typography>
             <Typography variant="h4" color="textSecondary" textAlign={'center'} maxWidth={'20em'} marginBottom={'2em'}>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas pharetra bibendum tempor.
@@ -23,13 +31,6 @@ function LoginPage() {
             </Typography>
         </Box>
     )
-
-    function tryUserLogin(){
-        navigate('Home')//fali login
-    }
-    function tryGuestLogin(){
-        navigate('Home')//da se zameni sa lobby
-    }
 }
 
 export default LoginPage

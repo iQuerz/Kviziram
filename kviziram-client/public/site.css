@@ -12,7 +12,7 @@
     --black: #222;
 }
 body{
-    width: 100vh;
+    width: 100vw;
     height: 100vh;
     padding: 0;
     margin: 0;
@@ -23,13 +23,13 @@ body{
     margin: 0;
 }
 #root{
-    width: 100vh;
+    width: 100vw;
     height: 100vh;
 }
 
 .sidebar {
     height: 100%;
-    width: 10em;
+    width: 15em;
     position: fixed;
     z-index: 1;
     top: 0;
@@ -43,8 +43,20 @@ body{
     display: block;
     color: #ddd;/*nepotrebno, ali tu je dok ne implementiramo friends*/
 }
-.non-sidebar{
-    margin-left: 10em; /*must match sidebar width*/
+.page-container{
+    margin-left: 15em; /*must match sidebar width*/
+}
+
+.ad{
+    width: 35em;
+    height: 8em;
+    margin: 1em;
+    border: 1px solid var(--black);
+    cursor: pointer;
+}
+.ad > *{
+    vertical-align: middle;
+    text-align: center;
 }
 
 .flex-down{
@@ -56,8 +68,11 @@ body{
 .flex-right{
     display: flex;
     flex-direction: row;
-    justify-content: center;
-    align-items: center;
+    justify-content: space-around;
+    align-items: top;
+}
+.wrap{
+    flex-wrap: wrap;
 }
 
 .seperate-children-small > * {
@@ -72,4 +87,20 @@ body{
 
 .padding{
     padding: 1em;
+}
+
+.width-small{
+    width: 5em;
+}
+.width-medium{
+    width: 10em;
+}
+.width-large{
+    width: 25em;
+}
+.width-75{
+    width:75%;
+}
+.width-35{
+    width:35%
 }

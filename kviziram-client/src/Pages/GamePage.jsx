@@ -1,8 +1,10 @@
 
 import { Typography } from "@mui/material";
+
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
 
-function CreateQuizPage() {
+function GamePage() {
+
     return(
         <>
             <SidebarLayout>
@@ -12,4 +14,4 @@ function CreateQuizPage() {
     )
 }
 
-export default CreateQuizPage
+export default GamePage

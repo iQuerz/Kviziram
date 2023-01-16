@@ -1,11 +1,10 @@
-
-import { Typography } from "@mui/material";
 import { Link } from "react-router-dom";
 
-function SideBar() {
+function Sidebar() {
     return(
         <div className="sidebar">
-            <Link to="/Home"><h2>Home</h2></Link>
+            <Link to="/Play"><h2>Play</h2></Link>
+            <Link to="/Create"><h2>Create</h2></Link>
             <Link to="/Profile"><h2>Profile</h2></Link>
             <Link to="/"><h2>Logout</h2></Link>
             <div>
@@ -24,4 +23,4 @@ function SideBar() {
     )
 }
 
-export default SideBar
+export default Sidebar

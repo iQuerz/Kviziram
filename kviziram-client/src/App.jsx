@@ -1,18 +1,23 @@
-import { Login } from '@mui/icons-material';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import LoginPage from "./Pages/LoginPage";
-import HomePage from './Pages/HomePage';
+import PlayPage from './Pages/PlayPage';
+import LobbyPage from './Pages/LobbyPage';
+import GamePage from './Pages/GamePage';
+import CreateQuizPage from './Pages/CreateQuizPage';
+import ProfilePage from './Pages/ProfilePage';
 
 function App() {
     return (
         <Router>
-            <div>
-                <Routes>
-                    <Route path="/" element={<LoginPage />} />
-                    <Route path="/Home" element={<HomePage />} />
-                </Routes>
-            </div>
+            <Routes>
+                <Route path="/"         element={<LoginPage />} />
+                <Route path="/Play"     element={<PlayPage />} />
+                <Route path="/Lobby"    element={<LobbyPage />} />
+                <Route path="/Game"     element={<GamePage />} />
+                <Route path="/Create"   element={<CreateQuizPage />} />
+                <Route path="/Profile"  element={<ProfilePage/>} />
+            </Routes>
         </Router>
     )
 }
