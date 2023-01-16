@@ -36,6 +36,11 @@ public class Utility
         return _context.AccountCaller;
     }
 
+    public string GetRedisSID() {
+        if (_context.SID != null) return _context.SID;
+        return string.Empty;
+    }
+
     public bool IsCallerAccountAdmin() {
         if (!CallerAccountExists().isAdmin) 
             throw new KviziramException(Msg.NoAccess);
@@ -65,13 +70,26 @@ public class Utility
     }
     #endregion
 
-    #region Key Functions
+    #region Redis keys
+    public string PublicMatches = "list:games:public";
+    //Korisnici, invite kljuc za korisnika tj lista.
     public string RedisKeyGuest(string key) { return "guest:" + key + ":id"; }
     public string RedisKeyAccount(string key) { return "account:" + key + ":id"; }
-    public string RedisKeyGame(string key) { return "game:" + key + ":id"; }
     public string RedisKeyInvite(string key) { return "invite:" + key + ":id"; }
-    public string RedisKeyChat(string key) { return "lobby:" + key + ":id"; }
+
+    //Igra, kviz id-ime-kategorija-trofej
+    public string RedisKeyGame(string key) { return "game:" + key + ":id"; }
+    public string RedisKeyChat(string key) { return "chat:" + key + ":id"; }
+
+    //Pitanja od kviza u redis, jer ce konstantno da se igraju pa ih cuvamo u redis
+    //Broj igraca za igru koji je odg na pitanje pa refresh za sledece pitanje
     public string RedisKeyQuestions(string key) { return "questions:" + key + ":id"; }
+    public string RedisKeyQuestions(Guid? key) { if(key == null) throw new KviziramException(Msg.NoQuiz); else return "questions:" + key + ":id"; }
+    public string RedisKeyPlayersAnswered(string key) { return "answered:" + key + ":id"; }
+
+    //Lobby prati broj igraca koji su trenutno u game, scores cuva rezultat i uporedjujemo ako se igrac disconnect/connect-uje
+    public string RedisKeyLobby(string key) { return "lobby:" + key + ":id"; }
+    public string RedisKeyScores(string key) { return "score:" + key + ":id"; }
     #endregion
 
     #region Convert Functions
@@ -82,5 +100,17 @@ public class Utility
     public string ListOfIntToString (List<int> listInt) {
         return "['" + string.Join("','", listInt) + "']";
     }
+    #endregion
+
+    #region JSON Formatting 
+    public string SerializeQuestion(QuestionDto question) { return JsonSerializer.Serialize<QuestionDto>(question); }
+    public QuestionDto? DeserializeQuestion(string question) { return JsonSerializer.Deserialize<QuestionDto>(question); }
+    
+    public string SerializeGameDto(GameDto gameDTO) { return JsonSerializer.Serialize<GameDto>(gameDTO); }
+    public GameDto? DeserializeGameDto(string gameDTO) { return JsonSerializer.Deserialize<GameDto>(gameDTO); }
+
+    public string SerializeMatch(Match match) { return JsonSerializer.Serialize<Match>(match); }
+    public Match? DeserializeMatch(string match) { return JsonSerializer.Deserialize<Match>(match); }
+
     #endregion
 }

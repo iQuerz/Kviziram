@@ -15,6 +15,10 @@ public class GameController : ControllerBase
     #endregion
 
     #region POST Methods
+    [HttpPost]
+    public async Task<ActionResult<Match>> CreateGame(Match game) {
+        return Ok(await _kviziram.CreateGameAsync(game));
+    }
     #endregion
 
     #region PUT Methods

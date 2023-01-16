@@ -125,12 +125,10 @@ public class QuizService: IQuizService
                 .WithParams( new {idQS = newQuiz.QuestionsID, propQS = newQuiz.QuestionsToJsonString()})
                 .Merge("(q)-[:IS_TYPE]->(c)")
                 .ExecuteWithoutResultsAsync();
-            Console.WriteLine("Iznad sam");
-            if (newQuiz.AchievementID != null && _util.CallerAccountExists().isAdmin) {
-                Console.WriteLine("Ovde sam");
+
+            if (newQuiz.AchievementID != null && _util.CallerAccountExists().isAdmin)
                 await ConnectQuizAchievementQueryAsync(newQuiz.ID, newQuiz.AchievementID);
-            }
-            Console.WriteLine("Preskocio sam IF");
+                
             return await GetQuizAsync(newQuiz.ID);            
         }
         throw new KviziramException(Msg.NoAccess);
