@@ -12,7 +12,7 @@ public class LoginController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<string>> Login() {
-        string? authHeader = HttpContext.Request.Headers["Authentication"];
+        string? authHeader = HttpContext.Request.Headers["Authentication"]; 
         return Ok(await _kviziram.Login(authHeader));
     }
 

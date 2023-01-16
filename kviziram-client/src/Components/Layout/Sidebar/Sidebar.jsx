@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import FriendsContainer from "../Friends/FriendsContainer";
 
 function Sidebar() {
     return(
@@ -7,18 +8,7 @@ function Sidebar() {
             <Link to="/Create"><h2>Create</h2></Link>
             <Link to="/Profile"><h2>Profile</h2></Link>
             <Link to="/"><h2>Logout</h2></Link>
-            <div>
-                <h2>friend 1</h2>
-                <p>status 1</p>
-            </div>
-            <div>
-                <h2>friend 2</h2>
-                <p>status 2</p>
-            </div>
-            <div>
-                <h2>friend 3</h2>
-                <p>status 3</p>
-            </div>
+            <FriendsContainer></FriendsContainer>
         </div>
     )
 }

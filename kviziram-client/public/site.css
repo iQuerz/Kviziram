@@ -104,3 +104,20 @@ body{
 .width-35{
     width:35%
 }
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-right: 20px;
+  }
+.initials-avatar {
+    background-color: #45cef0; /* set the background color as desired */
+    text-align: center;
+    color: #fff; /* set the text color as desired */
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 50%;
+    display: inline-block;
+    font-size: 1.5em;
+}
