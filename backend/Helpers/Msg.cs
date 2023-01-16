@@ -65,6 +65,9 @@ public static class Msg
     #region Game messages
     public const string NoGame = "Game not found";
     public const string ChatWelcome = "Welcome to the chat boiii";
+    public const string NoStartGame = "Can't start the game";
+    public const string NoLobby = "Lobby is empty?";
+    public const string GameStarted = "The game has started";
     #endregion
     
 

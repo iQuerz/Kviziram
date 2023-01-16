@@ -65,17 +65,39 @@ public class GameService: IGameService
         double toDate = fromToDate.ToDate.ToOADate();
         Order order = (asc) ? Order.Ascending : Order.Descending;
 
-        var list = await _redis.SortedSetRangeByScoreAsync(_util.PublicMatches, fromDate, toDate, Exclude.None, order, skip, limit);
-        if (list == null)
+        var gamesObj = await _redis.SortedSetRangeByScoreAsync(_util.PublicMatches, fromDate, toDate, Exclude.None, order, skip, limit);
+        if (gamesObj == null)
             return null;
 
         List<GameDto> gameList = new List<GameDto>();
         //Nije vreme UTC, pazi kako setup-ujes (+01:00h)
-        foreach(RedisValue value in list) {
+        foreach(RedisValue value in gamesObj) {
             GameDto? gameDto = _util.DeserializeGameDto(value);
             if (gameDto != null) gameList.Add(gameDto);
         }
         return gameList;
+    }
+
+    public async Task<string> StartGame(string inviteCode) {
+        Match? match = _util.DeserializeMatch(await _redis.StringGetAsync(_util.RedisKeyGame(inviteCode)));
+        if (match != null && match.HostID != null) {
+            if (match.HostID == _util.CallerAccountExists().ID) {
+                
+                var playersList = await _redis.HashKeysAsync(_util.RedisKeyLobby(inviteCode));
+                if (playersList != null) {
+                    foreach(RedisValue playerGuid in playersList)
+                        await _redis.SortedSetAddAsync(_util.RedisKeyScores(inviteCode), playerGuid, 0.00);
+
+                    await _redis.KeyExpireAsync(_util.RedisKeyLobby(inviteCode), Duration.GameScore);
+                    await _redis.StringSetAsync(_util.RedisKeyPlayersAnswered(inviteCode), 0, Duration.NumberOfAnswers);
+
+                    return Msg.GameStarted;
+                }
+                return Msg.NoLobby;
+            }
+            return Msg.NoStartGame;
+        }
+        return Msg.NoGame;
     }
 
     

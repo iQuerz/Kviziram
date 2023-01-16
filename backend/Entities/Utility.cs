@@ -111,6 +111,9 @@ public class Utility
 
     public string SerializeMatch(Match match) { return JsonSerializer.Serialize<Match>(match); }
     public Match? DeserializeMatch(string? match) { if (match != null) return JsonSerializer.Deserialize<Match?>(match); else return null; }
+    
+    public string SerializeAccountPoco(AccountPoco acc) { return JsonSerializer.Serialize<AccountPoco>(acc); }
+    public AccountPoco? DeserializeAccountPoco(string? acc) { if (acc != null) return JsonSerializer.Deserialize<AccountPoco?>(acc); else return null; }
 
     #endregion
 }
