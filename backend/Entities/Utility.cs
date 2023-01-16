@@ -104,13 +104,13 @@ public class Utility
 
     #region JSON Formatting 
     public string SerializeQuestion(QuestionDto question) { return JsonSerializer.Serialize<QuestionDto>(question); }
-    public QuestionDto? DeserializeQuestion(string question) { return JsonSerializer.Deserialize<QuestionDto>(question); }
+    public QuestionDto? DeserializeQuestion(string question) { return JsonSerializer.Deserialize<QuestionDto?>(question); }
     
     public string SerializeGameDto(GameDto gameDTO) { return JsonSerializer.Serialize<GameDto>(gameDTO); }
-    public GameDto? DeserializeGameDto(string gameDTO) { return JsonSerializer.Deserialize<GameDto>(gameDTO); }
+    public GameDto? DeserializeGameDto(string? gameDTO) { if (gameDTO != null) return JsonSerializer.Deserialize<GameDto?>(gameDTO); else return null; }
 
     public string SerializeMatch(Match match) { return JsonSerializer.Serialize<Match>(match); }
-    public Match? DeserializeMatch(string match) { return JsonSerializer.Deserialize<Match>(match); }
+    public Match? DeserializeMatch(string? match) { if (match != null) return JsonSerializer.Deserialize<Match?>(match); else return null; }
 
     #endregion
 }

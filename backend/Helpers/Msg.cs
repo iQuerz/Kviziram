@@ -61,6 +61,11 @@ public static class Msg
     public const string NoMatch = "Match not found";
     public const string SavedMatch = "Match has been saved";
     #endregion
+
+    #region Game messages
+    public const string NoGame = "Game not found";
+    public const string ChatWelcome = "Welcome to the chat boiii";
+    #endregion
     
 
 
