@@ -7,6 +7,9 @@ public static class Msg
     public const string Deleted = " has been deleted";
     public const string NoAccess = "You don't have access";
     public const string NoAnything = "Could not find anything";
+    public const string OperationDone = "Operation done";
+    public const string Empty = "Null as parameter wtf";
+    public const string IndexOutOfRange = "Index out of range";
     #endregion
 
     #region Login/Register messages
@@ -47,9 +50,25 @@ public static class Msg
     public const string QuizNoCategory = "Category for this quiz has not been set";
     public const string NoQuiz = "Quiz not found";
     public const string NoQuestions = "You didn't enter any questions for your quiz";
-
     #endregion
 
+    #region Ad messages
+    public const string NoAd = "Category not found";
+    public const string AdBlocked = "The ad has been blocked";
+    #endregion
+
+    #region Match messages
+    public const string NoMatch = "Match not found";
+    public const string SavedMatch = "Match has been saved";
+    #endregion
+
+    #region Game messages
+    public const string NoGame = "Game not found";
+    public const string ChatWelcome = "Welcome to the chat boiii";
+    public const string NoStartGame = "Can't start the game";
+    public const string NoLobby = "Lobby is empty?";
+    public const string GameStarted = "The game has started";
+    #endregion
     
 
 

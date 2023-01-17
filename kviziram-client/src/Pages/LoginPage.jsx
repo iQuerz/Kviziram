@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 
-function LoginPage() {
+function LoginPage(props) {
     const navigate = useNavigate();
     const [userName, setUserName] = useState("");
     const [email, setEmail] = useState("");
@@ -39,17 +39,17 @@ function LoginPage() {
                         'Authentication': email + ":" + password
                     }
                 });
-                const json = await response.text();
-                const sessionId = json.substring(json.indexOf("sessionID:") + 10);
-                console.log(sessionId);
-                //console.log(json)
+                const json = await response.json();
+                
+                console.log("from login page :" + json);
                 if(response.ok)
+                    props.onSessionIDChange(json) //predaje se sessionID app komponenti
                     handleLoginSuccess()
             } catch (error) {
                 console.error(error);
             }
     }
-    function handleLoginSuccess(){
+    function handleLoginSuccess(){    
         navigate('Play')//fali login
     }
     function tryGuestLogin(){

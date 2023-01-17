@@ -22,9 +22,9 @@ public class QuizController : ControllerBase
         return Ok(await _kviziram.GetQuizRatingsAsync(quID));
     }
 
-    [HttpGet("search")]
-    public async Task<ActionResult<List<QuizDto>>> SearchQuizzes([FromQuery] QuizQuery quizQuery) {
-        return Ok(await _kviziram.SearchQuizzesAsync(quizQuery));
+    [HttpGet("search/{skip}/{limit}/q")]
+    public async Task<ActionResult<List<QuizDto>>> SearchQuizzes([FromQuery] QuizQuery quizQuery, int skip = 0, int limit = 10) {
+        return Ok(await _kviziram.SearchQuizzesAsync(quizQuery, skip, limit));
     }
 
     [HttpGet("{quID}/achievement/set/{acuID}")]

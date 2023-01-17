@@ -21,4 +21,10 @@ public interface IAccountService
     public Task<string> SetUpdateAchievementAsync(Guid auID, Guid acuID);
     public Task<List<Achievement>?> GetAccountAchievementsAsync(Guid auID);
 
+    public Task<Ad?> GetRecommendedAdsAsync();
+    public Task<List<AccountPoco>?> GetRecommendedFriendsAsync(Guid auID);
+    public Task<List<AccountPoco>?> GetFriendsOfFriendsAsync(Guid auID);
+    public Task<List<AccountPoco>?> RecommendedPlayersFromMatchAsync(Guid auID);
+    public Task<List<Quiz>?> GetRecommendedQuizzesAsync();
+
 }

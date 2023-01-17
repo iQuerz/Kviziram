@@ -16,6 +16,7 @@ function FriendsContainer(){
         setFriends(friends)
     }
 
+    
     return (
         <>
             <Divider variant="middle" className="sidebar-divider"></Divider>

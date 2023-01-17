@@ -16,7 +16,7 @@ public class CategoryService: ICategoryService
     }
 
     #region Main Functions
-    public async Task<Category?> GetCategoryAsync(Guid? uID) {
+    public async Task<Category?> GetCategoryAsync(Guid uID) {
         Category? category = await GetCategoryQueryAsync(uID);
         if (category == null)
             throw new KviziramException(Msg.NoCategory);
@@ -26,6 +26,11 @@ public class CategoryService: ICategoryService
     public async Task<List<Category>> GetAllCategoriesAsync() {
         return await GetAllCategoriesQueryAsync();
     }
+
+    public async Task<List<AccountPoco>?> GetCategoryAccountsAsync(Guid cuID) {
+        return await GetCategoryAccountsQueryAsync(cuID);
+    }
+
 
     public async Task<Category> CreateCategoryAsync(Category newCategory) {
         newCategory.ID = Guid.NewGuid();
@@ -48,10 +53,15 @@ public class CategoryService: ICategoryService
         await DeleteCategoryQueryAsync(uID);
         return ("Category: " + uID + Msg.Deleted);
     }
+
+    public async Task<List<Ad>?> GetCategoryAdsAsync(Guid cuID) {
+        return await GetCategoryAdsQueryAsync(cuID);
+    }
+
     #endregion
 
     #region Helper Functions
-    public async Task<Category?> GetCategoryQueryAsync(Guid? uID) {
+    public async Task<Category?> GetCategoryQueryAsync(Guid uID) {
         var query = await _neo.Cypher
             .OptionalMatch("(c:Category)")
             .Where((Category c) => c.ID == uID)
@@ -66,6 +76,16 @@ public class CategoryService: ICategoryService
             .Return(c => c.As<Category>())
             .ResultsAsync;
         return query.ToList();
+    }
+
+    public async Task<List<AccountPoco>?> GetCategoryAccountsQueryAsync(Guid cuID) {
+        var query = await _neo.Cypher
+            .OptionalMatch("(c:Category)<-[:PREFERS]-(a:Account)")
+            .Where((Category c) => c.ID == cuID)
+            .Return(a => a.As<AccountPoco>())
+            .ResultsAsync;
+        if (query.Count() == 1) return null; 
+        else return query.ToList(); 
     }
 
     public async Task CreateCategoryQueryAsync(Category newCategory) {
@@ -90,6 +110,18 @@ public class CategoryService: ICategoryService
             .Where((Category c) => c.ID == uID)
             .DetachDelete("c")
             .ExecuteWithoutResultsAsync();
+    }
+
+    public async Task<List<Ad>?> GetCategoryAdsQueryAsync(Guid cuID) {
+        var query = _neo.Cypher
+            .OptionalMatch("(ad:Ad)-[r:AD_CATEGORY]->(c:Category)")
+            .Where((Category c) => c.ID == cuID)
+            .Return( ad => ad.As<Ad>());
+        var result = await query.ResultsAsync;
+        if (result.Count() != 0) {
+            return result.ToList();
+        }
+        return null;
     }
     #endregion
 

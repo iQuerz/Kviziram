@@ -46,7 +46,7 @@ public class QuizService: IQuizService
             newQuiz.QuestionsID = Guid.NewGuid();
 
             if (newQuiz.CategoryID != null) {
-                Category? categoryCheck = await _category.GetCategoryAsync(newQuiz.CategoryID);
+                Category? categoryCheck = await _category.GetCategoryAsync((Guid) newQuiz.CategoryID);
             if (categoryCheck == null) 
                 throw new KviziramException(Msg.QuizNoCategory);        
             }           
@@ -68,7 +68,7 @@ public class QuizService: IQuizService
         return await GetQuizRatingsQueryAsync(quID);
     }
 
-    public async Task<List<QuizDto>?> SearchQuizzesAsync(QuizQuery quizQuery) {
+    public async Task<List<QuizDto>?> SearchQuizzesAsync(QuizQuery quizQuery, int skip, int limit) {
         var finalQuery = _neo.Cypher.OptionalMatch("(q:Quiz)");
 
         if (quizQuery.CreatorID != null) finalQuery = finalQuery.Match("(q)<-[:CREATOR]-(a:Account)").Where((Account a) => a.ID == quizQuery.CreatorID);
@@ -81,6 +81,7 @@ public class QuizService: IQuizService
                 Quizzes = q.CollectAs<QuizDto>(),
                 Ratings = rating.CollectAs<float>()
             });
+        Console.WriteLine(query.Query.DebugQueryText);
         var result = (await query.ResultsAsync).Single();
 
         IEnumerable<QuizDto> tempList = result.Quizzes;
@@ -93,9 +94,9 @@ public class QuizService: IQuizService
             tempList.ElementAt(j).AvgRating = 0;
 
         if (quizQuery.OrderAsc)
-            return tempList.OrderBy(x => x.AvgRating).ToList();
+            return tempList.OrderBy(x => x.AvgRating).Skip(skip).Take(limit).ToList();
         else
-            return tempList.OrderByDescending(x => x.AvgRating).ToList();
+            return tempList.OrderByDescending(x => x.AvgRating).Skip(skip).Take(limit).ToList();
     }
     
     public async Task<string> ConnectQuizAchievementAsync(Guid quID, Guid? acuID) {
@@ -127,7 +128,7 @@ public class QuizService: IQuizService
 
             if (newQuiz.AchievementID != null && _util.CallerAccountExists().isAdmin)
                 await ConnectQuizAchievementQueryAsync(newQuiz.ID, newQuiz.AchievementID);
-
+                
             return await GetQuizAsync(newQuiz.ID);            
         }
         throw new KviziramException(Msg.NoAccess);
@@ -165,19 +166,24 @@ public class QuizService: IQuizService
                     Questions = qs.As<QuestionPoco>(),
                     Category = c.As<Category>(),
                     Creator = a.As<AccountPoco>(),
-                    Achievement = ac.As<Achievement>()
+                    Achievement = ac.As<Achievement?>()
                 })
             .ResultsAsync;
         var result = query.Single();
         result.Quiz.Questions = result.Questions.DeserializeInfo();
-        result.Quiz.Category = result.Category;
-        result.Quiz.Creator = result.Creator;
-        result.Quiz.Achievement = result.Achievement;
+        if (result.Category != null)
+            result.Quiz.Category = result.Category;
+        
+        if (result.Creator != null)
+            result.Quiz.Creator = result.Creator;
+
+        if (result.Achievement != null)
+            result.Quiz.Achievement = result.Achievement;
 
         result.Quiz.QuestionsID = result.Questions.ID;
-        result.Quiz.CategoryID = result.Category.ID;
-        result.Quiz.CreatorID = result.Creator.ID;
-        result.Quiz.AchievementID = result.Achievement.ID;
+        result.Quiz.CategoryID = null;
+        result.Quiz.CreatorID = null;
+        result.Quiz.AchievementID = null;
 
 
         return result.Quiz;

@@ -58,7 +58,31 @@ namespace backend.Controllers
         public async Task<ActionResult<List<Achievement>>> GetAccountAchievements(Guid auID) {
             return Ok(await _kviziram.GetAccountAchievementsAsync(auID));
         }
-        
+
+        [HttpGet("me/ads/recommended")]
+        public async Task<ActionResult<Ad>> GetRecommendedAds() {
+            return Ok(await _kviziram.GetRecommendedAdsAsync());
+        }
+
+        [HttpGet("{auID}/friends/recommended")]
+        public async Task<ActionResult<List<AccountPoco>>> GetRecommendedFriends(Guid auID) {
+            return Ok(await _kviziram.GetRecommendedFriendsAsync(auID));
+        }
+
+        [HttpGet("{auID}/match/players")]
+        public async Task<ActionResult<List<AccountPoco>>> GetMatchPlayers(Guid auID) {
+            return Ok(await _kviziram.RecommendedPlayersFromMatchAsync(auID));
+        }
+
+        [HttpGet("{auID}/fof/recommended")]
+        public async Task<ActionResult<List<AccountPoco>>> GetFof(Guid auID) {
+            return Ok(await _kviziram.GetFriendsOfFriendsAsync(auID));
+        }
+
+        [HttpGet("me/quiz/recommended")]
+        public async Task<ActionResult<List<Quiz>>> GetRecommendedQuizzes() {
+            return Ok(await _kviziram.GetRecommendedQuizzesAsync());
+        }
         #endregion
         
         #region POST Methods

@@ -1,5 +1,6 @@
 using StackExchange.Redis;
 using Neo4jClient;
+using System.Text.Json;
 
 public class LoginRegisterService: ILoginRegisterService
 {
@@ -31,9 +32,9 @@ public class LoginRegisterService: ILoginRegisterService
 
         AccountPoco accountView = new AccountPoco(checkAccount.account);
 
-        await _redis.StringSetAsync(accountKey, accountView.ToJsonString(), new TimeSpan(12,0,0));
+        await _redis.StringSetAsync(accountKey, accountView.ToJsonString(), Duration.AccountLogin);
 
-        return newSID;
+        return JsonSerializer.Serialize(newSID);
     }
 
     public async Task<bool> Register(Account newAccount) {
