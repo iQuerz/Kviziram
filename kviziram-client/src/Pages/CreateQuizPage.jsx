@@ -11,30 +11,30 @@ function CreateQuizPage() {
     const [category, setCategory] = useState("");
     const [questions, setQuestions] = useState([]);
 
-    function handleNumOfQuestionsChange(){
+    function handleNumOfQuestionsChange() {
         setNumOfQuestions(numOfQuestion + 1)
     }
-    function handleQuizzNameChange(event){
+    function handleQuizzNameChange(event) {
         setQuizzName(event.target.value)
     }
-    function handleCategoryChange(event)
-    {
+    function handleCategoryChange(event) {
         setCategory(event)
     }
-    function handleQuestionChange()
-    {
+    function handleQuestionChange() {
 
     }
-    return(
+    return (
         <>
             <SidebarLayout>
                 <Typography></Typography>
-                <QuizzInfoForm 
-                quizzName={quizzName} onQuizzNameChange={handleQuizzNameChange} 
-                quizzCategory={category} onCategoryChange={handleCategoryChange}></QuizzInfoForm>
+                <QuizzInfoForm
+                    quizzName={quizzName} onQuizzNameChange={handleQuizzNameChange}
+                    quizzCategory={category} onCategoryChange={handleCategoryChange}></QuizzInfoForm>
+
                 {Array.from({ length: numOfQuestion }).map((_, i) => (
-                <QuizzQuestions key={i} num={i} />
+                    <QuizzQuestions key={i} num={i} />
                 ))}
+
                 <Button variant="contained" size="large" onClick={handleNumOfQuestionsChange}>+</Button>
 
             </SidebarLayout>

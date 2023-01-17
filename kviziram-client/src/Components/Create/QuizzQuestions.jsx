@@ -12,16 +12,14 @@ function QuizzQuestions(props) {
   }
 
   return (
-    <Box>
-      <Card>
+    <Box className="margin">
+      <Card className="flex-down seperate-children-small">
         <Typography variant="h5"> Question number : {props.num + 1}</Typography>
-          <Typography variant="h6">
-            Question:
-            <TextField
+            <TextField multiline
+              label="Question"
               value={question}
               onChange={props.handleQuestionChange}
             />
-          </Typography>
           {answers.map((answer, index) => (
             <div key={index}>
               <Typography  variant="h7">

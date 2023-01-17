@@ -14,10 +14,10 @@ function QuizzInfoForm(props) {
 
 
   return (
-    <Box>
-      <Card>
+    <Box className="margin">
+      <Card className="flex-down seperate-children-small padding">
         <Typography variant="h5"> Quizz Name: </Typography>
-        <TextField lable="Quizz Name" variant="outlined" value={props.quizzName} onChange={props.onQuizzNameChange}></TextField>
+        <TextField label="Quiz Name" variant="outlined" value={props.quizzName} onChange={props.onQuizzNameChange}></TextField>
         <Typography variant="h6"> Category: </Typography>
         <SelectComponent options={categoryOptions} onChange={props.onCategoryChange}/>
       </Card>
