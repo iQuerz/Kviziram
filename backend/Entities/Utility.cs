@@ -71,7 +71,9 @@ public class Utility
     #endregion
 
     #region Redis keys
-    public string PublicMatches = "list:games:public";
+
+    public string RedisKeyPublicMatches = "list:games:public";
+
     //Korisnici, invite kljuc za korisnika tj lista.
     public string RedisKeyGuest(string key) { return "guest:" + key + ":id"; }
     public string RedisKeyAccount(string key) { return "account:" + key + ":id"; }
@@ -90,6 +92,9 @@ public class Utility
     //Lobby prati broj igraca koji su trenutno u game, scores cuva rezultat i uporedjujemo ako se igrac disconnect/connect-uje
     public string RedisKeyLobby(string key) { return "lobby:" + key + ":id"; }
     public string RedisKeyScores(string key) { return "score:" + key + ":id"; }
+
+    //Cuvaj poslednje game-ove ako se diskonektuje pa mora reconnect
+    public string RedisKeyPlayedGames(string? key) { return "played:" + key + ":id"; }
     #endregion
 
     #region Convert Functions

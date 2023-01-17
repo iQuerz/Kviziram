@@ -12,6 +12,15 @@ public class GameController : ControllerBase
     }
 
     #region GET Methods
+    [HttpGet("{inviteCode}/start")]
+    public async Task<ActionResult<string>> StartGame(string inviteCode) {
+        return Ok(await _kviziram.StartGameAsync(inviteCode));
+    }
+
+    [HttpGet("{inviteCode}/information")]
+    public async Task<ActionResult<GameDto>> GetGameInformation(string inviteCode) {
+        return Ok(await _kviziram.GetGameInformationAsync(inviteCode));
+    }
     #endregion
 
     #region POST Methods
