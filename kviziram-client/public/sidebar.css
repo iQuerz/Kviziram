@@ -1,0 +1,58 @@
+
+/*#region Sidebar */
+.sidebar {
+    height: 100%;
+    width: 15em;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #222;
+    overflow-x: hidden;
+    padding-top: 1em;
+}
+.sidebar > * {
+    padding: 1em;
+    display: block;
+    color: var(--white);/*nepotrebno, ali tu je dok ne implementiramo friends*/
+}
+.page-container{
+    margin-left: 15em; /*must match sidebar width*/
+}
+
+    .sidebar-nav-button:hover{
+        background-color: var(--black-hover);
+    }
+
+.sidebar-divider{
+    border-color: var(--white)!important;
+}
+.friends-container{
+    padding-top: 1em;
+}
+
+.friend-card{
+    margin: 0.2em 0.4em;
+    padding: 0.1em 0.3em;
+    cursor: pointer;
+}
+    .friend-card:hover{
+        background-color: var(--black-hover)
+    }
+    .friend-card:active{
+        transform: translateY(1px);
+    }
+
+.status-dot{
+    height: 1em;
+    width: 1em;
+    border-radius: 0.5em;
+    margin-right: 0.5em;
+}
+.online{
+    background-color: var(--succes);
+}
+.offline{
+    background-color: var(--error)
+}
+/*#endregion*/

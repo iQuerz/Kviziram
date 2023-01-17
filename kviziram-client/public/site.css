@@ -10,6 +10,7 @@
 
     --white: #eee;
     --black: #222;
+    --black-hover: #444;
 }
 body{
     width: 100vw;
@@ -27,26 +28,6 @@ body{
     height: 100vh;
 }
 
-.sidebar {
-    height: 100%;
-    width: 15em;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    background-color: #222;
-    overflow-x: hidden;
-    padding-top: 1em;
-}
-.sidebar > * {
-    padding: 1em;
-    display: block;
-    color: #ddd;/*nepotrebno, ali tu je dok ne implementiramo friends*/
-}
-.page-container{
-    margin-left: 15em; /*must match sidebar width*/
-}
-
 .ad{
     width: 35em;
     height: 8em;
@@ -58,6 +39,8 @@ body{
     vertical-align: middle;
     text-align: center;
 }
+
+/*#region FLEX */
 
 .flex-down{
     display: flex;
@@ -71,9 +54,16 @@ body{
     justify-content: space-around;
     align-items: top;
 }
-.wrap{
+.flex-list-row{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    align-content: center;
     flex-wrap: wrap;
 }
+
+/*#endregion */
 
 .seperate-children-small > * {
     margin: 0.2em!important;
@@ -104,6 +94,7 @@ body{
 .width-35{
     width:35%
 }
+
 .avatar {
     width: 80px;
     height: 80px;
