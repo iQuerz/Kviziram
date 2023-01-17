@@ -1,6 +1,7 @@
 public enum GameState
 {
     Waiting,
-    Started,
-    Finished    
+    Playing,
+    Finished,
+    Unfinished
 }
