@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useState } from "react";
 
 import LoginPage from "./Pages/LoginPage";
 import PlayPage from './Pages/PlayPage';
@@ -9,11 +10,17 @@ import ProfilePage from './Pages/ProfilePage';
 import RegisterPage from './Pages/RegisterPage';
 
 function App() {
+    const [sessionID, setSessionID] = useState("")
+
+    function handleSessionIDChange(sessionID){
+        console.log("from app page :" + sessionID)
+        setSessionID(sessionID);
+    }
     return (
         <Router>
             <Routes>
-                <Route path="/"         element={<LoginPage />} />
-                <Route path="/Play"     element={<PlayPage />} />
+                <Route path="/"         element={<LoginPage onSessionIDChange={handleSessionIDChange} />} />
+                <Route path="/Play"     element={<PlayPage sessionID={sessionID}/>} />
                 <Route path="/Lobby"    element={<LobbyPage />} />
                 <Route path="/Game"     element={<GamePage />} />
                 <Route path="/Create"   element={<CreateQuizPage />} />

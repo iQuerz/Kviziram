@@ -56,7 +56,7 @@ function RegisterPage() {
         }     
     }  
     function handleFetchSuccess(){
-        navigate('/play')
+        navigate('/Login')
     }
     return(
         <Box className="flex-down" marginTop={'5em'}>

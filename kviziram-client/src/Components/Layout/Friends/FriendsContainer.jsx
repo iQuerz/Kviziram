@@ -16,6 +16,7 @@ function FriendsContainer(){
         setFriends(friends)
     }
 
+    
     return (
         <Card>
             {friends.map((friend, i) => (
