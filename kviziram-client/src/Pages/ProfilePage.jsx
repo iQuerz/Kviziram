@@ -3,12 +3,12 @@ import { Typography } from "@mui/material";
 
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
 
-function ProfilePage() {
+function ProfilePage(props) {
 
     return(
         <>
             <SidebarLayout>
-                <Typography variant="h1">Not yet implemented</Typography>
+                <Typography variant="h1">{props.mySessionID}</Typography>
             </SidebarLayout>
         </>
     )

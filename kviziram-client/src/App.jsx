@@ -20,11 +20,11 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/"         element={<LoginPage onSessionIDChange={handleSessionIDChange} />} />
-                <Route path="/Play"     element={<PlayPage sessionID={sessionID}/>} />
+                <Route path="/Play"     element={<PlayPage mySessionID={sessionID}/>} />
                 <Route path="/Lobby"    element={<LobbyPage />} />
                 <Route path="/Game"     element={<GamePage />} />
                 <Route path="/Create"   element={<CreateQuizPage />} />
-                <Route path="/Profile"  element={<ProfilePage/>} />
+                <Route path="/Profile"  element={<ProfilePage mySessionID={sessionID}/>} />
                 <Route path="/Register" element={<RegisterPage />} />
             </Routes>
         </Router>

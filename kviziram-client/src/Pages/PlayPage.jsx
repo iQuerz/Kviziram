@@ -5,10 +5,11 @@ import { useNavigate } from "react-router-dom";
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
 import Ad from "../Components/Layout/Ad";
 
-function PlayPage() {
+function PlayPage(props) {
     const navigate = useNavigate();
     
     function joinLobby(){
+        console.log(props.sesisonID)
         navigate('../Lobby')
     }
     function createLobby(){
