@@ -1,4 +1,5 @@
 import { Typography, Button } from "@mui/material";
+import { Box } from "@mui/system";
 import { useState } from "react";
 import QuizzInfoForm from "../Components/Create/QuizInfoForm";
 import QuizzQuestions from "../Components/Create/QuizzQuestions";
@@ -50,21 +51,23 @@ function CreateQuizPage() {
           onCategoryChange={handleCategoryChange}
         ></QuizzInfoForm>
 
-        {Array.from({ length: numOfQuestion }).map((_, i) => (
-          <QuizzQuestions
-            key={i}
-            num={i}
-            onQuestionChange={handleQuestionChange}
-          />
-        ))}
+        <Box className="flex-list-row">
+          {Array.from({ length: numOfQuestion }).map((_, i) => (
+            <QuizzQuestions
+              key={i}
+              num={i}
+              onQuestionChange={handleQuestionChange}
+            />
+          ))}
 
-        <Button
-          variant="contained"
-          size="large"
-          onClick={handleNumOfQuestionsChange}
-        >
-          +
-        </Button>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={handleNumOfQuestionsChange}
+          >
+            +
+          </Button>
+        </Box>
         
       </SidebarLayout>
     </>

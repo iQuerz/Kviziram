@@ -1,4 +1,5 @@
-import { Box, TextField, Typography, Card, Button } from "@mui/material";
+import { CheckBox } from "@mui/icons-material";
+import { Box, TextField, Typography, Card, Button, Radio } from "@mui/material";
 import { useState } from "react";
 
 function QuizzQuestions(props) {
@@ -46,37 +47,33 @@ function QuizzQuestions(props) {
 
   return (
     <Box className="margin">
-      <Card className="flex-down seperate-children-small">
-        <Typography variant="h5"> Question number : {props.num + 1}</Typography>
-            <TextField multiline
-              label="Question"
-              value={props.question}
-              onChange={handleQuestionChange}
-            />
-            <TextField
-              label="Points"
-              type="number"
-              value={props.points}
-              onChange={handlePointsChange}
-            />
-          {answers.map((answer, index) => (
-            <div key={index}>
-              <Typography  variant="h7">
-                Answer {index + 1}:
-                <TextField
-                  value={answer.value}
-                  onChange={(event) => handleAnswerChange(event, index)}
-                />
-              </Typography>
-              <input
-                type="checkbox"
-                checked={answer.correct}
-                onChange={(event) => handleCorrectAnswerChange(event, index)}
-              />
-              Correct answer
-            </div>
-          ))}
-          <Button variant="contained" size="large" onClick={handlenumOfAnswersChange}>+</Button>
+      <Card className="flex-down seperate-children-small padding">
+        <Typography variant="h5"> Question {props.num + 1}:</Typography>
+          <TextField multiline
+            label="Question"
+            value={props.question}
+            onChange={handleQuestionChange}
+          />
+          <TextField
+            label="Points"
+            type="number"
+            value={props.points}
+            onChange={handlePointsChange}
+          />
+          <Box className="flex-down seperate-children-medium" sx={{border:1, borderRadius:2}}>
+            <Typography>Question answers (mark the correct answer):</Typography>
+            {answers.map((answer, index) => (
+              <div key={index} className="flex-right">
+                <TextField label = {"Answer " + (index + 1)}
+                            value={answer.value}
+                            onChange={(event) => handleAnswerChange(event, index)} />
+                <Radio checked={answer.correct} name={"Question"+props.num}
+                      label="Correct"
+                      onChange={(event) => handleCorrectAnswerChange(event, index)}/>
+              </div>
+            ))}
+            <Button variant="contained" size="large" onClick={handlenumOfAnswersChange}>+</Button>
+          </Box>
       </Card>
     </Box>
   );

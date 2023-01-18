@@ -62,6 +62,9 @@ body{
     align-content: center;
     flex-wrap: wrap;
 }
+.wrap{
+    flex-wrap: wrap;
+}
 
 /*#endregion */
 
@@ -76,10 +79,10 @@ body{
 }
 
 .margin{
-    margin: 1em;
+    margin: 1em!important;
 }
 .padding{
-    padding: 1em;
+    padding: 1em!important;
 }
 
 .width-small{
@@ -88,11 +91,17 @@ body{
 .width-medium{
     width: 10em;
 }
-.width-large{
+.width-big{
     width: 25em;
+}
+.width-100{
+    width:100%;
 }
 .width-75{
     width:75%;
+}
+.width-50{
+    width:50%;
 }
 .width-35{
     width:35%

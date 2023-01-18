@@ -4,16 +4,28 @@ import { useNavigate } from "react-router-dom";
 
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
 import Ad from "../Components/Layout/Ad";
+import PickQuizModal from "../Components/Lobby/PickQuizModal";
+import { useState } from "react";
 
 function PlayPage(props) {
     const navigate = useNavigate();
+    const [lobbyCode, setLobbyCode] = useState("");
+    const [newLobbyName, setNewLobbyName] = useState("");
+    const [isCreateLobbyModalOpen, setCreateLobbyModalOpen] = useState(false);
     
+    function lobbyCodeInputChanged(event){
+        setLobbyCode(event.target.value);
+    }
     function joinLobby(){
         console.log(props.sesisonID)
         navigate('../Lobby')
     }
+
+    function newLobbyNameInputChanged(event){
+        setNewLobbyName(event.target.value);
+    }
     function createLobby(){
-        navigate('../Lobby')
+        setCreateLobbyModalOpen(true);
     }
 
     return(
@@ -33,16 +45,18 @@ function PlayPage(props) {
                 <Box className="flex-right width-75 seperate-children-big">
                     <Card className="width-35 flex-down seperate-children-small padding">
                         <Typography variant="h4">Join via Code</Typography>
-                        <TextField label="Lobby code"></TextField>
+                        <TextField label="Lobby code" onChange={lobbyCodeInputChanged}></TextField>
                         <Button variant="contained" size="large" onClick={joinLobby}>Join</Button>
                     </Card>
                     <Card className="width-35 flex-down seperate-children-small padding">
                         <Typography variant="h4">Create Lobby</Typography>
-                        <TextField label="Lobby name"></TextField>
+                        <TextField label="Lobby name" onChange={newLobbyNameInputChanged}></TextField>
                         <Button variant="contained" size="large" onClick={createLobby}>Create</Button>
                     </Card>
                 </Box>
                 <Ad></Ad>
+            
+                <PickQuizModal open={isCreateLobbyModalOpen} name={newLobbyName}></PickQuizModal>
             </SidebarLayout>
         </>
     )

@@ -5,7 +5,7 @@ import SelectComponent from "./SelectComponent";
 function QuizzInfoForm(props) {
   const [Category, setQuizzCategory] = useState(props.category);
 
-  const categoryOptions = ['Option 1', 'Option 2', 'Option 3'];
+  const categoryOptions = ['Music', 'Sport', 'Gaming'];
 
   function handleCategoryChange(category)
   {
@@ -19,7 +19,7 @@ function QuizzInfoForm(props) {
         <Typography variant="h5"> Quizz Name: </Typography>
         <TextField label="Quiz Name" variant="outlined" value={props.quizzName} onChange={props.onQuizzNameChange}></TextField>
         <Typography variant="h6"> Category: </Typography>
-        <SelectComponent options={categoryOptions} onChange={props.onCategoryChange}/>
+        <SelectComponent label="Category" options={categoryOptions} onChange={props.onCategoryChange}/>
       </Card>
     </Box>
   );

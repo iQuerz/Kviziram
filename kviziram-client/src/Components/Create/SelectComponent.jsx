@@ -14,7 +14,7 @@ function SelectComponent(props) {
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
                 value={selectedOption}
-                label="Category"
+                label={props.label}
                 onChange={handleChange}
             >
                 {props.options.map((option) => (
