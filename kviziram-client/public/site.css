@@ -1,0 +1,123 @@
+:root{
+    --green: #9fb8a9;
+    --blue: #728c9a;
+    --brown: #9a9071;
+    --pink: #9a7174;
+    --purple: #79719a;
+
+    --succes: #198754;
+    --error: #7f0000;
+
+    --white: #eee;
+    --black: #222;
+}
+body{
+    width: 100vw;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+    background-image: linear-gradient(var(--green), var(--blue));
+}
+*{
+    padding: 0;
+    margin: 0;
+}
+#root{
+    width: 100vw;
+    height: 100vh;
+}
+
+.sidebar {
+    height: 100%;
+    width: 15em;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: #222;
+    overflow-x: hidden;
+    padding-top: 1em;
+}
+.sidebar > * {
+    padding: 1em;
+    display: block;
+    color: #ddd;/*nepotrebno, ali tu je dok ne implementiramo friends*/
+}
+.page-container{
+    margin-left: 15em; /*must match sidebar width*/
+}
+
+.ad{
+    width: 35em;
+    height: 8em;
+    margin: 1em;
+    border: 1px solid var(--black);
+    cursor: pointer;
+}
+.ad > *{
+    vertical-align: middle;
+    text-align: center;
+}
+
+.flex-down{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.flex-right{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: top;
+}
+.wrap{
+    flex-wrap: wrap;
+}
+
+.seperate-children-small > * {
+    margin: 0.2em!important;
+}
+.seperate-children-medium > * {
+    margin: 0.5em!important;
+}
+.seperate-children-big > * {
+    margin: 1em!important;
+}
+
+.padding{
+    padding: 1em;
+}
+
+.width-small{
+    width: 5em;
+}
+.width-medium{
+    width: 10em;
+}
+.width-large{
+    width: 25em;
+}
+.width-75{
+    width:75%;
+}
+.width-35{
+    width:35%
+}
+.avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-right: 20px;
+  }
+.initials-avatar {
+    background-color: #45cef0; /* set the background color as desired */
+    text-align: center;
+    color: #fff; /* set the text color as desired */
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    border-radius: 50%;
+    display: inline-block;
+    font-size: 1.5em;
+}
