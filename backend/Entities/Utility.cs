@@ -72,29 +72,38 @@ public class Utility
 
     #region Redis keys
 
-    public string RedisKeyPublicMatches = "list:games:public";
+    public string RK_PublicMatches = "list:games:public";
 
     //Korisnici, invite kljuc za korisnika tj lista.
-    public string RedisKeyGuest(string key) { return "guest:" + key + ":id"; }
-    public string RedisKeyAccount(string key) { return "account:" + key + ":id"; }
-    public string RedisKeyInvite(string key) { return "invite:" + key + ":id"; }
+    public string RK_Guest(string key) { return "guest:" + key + ":id"; }
+    public string RK_Account(string key) { return "account:" + key + ":id"; }
+    public string RK_Invite(string key) { return "invite:" + key + ":id"; }
 
     //Igra, kviz id-ime-kategorija-trofej
-    public string RedisKeyGame(string key) { return "game:" + key + ":id"; }
-    public string RedisKeyChat(string key) { return "chat:" + key + ":id"; }
+    public string RK_Game(string key) { return "game:" + key + ":id"; }
+    public string RK_Chat(string key) { return "chat:" + key + ":id"; }
 
     //Pitanja od kviza u redis, jer ce konstantno da se igraju pa ih cuvamo u redis
     //Broj igraca za igru koji je odg na pitanje pa refresh za sledece pitanje
-    public string RedisKeyQuestions(string key) { return "questions:" + key + ":id"; }
-    public string RedisKeyQuestions(Guid? key) { if(key == null) throw new KviziramException(Msg.NoQuiz); else return "questions:" + key + ":id"; }
-    public string RedisKeyPlayersAnswered(string key) { return "answered:" + key + ":id"; }
+    public string RK_Questions(string key) { return "questions:" + key + ":id"; }
+    public string RK_Questions(Guid? key) { if(key == null) throw new KviziramException(Msg.NoQuiz); else return "questions:" + key + ":id"; }
+    //Broj igraca koji je odg na trenutno pitanje kljuc
+    public string RK_PlayersAnswered(string key) { return "answered:" + key + ":id"; }
+    //Odgovori na pitanjca, odvojeno ofc
+    public string RK_QuestionsAnswers(string key) { return "answers:" + key + ":id"; }
+    public string RK_QuestionsAnswers(Guid? key) { if(key == null) throw new KviziramException(Msg.NoQuiz); else return "answers:" + key + ":id"; }
+    //Trenutno pitanje
+    public string RK_CurrentQuestion(string key) { return "question:" + key + ":index"; }
 
     //Lobby prati broj igraca koji su trenutno u game, scores cuva rezultat i uporedjujemo ako se igrac disconnect/connect-uje
-    public string RedisKeyLobby(string key) { return "lobby:" + key + ":id"; }
-    public string RedisKeyScores(string key) { return "score:" + key + ":id"; }
+    public string RK_Lobby(string key) { return "lobby:" + key + ":id"; }
+    public string RK_Scores(string key) { return "score:" + key + ":id"; }
 
     //Cuvaj poslednje game-ove ako se diskonektuje pa mora reconnect
-    public string RedisKeyPlayedGames(string? key) { return "played:" + key + ":id"; }
+    public string RK_PlayedGames(string? key) { return "played:" + key + ":id"; }
+    public string RK_GameWatcher(string? key) { return "game:" + key + ":watcher"; }
+
+
     #endregion
 
     #region Convert Functions

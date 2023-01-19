@@ -28,7 +28,7 @@ public class LoginRegisterService: ILoginRegisterService
         VerifyPassword(loginInfo.password, checkAccount.account.Password);
 
         string newSID = BCrypt.Net.BCrypt.GenerateSalt();
-        string accountKey = _util.RedisKeyAccount(newSID);
+        string accountKey = _util.RK_Account(newSID);
 
         AccountPoco accountView = new AccountPoco(checkAccount.account);
 
@@ -52,7 +52,7 @@ public class LoginRegisterService: ILoginRegisterService
 
     public async Task<string> LoginGuest(string username) {
         string newSID = BCrypt.Net.BCrypt.GenerateSalt();
-        string guestKey = _util.RedisKeyGuest(newSID);
+        string guestKey = _util.RK_Guest(newSID);
         Guest? guest = new Guest(Guid.NewGuid(), username);
 
         await _redis.StringSetAsync(guestKey, guest.ToJsonString(), new TimeSpan(6,0,0));        

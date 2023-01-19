@@ -13,15 +13,15 @@ public class Auth
         try {
             string? sID = context.Request.Headers["SessionID"];
             if (!string.IsNullOrEmpty(sID)) {
-                string? account = (await _context.Redis.GetDatabase().StringGetAsync(_util.RedisKeyAccount(sID))).ToString();
-                string? guest = (await _context.Redis.GetDatabase().StringGetAsync(_util.RedisKeyGuest(sID))).ToString();
+                string? account = (await _context.Redis.GetDatabase().StringGetAsync(_util.RK_Account(sID))).ToString();
+                string? guest = (await _context.Redis.GetDatabase().StringGetAsync(_util.RK_Guest(sID))).ToString();
                 if (account != null) {
                     _context.AccountCaller = JsonSerializer.Deserialize<AccountPoco>(account);
-                    _context.SID = _util.RedisKeyAccount(sID);
+                    _context.SID = _util.RK_Account(sID);
                 } 
                 else if (guest != null) {
                     _context.GuestCaller = JsonSerializer.Deserialize<Guest>(guest);
-                    _context.SID = _util.RedisKeyGuest(sID);
+                    _context.SID = _util.RK_Guest(sID);
                 }
             } else {
                 _context.SID = null;
