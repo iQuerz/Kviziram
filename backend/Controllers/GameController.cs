@@ -81,7 +81,7 @@ public class GameController : ControllerBase
         return Ok(await _kviziram.SaveGameToHistoryAsync(game));
     }
 
-    [HttpGet("{inviteCode}/{auID}/{sid}")]
+    [HttpGet("test/{inviteCode}/{auID}/{sid}")]
     public async Task AddToLobby(string inviteCode, Guid auID, string sid) {
         await _kviziram.AddToLobby(inviteCode, auID, sid);
     }

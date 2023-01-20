@@ -91,7 +91,6 @@ public class GameService: IGameService
                         } else {
                             await _redis.HashSetAsync(_util.RK_Lobby(inviteCode), playerID, playerSID);
                         }
-
                         break;
                     }
 
@@ -99,7 +98,8 @@ public class GameService: IGameService
                         string[] SIDandID = msgOperation[1].Split('|');
                         string playerSID = SIDandID[0];
                         string playerID = SIDandID[1];
-                        await _redis.HashDeleteAsync(_util.RK_Lobby(inviteCode), playerID);   
+                        await _redis.HashDeleteAsync(_util.RK_Lobby(inviteCode), playerID);
+                        await _redis.HashDeleteAsync(_util.RK_PlayersAnswered(inviteCode), playerID);   
 
                         if (await _redis.HashLengthAsync(_util.RK_Lobby(inviteCode)) == 0 && game != null) {
                             if (await _redis.KeyExistsAsync(_util.RK_Scores(inviteCode))) {
@@ -112,10 +112,49 @@ public class GameService: IGameService
                     }
 
                     case "Answered": {
+                        string[] IDAndAnswer = msgOperation[1].Split('|');
+                        string playerID = IDAndAnswer[0];
+                        int playerAnswer = Int32.Parse(IDAndAnswer[1]);
+
+                        await _redis.HashSetAsync(_util.RK_PlayersAnswered(inviteCode), playerID, playerAnswer);
+
+                        long LobbyLength = await _redis.HashLengthAsync(_util.RK_Lobby(inviteCode));
+                        long AnsweredLength = await _redis.HashLengthAsync(_util.RK_PlayersAnswered(inviteCode));
+
+                        //Svi odgovorili, ako neko ne odgovara, force-uj ga da posalje -1 kao odgovor
+                        if (LobbyLength == AnsweredLength && game != null) {
+                            int index = (int) (await _redis.StringGetAsync(_util.RK_CurrentQuestion(inviteCode)));
+                            //Potrebno da vidimo koliko poena pitanje iznosi
+                            string res = (await _redis.ListGetByIndexAsync(_util.RK_Questions(game.QuizID), index)).ToString();
+                            QuestionDto? question = _util.DeserializeQuestion(res);
+                            if (question != null) {
+                                //Tacan odgovor
+                                int correctAnswer = Int32.Parse((await _redis.ListGetByIndexAsync(_util.RK_QuestionsAnswers(game.QuizID), index)).ToString());
+
+                                var finalAnswers = await _redis.HashGetAllAsync(_util.RK_PlayersAnswered(inviteCode));
+                                foreach(var elem in finalAnswers) {
+                                    //Dal je odgovor tacan
+                                    if (Int32.Parse(elem.Value.ToString()) == correctAnswer) {
+                                        await _redis.SortedSetIncrementAsync(_util.RK_Scores(inviteCode), elem.Name, (double) question.Points);
+                                    }
+                                }
+                                await _redis.KeyDeleteAsync(_util.RK_PlayersAnswered(inviteCode));
+                                await _redis.StringIncrementAsync(_util.RK_CurrentQuestion(inviteCode));
+                            }   
+
+                            long numOfQuestions = await _redis.ListLengthAsync(_util.RK_Questions(game.QuizID));
+                            if ( (index+1) == numOfQuestions) {
+                                game.GameState = GameState.Finished;
+                                await SaveGameToHistoryAsync(game);
+                                await RemoveGameFromRedisAsync(inviteCode);
+                            }                                                     
+                        }
                         break;
                     }
 
                     case "Chat": {
+                        string chatMessage = msgOperation[1];
+                        await _redis.ListLeftPushAsync(_util.RK_Chat(inviteCode), chatMessage);
                         break;
                     }
 
@@ -167,7 +206,6 @@ public class GameService: IGameService
                     }
 
                     await _redis.KeyExpireAsync(_util.RK_Lobby(inviteCode), Duration.GameScore);
-                    await _redis.StringSetAsync(_util.RK_PlayersAnswered(inviteCode), 0, Duration.NumberOfAnswers);
                     await _redis.StringSetAsync(_util.RK_CurrentQuestion(inviteCode), 0, Duration.Questions);
 
                     match.GameState = GameState.Playing;
@@ -176,6 +214,7 @@ public class GameService: IGameService
                     double PublicGameKey = match.Created.Value.ToOADate();
                     await _redis.SortedSetRemoveRangeByScoreAsync(_util.RK_PublicMatches, PublicGameKey, PublicGameKey);
 
+                    //redis.publish(master kanal, started)
                     return Msg.GameStarted;
                 }
                 return Msg.NoLobby;
