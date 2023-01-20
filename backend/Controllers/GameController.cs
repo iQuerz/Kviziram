@@ -23,17 +23,17 @@ public class GameController : ControllerBase
     }
 
     [HttpGet("{inviteCode}/lobby")]
-    public async Task<ActionResult<string>> GetGameLobby(string inviteCode) {
+    public async Task<ActionResult<Dictionary<string, string>>> GetGameLobby(string inviteCode) {
         return Ok(await _kviziram.GetGameLobbyAsync(inviteCode));
     }
 
     [HttpGet("{inviteCode}/scores")]
-    public async Task<ActionResult<string>> GetGameScores(string inviteCode) {
+    public async Task<ActionResult<Dictionary<string, int>>> GetGameScores(string inviteCode) {
         return Ok(await _kviziram.GetGameScoresAsync(inviteCode));
     }
 
     [HttpGet("{inviteCode}/chat/{start}/{stop}")]
-    public async Task<ActionResult<string>> GetGameChat(string inviteCode, int start, int stop) {
+    public async Task<ActionResult<List<string>>> GetGameChat(string inviteCode, int start, int stop) {
         return Ok(await _kviziram.GetGameChatAsync(inviteCode, start, stop));
     }
 
@@ -79,6 +79,11 @@ public class GameController : ControllerBase
     [HttpPost("test/savetohistory")]
     public async Task<ActionResult<Match>> SaveGameToHistory([FromBody] Match game) {
         return Ok(await _kviziram.SaveGameToHistoryAsync(game));
+    }
+
+    [HttpGet("{inviteCode}/{auID}/{sid}")]
+    public async Task AddToLobby(string inviteCode, Guid auID, string sid) {
+        await _kviziram.AddToLobby(inviteCode, auID, sid);
     }
     #endregion
 }

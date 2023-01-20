@@ -262,19 +262,25 @@ public class GameService: IGameService
         return false;
     }
 
-    public async Task<string> GetGameLobbyAsync(string inviteCode) {
+    public async Task<Dictionary<string, string>> GetGameLobbyAsync(string inviteCode) {
         var lobby = await _redis.HashGetAllAsync(_util.RK_Lobby(inviteCode));
-        return JsonSerializer.Serialize<HashEntry[]>(lobby);
+        Dictionary<string, string> dic = new Dictionary<string, string>();
+        foreach(var elem in lobby)
+            dic.Add(elem.Name.ToString(), elem.Value.ToString());
+        return dic;
     }
 
-    public async Task<string> GetGameScoresAsync(string inviteCode) {
+    public async Task<Dictionary<string, int>> GetGameScoresAsync(string inviteCode) {
         var scores = await _redis.SortedSetRangeByScoreWithScoresAsync(_util.RK_Scores(inviteCode), double.NegativeInfinity, double.PositiveInfinity, Exclude.None, Order.Descending);
-        return JsonSerializer.Serialize<SortedSetEntry[]>(scores);
+        Dictionary<string, int> dic = new Dictionary<string, int>();
+        foreach(var elem in scores)
+            dic.Add(elem.Element.ToString(), (int) elem.Score);
+        return dic;
     }
 
-    public async Task<string> GetGameChatAsync(string inviteCode, int start = 0, int stop = 100) {
+    public async Task<List<string>> GetGameChatAsync(string inviteCode, int start = 0, int stop = 100) {
         var chat = await _redis.ListRangeAsync(_util.RK_Chat(inviteCode), start, stop);
-        return JsonSerializer.Serialize<RedisValue[]>(chat);
+        return chat.Select(x => x.ToString()).ToList();
     }
 
     public async Task<QuestionDto?> GetGameCurrentQuestionAsync(string inviteCode, Guid quizID) {
@@ -296,5 +302,9 @@ public class GameService: IGameService
             return gamesPlayed;
         }
         return null;            
+    }
+
+    public async Task AddToLobby(string inviteCode, Guid auID, string sid) {
+        await _redis.HashSetAsync(_util.RK_Lobby(inviteCode), auID.ToString(), sid);
     }
 }
