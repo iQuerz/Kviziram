@@ -21,6 +21,31 @@ public class GameController : ControllerBase
     public async Task<ActionResult<GameDto>> GetGameInformation(string inviteCode) {
         return Ok(await _kviziram.GetGameInformationAsync(inviteCode));
     }
+
+    [HttpGet("{inviteCode}/lobby")]
+    public async Task<ActionResult<string>> GetGameLobby(string inviteCode) {
+        return Ok(await _kviziram.GetGameLobbyAsync(inviteCode));
+    }
+
+    [HttpGet("{inviteCode}/scores")]
+    public async Task<ActionResult<string>> GetGameScores(string inviteCode) {
+        return Ok(await _kviziram.GetGameScoresAsync(inviteCode));
+    }
+
+    [HttpGet("{inviteCode}/chat/{start}/{stop}")]
+    public async Task<ActionResult<string>> GetGameChat(string inviteCode, int start, int stop) {
+        return Ok(await _kviziram.GetGameChatAsync(inviteCode, start, stop));
+    }
+
+    [HttpGet("{inviteCode}/question/{quizID}")]
+    public async Task<ActionResult<QuestionDto>> GetGameCurrentQuestion(string inviteCode, Guid quizID) {
+        return Ok(await _kviziram.GetGameCurrentQuestionAsync(inviteCode, quizID));
+    }
+
+    [HttpGet("recent/account/{playerGuid}")]
+    public async Task<ActionResult<QuestionDto>> GetLastPlayedGames(Guid playerGuid) {
+        return Ok(await _kviziram.GetLastPlayedGamesAsync(playerGuid));
+    }
     #endregion
 
     #region POST Methods
@@ -39,5 +64,21 @@ public class GameController : ControllerBase
     #endregion
 
     #region DELETE Methods
+    [HttpDelete("{inviteCode}")]
+    public async Task<ActionResult<bool>> RemoveGameFromRedis(string inviteCode) {
+        return Ok(await _kviziram.RemoveGameFromRedisAsync(inviteCode));
+    }
+    #endregion
+
+    #region Test Methods
+    [HttpPost("test/converter")]
+    public async Task<ActionResult<GameDto>> ConvertMatchToGameDto([FromBody] Match game) {
+        return Ok(await _kviziram.ConvertMatchToGameDtoAsync(game));
+    }
+
+    [HttpPost("test/savetohistory")]
+    public async Task<ActionResult<Match>> SaveGameToHistory([FromBody] Match game) {
+        return Ok(await _kviziram.SaveGameToHistoryAsync(game));
+    }
     #endregion
 }

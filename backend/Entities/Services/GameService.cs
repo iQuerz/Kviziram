@@ -8,14 +8,18 @@ public class GameService: IGameService
     IGraphClient _neo;
     Utility _util;
     IQuizService _quiz;
+    IMatchService _match;
+    IAccountService _account;
     KviziramContext _context;
     
-    public GameService(KviziramContext context, Utility utility, IQuizService quiz) {
+    public GameService(KviziramContext context, Utility utility, IQuizService quiz, IMatchService match, IAccountService account) {
         _context = context;
         _redis = context.Redis.GetDatabase();
         _neo = context.Neo;
         _util = utility;
         _quiz = quiz;
+        _match = match;
+        _account = account;
     }
 
     public async Task<Match?> CreateGameAsync(Match game) {
@@ -46,16 +50,11 @@ public class GameService: IGameService
                 }
 
                 if (game.IsSearchable) {
-                    GameDto gameDTO = new GameDto();
-                    gameDTO.Created = game.Created.Value;
-                    gameDTO.InviteCode = game.InviteCode;
-                    gameDTO.HostName = _util.CallerAccountExists().Username;
-                    gameDTO.QuizName = (tempQuiz.Name != null) ? tempQuiz.Name : string.Empty;
-                    gameDTO.CategoryName = (tempQuiz.Category != null && tempQuiz.Category.Name != null) ? tempQuiz.Category.Name : string.Empty;
-                    gameDTO.TrophyName = (tempQuiz.Achievement != null && tempQuiz.Achievement.Name != null) ? tempQuiz.Achievement.Name : string.Empty;
-
-                    string gameDTOjson = _util.SerializeGameDto(gameDTO);
-                    await _redis.SortedSetAddAsync(_util.RK_PublicMatches, gameDTOjson, game.Created.Value.ToOADate());
+                    GameDto? gameDto = await ConvertMatchToGameDtoAsync(game);
+                    if (gameDto != null) {
+                        string gameDTOjson = _util.SerializeGameDto(gameDto);
+                        await _redis.SortedSetAddAsync(_util.RK_PublicMatches, gameDTOjson, game.Created.Value.ToOADate());
+                    }
                 }
                 
                 await _redis.ListLeftPushAsync(_util.RK_Chat(game.InviteCode), Msg.ChatWelcome);
@@ -64,17 +63,17 @@ public class GameService: IGameService
                 await _redis.StringSetAsync(_util.RK_Game(game.InviteCode), _util.SerializeMatch(game), Duration.Game);
             } else throw new KviziramException(Msg.NoQuiz);
 
+            #region PubSub
+            //############################################################################
             ISubscriber masterOfDisaster = _context.Redis.GetSubscriber();
             await masterOfDisaster.SubscribeAsync(_util.RK_GameWatcher(game.InviteCode), async (channel, message) => {
-                string? msg = (string?) message;
-                Console.Write(msg + "--------------------");
-                if (msg == null) throw new KviziramException("Empty message");
-                string[] msgOperation = msg.Split(":", 2);
+                string[] msgOperation = message.ToString().Split(":", 2);;
+                Console.Write(msgOperation[0] + " ----- " + msgOperation[1]);
 
-                string? tempInviteCode = (string?) channel;
-                Console.WriteLine(tempInviteCode);
-                if (tempInviteCode == null) throw new KviziramException("Nekako prazan kanal");
-                string inviteCode = tempInviteCode.Split(':')[1];
+                string inviteCode = channel.ToString().Split(':')[1];
+                Console.WriteLine(inviteCode);
+
+                Match? game = _util.DeserializeMatch(await _redis.StringGetAsync(_util.RK_Game(inviteCode)));
 
                 //Bogy pomogy ako ovo radi
                 switch(msgOperation[0]) {
@@ -102,9 +101,12 @@ public class GameService: IGameService
                         string playerID = SIDandID[1];
                         await _redis.HashDeleteAsync(_util.RK_Lobby(inviteCode), playerID);   
 
-                        if (await _redis.HashLengthAsync(_util.RK_Lobby(inviteCode)) == 0) {
-                            //Deo gde cuva game u history tj. sa redisa u neo4j 
-                            masterOfDisaster.Unsubscribe(channel);
+                        if (await _redis.HashLengthAsync(_util.RK_Lobby(inviteCode)) == 0 && game != null) {
+                            if (await _redis.KeyExistsAsync(_util.RK_Scores(inviteCode))) {
+                                game.GameState = GameState.Unfinished;
+                                await SaveGameToHistoryAsync(game);
+                            }
+                            await RemoveGameFromRedisAsync(inviteCode);                            
                         }
                         break;
                     }
@@ -125,6 +127,8 @@ public class GameService: IGameService
                 }
 
             });
+            //############################################################################
+            #endregion
 
             return _util.DeserializeMatch(await _redis.StringGetAsync(_util.RK_Game(game.InviteCode)));
         }
@@ -184,7 +188,11 @@ public class GameService: IGameService
     public async Task<GameDto?> GetGameInformationAsync(string inviteCode) {
         //Ako ovo vrati null, zovi getmatch u neo4j
         Match? game = _util.DeserializeMatch(await _redis.StringGetAsync(_util.RK_Game(inviteCode)));
-        if (game != null && game.Created != null && game.InviteCode != null && game.QuizID != null) {
+        return await ConvertMatchToGameDtoAsync(game);
+    }
+
+    public async Task<GameDto?> ConvertMatchToGameDtoAsync(Match? game) {
+        if (game != null && game.QuizID != null && game.Created != null && game.InviteCode != null) {
             Quiz? tempQuiz =  await _quiz.GetQuizAsync((Guid) game.QuizID);
             if (tempQuiz != null) {
                 GameDto gameDTO = new GameDto();
@@ -196,11 +204,97 @@ public class GameService: IGameService
                 gameDTO.TrophyName = (tempQuiz.Achievement != null && tempQuiz.Achievement.Name != null) ? tempQuiz.Achievement.Name : string.Empty;
 
                 return gameDTO;
-            }            
+            }
         }
+        return null;       
+    }
+
+    public async Task<Match?> SaveGameToHistoryAsync(Match game) {
+        if (game.InviteCode != null && game.QuizID != null) {
+            var playerIDsAndScores = await _redis.SortedSetRangeByScoreWithScoresAsync(_util.RK_Scores(game.InviteCode), double.NegativeInfinity, double.PositiveInfinity, Exclude.None, Order.Descending);
+            game.SetPlayerIDsScores = new Dictionary<Guid, int>();
+            game.Guests = new Dictionary<string, int>();
+
+            int maxPoints = (await _redis.ListRangeAsync(_util.RK_QuestionsAnswers(game.QuizID))).Select(x => (int) x).Sum();
+            Quiz? tempQuiz =  await _quiz.GetQuizAsync((Guid) game.QuizID);
+
+            foreach(SortedSetEntry playerScore in playerIDsAndScores) {
+                Guid tempGUID = Guid.Parse(playerScore.Element.ToString());
+                if (await _account.AccountExistsAsync(tempGUID)) {
+                    game.SetPlayerIDsScores.Add(tempGUID, (int) playerScore.Score);
+                    if (playerScore.Score == maxPoints && tempQuiz != null && tempQuiz.Achievement != null)
+                        await _account.SetUpdateAchievementAsync(tempGUID, tempQuiz.Achievement.ID);
+                } else {
+                    game.Guests.Add(tempGUID.ToString(), (int) playerScore.Score);
+                }
+            }
+
+            if (game.GameState == GameState.Unfinished) 
+                game.WinnerID = Guid.Empty;
+            else 
+                game.WinnerID = Guid.Parse(playerIDsAndScores.ElementAt(0).ToString());
+
+            await _match.SaveMatchAsync(game);
+            return await _match.GetMatchAsync(game.ID);
+        }
+        
         return null;
     }
 
+    public async Task<bool> RemoveGameFromRedisAsync(string inviteCode) {
+        Match? match = _util.DeserializeMatch(await _redis.StringGetAsync(_util.RK_Game(inviteCode)));
+        if (match != null && match.Created != null) {
+            double PublicGameKey = match.Created.Value.ToOADate();
+            await _redis.SortedSetRemoveRangeByScoreAsync(_util.RK_PublicMatches, PublicGameKey, PublicGameKey);
+            //Dis gonna be ugly
+            RedisKey[] keys = new RedisKey[] {
+                _util.RK_Game(inviteCode),
+                _util.RK_Lobby(inviteCode),
+                _util.RK_Scores(inviteCode),
+                _util.RK_Chat(inviteCode),
+                _util.RK_CurrentQuestion(inviteCode),
+                _util.RK_PlayersAnswered(inviteCode)
+            };
+            await _redis.KeyDeleteAsync(keys);
 
-    
+            return true;
+        } 
+        return false;
+    }
+
+    public async Task<string> GetGameLobbyAsync(string inviteCode) {
+        var lobby = await _redis.HashGetAllAsync(_util.RK_Lobby(inviteCode));
+        return JsonSerializer.Serialize<HashEntry[]>(lobby);
+    }
+
+    public async Task<string> GetGameScoresAsync(string inviteCode) {
+        var scores = await _redis.SortedSetRangeByScoreWithScoresAsync(_util.RK_Scores(inviteCode), double.NegativeInfinity, double.PositiveInfinity, Exclude.None, Order.Descending);
+        return JsonSerializer.Serialize<SortedSetEntry[]>(scores);
+    }
+
+    public async Task<string> GetGameChatAsync(string inviteCode, int start = 0, int stop = 100) {
+        var chat = await _redis.ListRangeAsync(_util.RK_Chat(inviteCode), start, stop);
+        return JsonSerializer.Serialize<RedisValue[]>(chat);
+    }
+
+    public async Task<QuestionDto?> GetGameCurrentQuestionAsync(string inviteCode, Guid quizID) {
+        int index = (int) (await _redis.StringGetAsync(_util.RK_CurrentQuestion(inviteCode)));
+        string res = (await _redis.ListGetByIndexAsync(_util.RK_Questions(quizID), index)).ToString();
+        return _util.DeserializeQuestion(res);
+    }
+
+    public async Task<List<GameDto>?> GetLastPlayedGamesAsync(Guid playerGuid) {
+        var res = await _redis.ListRangeAsync(_util.RK_PlayedGames(playerGuid.ToString()));
+
+        if (res != null) {                
+            List<GameDto> gamesPlayed = new List<GameDto>();
+            foreach(var inviteCode in res) {
+                Match? match = _util.DeserializeMatch(await _redis.StringGetAsync(_util.RK_Game(inviteCode.ToString())));
+                GameDto? gameDto = await ConvertMatchToGameDtoAsync(match);
+                if (gameDto != null) gamesPlayed.Add(gameDto);
+            }
+            return gamesPlayed;
+        }
+        return null;            
+    }
 }

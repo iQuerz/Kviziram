@@ -27,4 +27,7 @@ public interface IAccountService
     public Task<List<AccountPoco>?> RecommendedPlayersFromMatchAsync(Guid auID);
     public Task<List<Quiz>?> GetRecommendedQuizzesAsync();
 
+    public Task<bool> AccountExistsAsync(Guid uID);
+
+
 }
