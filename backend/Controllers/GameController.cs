@@ -42,9 +42,25 @@ public class GameController : ControllerBase
         return Ok(await _kviziram.GetGameCurrentQuestionAsync(inviteCode, quizID));
     }
 
+    [HttpGet("{inviteCode}")]
+    public async Task<ActionResult<Match>> GetGame(string inviteCode) {
+        return Ok(await _kviziram.GetGameAsync(inviteCode));
+    }
+
     [HttpGet("recent/account/{playerGuid}")]
-    public async Task<ActionResult<QuestionDto>> GetLastPlayedGames(Guid playerGuid) {
+    public async Task<ActionResult<List<GameDto>>> GetLastPlayedGames(Guid playerGuid) {
         return Ok(await _kviziram.GetLastPlayedGamesAsync(playerGuid));
+    }
+
+    [HttpGet("/invite/{inviteCode}/account/{auID}")]
+    public async Task<ActionResult> SendInvite(Guid auID, string inviteCode) {
+        await _kviziram.SendInviteAsync(auID, inviteCode);
+        return Ok(Msg.Invited);
+    }
+
+    [HttpGet("invites/account/{auID}")]
+    public async Task<ActionResult<List<GameInviteDto>>> GetAllInvites(Guid auID) {
+        return Ok(await _kviziram.GetAllInvitesAsync(auID));
     }
     #endregion
 
@@ -57,6 +73,12 @@ public class GameController : ControllerBase
     [HttpPost("public/{skip}/{limit}/{asc}")]
     public async Task<ActionResult<List<GameDto>>> GetPublicGames([FromBody] FromToDate fromToDate, int skip, int limit, bool asc) {
         return Ok(await _kviziram.GetPublicGamesAsync(fromToDate, skip, limit, asc));
+    }
+
+    [HttpPost("invite/clicked")]
+    public async Task<ActionResult> ClickInvite(GameInviteDto invite) {
+        await _kviziram.ClickInviteAsync(invite);
+        return Ok(Msg.InviteOpened);
     }
     #endregion
 
@@ -71,19 +93,19 @@ public class GameController : ControllerBase
     #endregion
 
     #region Test Methods
-    [HttpPost("test/converter")]
-    public async Task<ActionResult<GameDto>> ConvertMatchToGameDto([FromBody] Match game) {
-        return Ok(await _kviziram.ConvertMatchToGameDtoAsync(game));
-    }
+    // [HttpPost("test/converter")]
+    // public async Task<ActionResult<GameDto>> ConvertMatchToGameDto([FromBody] Match game) {
+    //     return Ok(await _kviziram.ConvertMatchToGameDtoAsync(game));
+    // }
 
-    [HttpPost("test/savetohistory")]
-    public async Task<ActionResult<Match>> SaveGameToHistory([FromBody] Match game) {
-        return Ok(await _kviziram.SaveGameToHistoryAsync(game));
-    }
+    // [HttpPost("test/savetohistory")]
+    // public async Task<ActionResult<Match>> SaveGameToHistory([FromBody] Match game) {
+    //     return Ok(await _kviziram.SaveGameToHistoryAsync(game));
+    // }
 
-    [HttpGet("test/{inviteCode}/{auID}/{sid}")]
-    public async Task AddToLobby(string inviteCode, Guid auID, string sid) {
-        await _kviziram.AddToLobby(inviteCode, auID, sid);
-    }
+    // [HttpGet("test/{inviteCode}/{auID}/{sid}")]
+    // public async Task AddToLobby(string inviteCode, Guid auID, string sid) {
+    //     await _kviziram.AddToLobby(inviteCode, auID, sid);
+    // }
     #endregion
 }

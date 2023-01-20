@@ -84,12 +84,17 @@ public class GameService: IGameService
                         Console.WriteLine(playerSID + " ----- " + playerID);
 
                         if (await _redis.KeyExistsAsync(_util.RK_Scores(inviteCode))) {
-                            if (await _redis.HashExistsAsync(_util.RK_Lobby(inviteCode), playerID))
+                            if (await _redis.HashExistsAsync(_util.RK_Lobby(inviteCode), playerID)) {
                                 await _redis.HashSetAsync(_util.RK_Lobby(inviteCode), playerID, playerSID);
+
+                                await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Reconnected:{playerID}");
+                            }
                             else 
                                 Console.WriteLine("Ovaj korisnik nije bio u lobby kad je igra zapoceta");
                         } else {
                             await _redis.HashSetAsync(_util.RK_Lobby(inviteCode), playerID, playerSID);
+
+                            await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Connected:{playerID}");
                         }
                         break;
                     }
@@ -100,6 +105,8 @@ public class GameService: IGameService
                         string playerID = SIDandID[1];
                         await _redis.HashDeleteAsync(_util.RK_Lobby(inviteCode), playerID);
                         await _redis.HashDeleteAsync(_util.RK_PlayersAnswered(inviteCode), playerID);   
+
+                        await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Disconnected:{playerID}");
 
                         if (await _redis.HashLengthAsync(_util.RK_Lobby(inviteCode)) == 0 && game != null) {
                             if (await _redis.KeyExistsAsync(_util.RK_Scores(inviteCode))) {
@@ -140,6 +147,8 @@ public class GameService: IGameService
                                 }
                                 await _redis.KeyDeleteAsync(_util.RK_PlayersAnswered(inviteCode));
                                 await _redis.StringIncrementAsync(_util.RK_CurrentQuestion(inviteCode));
+
+                                await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Answered:{playerID}");
                             }   
 
                             long numOfQuestions = await _redis.ListLengthAsync(_util.RK_Questions(game.QuizID));
@@ -147,7 +156,11 @@ public class GameService: IGameService
                                 game.GameState = GameState.Finished;
                                 await SaveGameToHistoryAsync(game);
                                 await RemoveGameFromRedisAsync(inviteCode);
-                            }                                                     
+
+                                await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Finished:{game.ID}");
+                            } else {
+                                await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"NextQuestion:{inviteCode}");
+                            }                                      
                         }
                         break;
                     }
@@ -155,6 +168,7 @@ public class GameService: IGameService
                     case "Chat": {
                         string chatMessage = msgOperation[1];
                         await _redis.ListLeftPushAsync(_util.RK_Chat(inviteCode), chatMessage);
+                        await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Chat:{chatMessage}");
                         break;
                     }
 
@@ -214,7 +228,7 @@ public class GameService: IGameService
                     double PublicGameKey = match.Created.Value.ToOADate();
                     await _redis.SortedSetRemoveRangeByScoreAsync(_util.RK_PublicMatches, PublicGameKey, PublicGameKey);
 
-                    //redis.publish(master kanal, started)
+                    await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Start:{inviteCode}");
                     return Msg.GameStarted;
                 }
                 return Msg.NoLobby;
@@ -222,6 +236,11 @@ public class GameService: IGameService
             return Msg.NoStartGame;
         }
         return Msg.NoGame;
+    }
+
+    public async Task<Match?> GetGameAsync(string inviteCode) {
+        Match? game = _util.DeserializeMatch(await _redis.StringGetAsync(_util.RK_Game(inviteCode)));
+        return game;
     }
 
     public async Task<GameDto?> GetGameInformationAsync(string inviteCode) {
@@ -345,5 +364,39 @@ public class GameService: IGameService
 
     public async Task AddToLobby(string inviteCode, Guid auID, string sid) {
         await _redis.HashSetAsync(_util.RK_Lobby(inviteCode), auID.ToString(), sid);
+    }
+
+    public async Task SendInviteAsync(Guid auID, string inviteCode) {
+        GameInviteDto invite = new GameInviteDto();
+        invite.FromUser = _util.CallerAccountExists();
+        invite.Game = await GetGameInformationAsync(inviteCode);
+        string inviteSerialized = JsonSerializer.Serialize<GameInviteDto>(invite);
+
+        if (invite.Game != null)
+            await _redis.SortedSetAddAsync(_util.RK_Invite(auID.ToString()), inviteSerialized, invite.Game.Created.ToOADate());
+        await _util.SendGameInvite(auID, inviteSerialized);
+    }
+
+    public async Task<List<GameInviteDto>?> GetAllInvitesAsync(Guid auID) {
+        var inviteList = await _redis.SortedSetRangeByScoreWithScoresAsync(_util.RK_Invite(auID.ToString()), double.NegativeInfinity, double.PositiveInfinity, Exclude.None, Order.Descending);
+        List<GameInviteDto> invites = new List<GameInviteDto>();
+
+        foreach(var elem in inviteList) {
+            GameInviteDto? invite = JsonSerializer.Deserialize<GameInviteDto>(elem.Element.ToString());
+            if (invite != null && invite.Game != null) {
+                Match? game = _util.DeserializeMatch(await _redis.StringGetAsync(_util.RK_Game(invite.Game.InviteCode)));
+                if (game == null || game.GameState == GameState.Playing)
+                    await _redis.SortedSetRemoveRangeByScoreAsync(_util.RK_Invite(auID.ToString()), invite.Game.Created.ToOADate(), invite.Game.Created.ToOADate());
+                else
+                    invites.Add(invite);
+            }
+        }
+        return invites;
+    }
+
+    public async Task ClickInviteAsync(GameInviteDto invite) {
+        if (_context.AccountCaller != null && invite.Game != null) {
+            await _redis.SortedSetRemoveRangeByScoreAsync(_util.RK_Invite(_context.AccountCaller.ID.ToString()), invite.Game.Created.ToOADate(), invite.Game.Created.ToOADate());
+        }
     }
 }

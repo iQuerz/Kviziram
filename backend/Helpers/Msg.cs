@@ -68,6 +68,8 @@ public static class Msg
     public const string NoStartGame = "Can't start the game";
     public const string NoLobby = "Lobby is empty?";
     public const string GameStarted = "The game has started";
+    public const string Invited = "Invitation sent";
+    public const string InviteOpened = "Invite has been opened";
     #endregion
     
 

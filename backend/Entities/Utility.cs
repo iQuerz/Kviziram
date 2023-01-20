@@ -1,19 +1,21 @@
 using StackExchange.Redis;
 using Neo4jClient;
 using System.Text.Json;
-
+using Microsoft.AspNetCore.SignalR;
 
 public class Utility
 {
-    private IDatabase _redis;
-    private IGraphClient _neo;
-    private KviziramContext _context;
+    IDatabase _redis;
+    IGraphClient _neo;
+    KviziramContext _context;
+    IHubContext<NotificationHub> _notifHub; 
 
-    public Utility(KviziramContext context)
+    public Utility(KviziramContext context, IHubContext<NotificationHub> notifHub)
     {
         _context = context;
         _redis = context.Redis.GetDatabase();
         _neo = context.Neo;
+        _notifHub = notifHub;
     }
 
     #region Caller Functions
@@ -102,6 +104,8 @@ public class Utility
     //Cuvaj poslednje game-ove ako se diskonektuje pa mora reconnect
     public string RK_PlayedGames(string? key) { return "played:" + key + ":id"; }
     public string RK_GameWatcher(string? key) { return "game:" + key + ":watcher"; }
+    public string RK_GameActions(string? key) { return "game:" + key + ":actions"; }
+
 
 
     #endregion
@@ -129,5 +133,11 @@ public class Utility
     public string SerializeAccountPoco(AccountPoco acc) { return JsonSerializer.Serialize<AccountPoco>(acc); }
     public AccountPoco? DeserializeAccountPoco(string? acc) { if (acc != null) return JsonSerializer.Deserialize<AccountPoco?>(acc); else return null; }
 
+    #endregion
+
+    #region hubs
+    public async Task SendGameInvite(Guid auID, string info) {
+        await _notifHub.Clients.Group(auID.ToString()).SendAsync("receiveInvite", info);
+    }
     #endregion
 }
