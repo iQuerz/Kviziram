@@ -113,7 +113,8 @@ public class GameService: IGameService
                                 game.GameState = GameState.Unfinished;
                                 await SaveGameToHistoryAsync(game);
                             }
-                            await RemoveGameFromRedisAsync(inviteCode);                            
+                            await RemoveGameFromRedisAsync(inviteCode); 
+                            await masterOfDisaster.UnsubscribeAsync(channel);                           
                         }
                         break;
                     }
@@ -158,6 +159,8 @@ public class GameService: IGameService
                                 await RemoveGameFromRedisAsync(inviteCode);
 
                                 await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Finished:{game.ID}");
+    
+                                await masterOfDisaster.UnsubscribeAsync(channel);                          
                             } else {
                                 await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"NextQuestion:{inviteCode}");
                             }                                      
