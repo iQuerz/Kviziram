@@ -31,6 +31,8 @@ public class GameService: IGameService
             game.Created = DateTime.Now;
             if(_util.CallerAccountExists() != null) game.HostID = _util.CallerAccountExists().ID;
 
+
+            //PROVERI DAL SU PITANJA U REDIS
             string RK_Questions = _util.RK_Questions(game.QuizID);
             Quiz? tempQuiz =  await _quiz.GetQuizAsync((Guid) game.QuizID);
             if (tempQuiz != null) {
@@ -323,11 +325,14 @@ public class GameService: IGameService
         return false;
     }
 
-    public async Task<Dictionary<string, string>> GetGameLobbyAsync(string inviteCode) {
+    public async Task<Dictionary<string, AccountPoco>> GetGameLobbyAsync(string inviteCode) {
         var lobby = await _redis.HashGetAllAsync(_util.RK_Lobby(inviteCode));
-        Dictionary<string, string> dic = new Dictionary<string, string>();
-        foreach(var elem in lobby)
-            dic.Add(elem.Name.ToString(), elem.Value.ToString());
+        Dictionary<string, AccountPoco> dic = new Dictionary<string, AccountPoco>();
+        foreach(var elem in lobby) {
+            var redisAcc = await _redis.StringGetAsync(elem.Value.ToString());
+            AccountPoco? acc = _util.DeserializeAccountPoco(redisAcc);
+            if (acc != null) dic.Add(elem.Name.ToString(), acc);
+        }
         return dic;
     }
 
