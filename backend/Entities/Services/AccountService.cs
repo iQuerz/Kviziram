@@ -3,13 +3,14 @@ using Neo4jClient;
 
 public class AccountService: IAccountService 
 {
-    private KviziramContext _context;
-    private IDatabase _redis;
-    private IGraphClient _neo;
-    private Utility _util;
+    KviziramContext _context;
+    IDatabase _redis;
+    IGraphClient _neo;
+    Utility _util;
 
-    private IAdService _ad;
-    private ICategoryService _category;
+    IAdService _ad;
+    ICategoryService _category;
+    
     
     public AccountService(KviziramContext context, IAdService ad, ICategoryService category, Utility utility) {
         _context = context;
@@ -186,6 +187,10 @@ public class AccountService: IAccountService
         return await GetRecommendedQuizzesQueryAsync();
     }
 
+    public async Task<bool> AccountExistsAsync(Guid uID) {
+        Account? acc = await GetAccountQueryAsync(uID);
+        return (acc != null) ? true : false;
+    }
 
     #endregion
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

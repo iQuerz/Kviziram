@@ -67,5 +67,7 @@ app.UseMiddleware<Auth>();
 app.MapControllers();
 
 app.MapHub<GameHub>("/hubs/game");
+app.MapHub<NotificationHub>("/hubs/notification");
+
 
 app.Run();
