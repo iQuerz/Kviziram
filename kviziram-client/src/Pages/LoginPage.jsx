@@ -11,6 +11,7 @@ function LoginPage(props) {
     const [email, setEmail] = useState("");
     const [password, setpassword] = useState("");
     const [code, setcode] = useState("");
+    const [errorMsg, setErrorMsg] = useState("");
 
     function handleUserNameChange(event){
         setUserName(event.target.value)
@@ -43,9 +44,17 @@ function LoginPage(props) {
                 
                 console.log("from login page :" + json);
                 if(response.ok)
+                {
                     props.onSessionIDChange(json) //predaje se sessionID app komponenti
                     handleLoginSuccess()
+                }
+                else
+                {
+                    setErrorMsg(json)
+                }
+                
             } catch (error) {
+                //setErrorMsg(error)
                 console.error(error);
             }
     }
@@ -72,6 +81,9 @@ function LoginPage(props) {
                            value2={code} onChangeField1={handleUserNameChange}
                            onChangeField2={handleCodeChange}></LoginForm>
             </div>
+            <Typography variant="subtitle1" color="red">
+                {errorMsg}
+            </Typography>
             <Typography variant="subtitle1" color="textPrimary">
                 Don't have an account? <Link to="Register">Sign up!</Link>
             </Typography>
