@@ -8,6 +8,7 @@ import GamePage from './Pages/GamePage';
 import CreateQuizPage from './Pages/CreateQuizPage';
 import ProfilePage from './Pages/ProfilePage';
 import RegisterPage from './Pages/RegisterPage';
+import AdminPage from './Pages/AdminPage';
 
 function App() {
     const [sessionID, setSessionID] = useState("")
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/Create"   element={<CreateQuizPage />} />
                 <Route path="/Profile"  element={<ProfilePage mySessionID={sessionID}/>} />
                 <Route path="/Register" element={<RegisterPage />} />
+                <Route path="/Admin" element={<AdminPage />} />
             </Routes>
         </Router>
     )
