@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import { Select, MenuItem, FormControl } from '@mui/material';
+import { useEffect } from 'react';
 
 function SelectComponent(props) {
-    const [selectedOption, setSelectedOption] = useState(props.options[0]);
+    const [selectedOption, setSelectedOption] = useState('');
 
+    useEffect(() => {
+        //setSelectedOption(props.options[0])
+    },)
+    function printDiagnostics(){
+        console.log("componet is " + selectedOption)
+    }
     const handleChange = (event) => {
         setSelectedOption(event.target.value);
         props.onChange && props.onChange(event.target.value)
@@ -13,13 +20,13 @@ function SelectComponent(props) {
             <Select
                 labelId="demo-simple-select-label"
                 id="demo-simple-select"
-                value={selectedOption}
                 label={props.label}
+                value={selectedOption}
                 onChange={handleChange}
             >
                 {props.options.map((option) => (
-                    <MenuItem key={option} value={option}>
-                        {option}
+                    <MenuItem key={option.id} value={option}>
+                        {option.name}
                     </MenuItem>
                 ))}
             </Select>

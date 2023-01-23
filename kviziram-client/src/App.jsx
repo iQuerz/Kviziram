@@ -23,7 +23,7 @@ function App() {
                 <Route path="/Play"     element={<PlayPage mySessionID={sessionID}/>} />
                 <Route path="/Lobby"    element={<LobbyPage />} />
                 <Route path="/Game"     element={<GamePage />} />
-                <Route path="/Create"   element={<CreateQuizPage />} />
+                <Route path="/Create"   element={<CreateQuizPage mySessionID={sessionID}/>} />
                 <Route path="/Profile"  element={<ProfilePage mySessionID={sessionID}/>} />
                 <Route path="/Register" element={<RegisterPage />} />
             </Routes>
