@@ -8,4 +8,6 @@ public interface IQuizService
     public Task<List<QuizDto>?> SearchQuizzesAsync(QuizQuery quizQuery, int skip, int limit);
     public Task<string> ConnectQuizAchievementAsync(Guid quID, Guid? acuID);
     public Task<string> DisconnectQuizAchievementAsync(Guid quID, Guid? acuID);
+
+    public Task<List<AccountPoco>?> GetAllCreatorsAsync();
 }
