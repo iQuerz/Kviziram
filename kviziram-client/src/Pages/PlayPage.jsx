@@ -24,8 +24,8 @@ function PlayPage(props) {
     function newLobbyNameInputChanged(event){
         setNewLobbyName(event.target.value);
     }
-    function createLobby(){
-        setCreateLobbyModalOpen(true);
+    function handleCreateLobbyModalOpenChange(){
+        setCreateLobbyModalOpen(!isCreateLobbyModalOpen);
     }
 
     return(
@@ -38,7 +38,7 @@ function PlayPage(props) {
                 <Card className="width-75 flex-down seperate-children-small padding">
                     <Typography variant="h4">Browse Public Lobbies</Typography>
                     <div className="flex-right wrap">
-                        {/* public lobbies */}
+                        {/*todo: public lobbies */}
                     </div>
                 </Card>
                 <Ad></Ad>
@@ -49,14 +49,15 @@ function PlayPage(props) {
                         <Button variant="contained" size="large" onClick={joinLobby}>Join</Button>
                     </Card>
                     <Card className="width-35 flex-down seperate-children-small padding">
-                        <Typography variant="h4">Create Lobby</Typography>
-                        <TextField label="Lobby name" onChange={newLobbyNameInputChanged}></TextField>
-                        <Button variant="contained" size="large" onClick={createLobby}>Create</Button>
+                        <Typography textAlign={"center"} variant="h4">Host a new match</Typography>
+                        
+                        {/* <TextField label="Lobby name" onChange={newLobbyNameInputChanged}></TextField> */}
+                        <Button variant="contained" size="large" onClick={handleCreateLobbyModalOpenChange}>Host</Button>
                     </Card>
                 </Box>
                 <Ad></Ad>
             
-                <PickQuizModal open={isCreateLobbyModalOpen} name={newLobbyName}></PickQuizModal>
+                <PickQuizModal open={isCreateLobbyModalOpen} onChange={handleCreateLobbyModalOpenChange} name={newLobbyName}></PickQuizModal>
             </SidebarLayout>
         </>
     )
