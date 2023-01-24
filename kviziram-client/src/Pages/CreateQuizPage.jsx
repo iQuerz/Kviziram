@@ -69,7 +69,6 @@ function CreateQuizPage(props) {
         opetions.push(answer.value);
         if (answer.correct == true) answerCorrectIndex = answeCounter;
       }
-      //console.log(question);
       Quizz.questions.push({
         description: question[0].questionName,
         options: opetions,

@@ -1,12 +1,12 @@
 import { Card, Box, Typography, TextField, Button } from "@mui/material";
 import React, { useState, useEffect } from "react";
-import SelectComponent from "./SelectComponent";
+import SelectComponent from "../Custom/SelectComponent";
 
 function QuizzInfoForm(props) {
   const [category, setCategory] = useState(props.category);
   const [achievement, setAchievement] = useState(props.achievement);
   const [categoryOptions, setCategoryOptions] = useState([]);
-  const [categoryAchievement, setAchievementOptions] = useState([]);
+  const [achievementOptions, setAchievementOptions] = useState([]);
   //const categoryOptions = ['Music', 'Sport', 'Gaming'];
   useEffect(() => {
     tryGetCategorys();
@@ -72,7 +72,7 @@ function QuizzInfoForm(props) {
             />
             <SelectComponent
               label="Achievement"
-              options={categoryAchievement}
+              options={achievementOptions}
               onChange={props.onAchivmentChange}
             />{" "}
           </Box>

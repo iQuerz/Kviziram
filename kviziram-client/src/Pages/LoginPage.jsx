@@ -15,19 +15,15 @@ function LoginPage(props) {
 
     function handleUserNameChange(event){
         setUserName(event.target.value)
-        console.log(userName)
     }
     function handleEmailChange(event){
         setEmail(event.target.value)
-        console.log(email)
     }
     function handlePasswordChange(event){
         setpassword(event.target.value)
-        console.log(password)
     }
     function handleCodeChange(event){
         setcode(event.target.value)
-        console.log(code)
     }
     
     
@@ -42,7 +38,6 @@ function LoginPage(props) {
                 });
                 const json = await response.json();
                 
-                console.log("from login page :" + json);
                 if(response.ok)
                 {
                     props.onSessionIDChange(json) //predaje se sessionID app komponenti
