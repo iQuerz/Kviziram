@@ -31,6 +31,14 @@ public class AccountService: IAccountService
         return accountPoco;
     }
 
+    public async Task<List<AccountPoco>> GetAllAccountsAsync() {
+        var res = await _neo.Cypher
+            .Match("(a:Account)")
+            .Return(a => a.As<AccountPoco>())
+            .ResultsAsync;
+        return res.ToList();
+    }
+
     public async Task<List<AccountPoco>> GetFriendsAsync(RelationshipState rState) {
         if (_util.IsCaller().account) {
             List<AccountPoco>? listFriends = await GetFriendsQueryAsync(rState);

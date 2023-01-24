@@ -19,6 +19,11 @@ namespace backend.Controllers
             return Ok(await _kviziram.GetAccountAsync(uID));
         }
 
+        [HttpGet("all")]
+        public async Task<ActionResult<List<AccountPoco>>> GetAllAccounts() {
+            return Ok(await _kviziram.GetAllAccountsAsync());
+        }
+
         [HttpGet("me/friends/all/{rState}")]
         public async Task<ActionResult<List<AccountPoco>>> GetFriends(RelationshipState rState) {
             return Ok(await _kviziram.GetFriendsAsync(rState));

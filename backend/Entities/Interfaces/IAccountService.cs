@@ -1,6 +1,7 @@
 public interface IAccountService 
 {
     public Task<AccountPoco> GetAccountAsync(Guid? uid);
+    public Task<List<AccountPoco>> GetAllAccountsAsync();
 
     public Task<List<AccountPoco>> GetFriendsAsync(RelationshipState rState);
 
