@@ -38,6 +38,11 @@ public class QuizController : ControllerBase
         //Samo admin
         return Ok(await _kviziram.DisconnectQuizAchievementAsync(quID, acuID));
     }
+
+    [HttpGet("creator/all")]
+    public async Task<ActionResult<List<AccountPoco>>> GetAllCreators() {
+        return Ok(await _kviziram.GetAllCreatorsAsync());
+    }
     #endregion
 
     #region POST Methods

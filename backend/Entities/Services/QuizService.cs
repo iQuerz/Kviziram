@@ -108,9 +108,22 @@ public class QuizService: IQuizService
         await DisconnectQuizAchievementQueryAsync(quID, acuID);
         return Msg.DisconnectedQuizAchievement;
     }
+
+    public async Task<List<AccountPoco>?> GetAllCreatorsAsync() {
+        return await GetAllCreatorsQueryAsync();
+    }
     #endregion
 
     #region Helper Functions
+    public async Task<List<AccountPoco>?> GetAllCreatorsQueryAsync() {
+        var query = _neo.Cypher
+            .Match("(a:Account)-[:CREATOR]->(q:Quiz)")
+            .Return(a => a.As<AccountPoco>());
+        Console.WriteLine(query.Query.DebugQueryText);
+        var res = await query.ResultsAsync;
+        return res.ToList();
+    }
+
     public async Task<Quiz?> CreateQuizQueryAsync(Quiz newQuiz) {
         if (_context.AccountCaller != null && newQuiz.CategoryID != null) {
             await _neo.Cypher
