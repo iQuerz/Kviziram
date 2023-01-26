@@ -13,8 +13,8 @@ public class AdController : ControllerBase
 
     #region GET Methods
     [HttpGet]
-    public async Task<ActionResult<Ad?>> GetAd(Guid acuID) {
-        return Ok(await _kviziram.GetAdAsync(acuID));
+    public async Task<ActionResult<Ad?>> GetAd(Guid aduID) {
+        return Ok(await _kviziram.GetAdAsync(aduID));
     }
 
     [HttpGet("all")]
