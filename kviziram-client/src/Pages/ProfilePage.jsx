@@ -1,21 +1,38 @@
 
 import { Box, Card, Typography } from "@mui/material";
+import { useEffect } from "react";
+import { useState } from "react";
 import AchievementIcon from "../Components/Achievements/AchievementIcon";
 
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
 
 function ProfilePage(props) {
-    var achievements = [
-        {
-            Name: "Opalac",
-            Picture: "https://static.vecteezy.com/system/resources/previews/008/693/484/original/trophy-cup-gold-cartoon-icon-vector.jpg",
-        },
-        {
-            Name: "Upravo si rešen ćevapu glupi",
-            Picture: "https://static.vecteezy.com/system/resources/previews/008/693/484/original/trophy-cup-gold-cartoon-icon-vector.jpg",
+    //const [account, setAccount] = useState(props.account);
+    const [achievements, setAchievements] = useState([]);
+    useEffect(()=>
+    {   
+        console.log("Loading Achivments...");
+        tryGetAchivments();
+    },[])
+    //trenutno izvlaci sve achivments cisto radi testiranja
+    async function tryGetAchivments() {
+        try {
+          const response = await fetch("http://localhost:5221/Achievement/all", {
+            method: "GET",
+            headers: {
+              accept: "text/plain",
+              'SessionID':  props.mySessionID
+            },
+          });
+          const json = await response.json();
+    
+          if (response.ok) {
+            setAchievements(json); 
+          }
+        } catch (error) {
+          console.error(error);
         }
-    ];
-
+      }
     var friends = [
         
     ]
@@ -26,13 +43,13 @@ function ProfilePage(props) {
 
     return(
         <>
-            <SidebarLayout>
+            <SidebarLayout  sessionID={props.mySessionID}>
                 <Typography variant="h1">{props.mySessionID}</Typography>
                 <Box className="flex-right seperate-children-medium" alignItems={"center"}>
-                    <img className="avatar" src="https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/lionel-animals-to-follow-on-instagram-1568319926.jpg?crop=0.922xw:0.738xh;0.0555xw,0.142xh&resize=640:*"></img>
+                    <img className="avatar" src={props.account.avatar}></img>
                     <Box className="flex-down">
-                        <Typography variant="h1">iQuerz</Typography>
-                        <Typography variant="h4">nikola@email.com</Typography>
+                        <Typography variant="h1">{props.account.username}</Typography>
+                        <Typography variant="h4">{props.account.email}</Typography>
                     </Box>
                 </Box>
                 
@@ -40,8 +57,8 @@ function ProfilePage(props) {
                     <Typography variant="h4">Achievements</Typography>
                     <Box className="flex-list-row seperate-children-medium margin">
                         {
-                            achievements.map(achievement => {
-                                return(<AchievementIcon achievement={achievement}/>)
+                            achievements.map((achievement, index) => {
+                                return(<AchievementIcon key={index} achievement={achievement}/>)
                             })
                         }
                     </Box>

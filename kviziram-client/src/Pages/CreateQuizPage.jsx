@@ -104,7 +104,7 @@ function CreateQuizPage(props) {
     }  
   return (
     <>
-      <SidebarLayout>
+      <SidebarLayout sessionID={props.mySessionID}>
         <Typography>sesion id is: {props.mySessionID}</Typography>
         <QuizzInfoForm
           quizzName={quizzName}

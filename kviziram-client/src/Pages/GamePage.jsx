@@ -3,11 +3,11 @@ import { Typography } from "@mui/material";
 
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
 
-function GamePage() {
+function GamePage(props) {
 
     return(
         <>
-            <SidebarLayout>
+            <SidebarLayout sessionID={props.mySessionID}>
                 <Typography variant="h1">Not yet implemented</Typography>
             </SidebarLayout>
         </>

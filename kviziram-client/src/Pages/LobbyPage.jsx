@@ -66,7 +66,7 @@ function LobbyPage(props) {
 
     return (
         <>
-            <SidebarLayout>
+            <SidebarLayout  sessionID={props.mySessionID}>
                 <Typography variant="h1" color="textPrimary" marginBottom="0.5em">Dzoni's Lobby</Typography>
 
                 <Card className="flex-right seperate-children-small padding">

@@ -1,12 +1,12 @@
 import { Box } from "@mui/material";
 import Sidebar from "./Sidebar";
 
-function SidebarLayout({children}) {
+function SidebarLayout(props) {
     return(
         <>
-            <Sidebar></Sidebar>
+            <Sidebar sessionID={props.sessionID}></Sidebar>
             <Box className="page-container flex-down padding">
-                {children}
+                {props.children}
             </Box>
         </>
     )

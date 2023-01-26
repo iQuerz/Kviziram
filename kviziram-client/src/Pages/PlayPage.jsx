@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 
 function PlayPage(props) {
     useEffect(() => {
+        console.log(props.mySessionID)
         window.localStorage.setItem('sessionID', props.mySessionID.toString())
     }, []);
 
@@ -34,7 +35,7 @@ function PlayPage(props) {
 
     return(
         <>
-            <SidebarLayout>
+            <SidebarLayout  sessionID={props.mySessionID}>
                 <Typography variant="h1" color="textPrimary">Play!</Typography>
                 <Typography variant="h4" color="textSecondary" textAlign="center" maxWidth={'20em'} marginBottom={'2em'}>
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas pharetra bibendum tempor.
