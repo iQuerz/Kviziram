@@ -19,9 +19,19 @@ namespace backend.Controllers
             return Ok(await _kviziram.GetAccountAsync(uID));
         }
 
+        [HttpGet("me")]
+        public async Task<ActionResult<AccountPoco>> GetMyAccount() {
+            return Ok(await _kviziram.GetMyAccount());
+        }
+
         [HttpGet("all")]
         public async Task<ActionResult<List<AccountPoco>>> GetAllAccounts() {
             return Ok(await _kviziram.GetAllAccountsAsync());
+        }
+
+        [HttpGet("search/name={username}")]
+        public async Task<ActionResult<List<AccountPoco>>> SearchAccountByName(string username) {
+            return Ok(await _kviziram.GetAccountsByUsername(username));
         }
 
         [HttpGet("me/friends/all/{rState}")]
