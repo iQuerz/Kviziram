@@ -42,6 +42,11 @@ public class GameController : ControllerBase
         return Ok(await _kviziram.GetGameCurrentQuestionAsync(inviteCode, quizID));
     }
 
+    [HttpGet("{inviteCode}/answered")]
+    public async Task<ActionResult<List<string>>> GetGameCurrentPlayersAnswered(string inviteCode) {
+        return Ok(await _kviziram.GetPlayersAnswered(inviteCode));
+    }
+
     [HttpGet("{inviteCode}")]
     public async Task<ActionResult<Match>> GetGame(string inviteCode) {
         return Ok(await _kviziram.GetGameAsync(inviteCode));

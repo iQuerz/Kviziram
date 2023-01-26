@@ -20,6 +20,8 @@ public interface IGameService
     public Task<List<GameInviteDto>?> GetAllInvitesAsync(Guid auID);
     public Task ClickInviteAsync(GameInviteDto invite);
 
+    public Task<List<string>> GetPlayersAnswered(string inviteCode);
+
     // public Task AddToLobby(string inviteCode, Guid auID, string sid);
 
 }

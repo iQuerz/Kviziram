@@ -355,6 +355,11 @@ public class GameService: IGameService
         return _util.DeserializeQuestion(res);
     }
 
+    public async Task<List<string>> GetPlayersAnswered(string inviteCode) {
+        var playersAnswered = await _redis.HashKeysAsync(_util.RK_PlayersAnswered(inviteCode));
+        return playersAnswered.Select(playerID => playerID.ToString()).ToList();
+    }
+
     public async Task<List<GameDto>?> GetLastPlayedGamesAsync(Guid playerGuid) {
         var res = await _redis.ListRangeAsync(_util.RK_PlayedGames(playerGuid.ToString()));
 
