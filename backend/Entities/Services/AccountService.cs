@@ -39,6 +39,20 @@ public class AccountService: IAccountService
         return res.ToList();
     }
 
+    public async Task<List<AccountPoco>?> GetAccountsByUsername(string username) {
+        var query = _neo.Cypher
+            .Match("(a:Account)")
+            .Where("toLower(a.Username) = toLower($prop)")
+            .WithParam("prop", username)
+            .Return(a => a.As<AccountPoco>());
+        Console.WriteLine(query.Query.DebugQueryText);
+        return (await query.ResultsAsync).ToList();
+    }
+
+    public async Task<AccountPoco?> GetMyAccount() {
+        return _util.DeserializeAccountPoco(await _redis.StringGetAsync(_context.SID));
+    }
+
     public async Task<List<AccountPoco>> GetFriendsAsync(RelationshipState rState) {
         if (_util.IsCaller().account) {
             List<AccountPoco>? listFriends = await GetFriendsQueryAsync(rState);

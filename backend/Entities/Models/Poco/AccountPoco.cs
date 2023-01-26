@@ -9,7 +9,7 @@ public class AccountPoco
 
     public string Email { get; set; }
 
-    public string Avatar { get; set; } = "";
+    public string Avatar { get; set; }
 
     public PlayerState Status { get; set; } = PlayerState.Online; 
 
@@ -22,6 +22,7 @@ public class AccountPoco
         this.ID = Guid.NewGuid();
         this.Username = "";
         this.Email = "";
+        this.Avatar = "";
     }
 
     public AccountPoco(Account account) {
@@ -30,6 +31,7 @@ public class AccountPoco
         this.Email =  account.Email;
         this.Status = account.Status;
         this.isAdmin = account.isAdmin;
+        this.Avatar = account.Avatar;
     }
 
     public string ToJsonString() {

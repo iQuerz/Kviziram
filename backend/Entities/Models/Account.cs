@@ -13,7 +13,7 @@ public class Account
     [Required]
     public string Password { get; set; }
 
-    public string Avatar { get; set; } = "";
+    public string Avatar { get; set; }
 
     public PlayerState Status { get; set; } = PlayerState.Online;  
 
@@ -23,5 +23,6 @@ public class Account
         this.Username = "";
         this.Email = "";
         this.Password = "";
+        this.Avatar = "";
     }
 }

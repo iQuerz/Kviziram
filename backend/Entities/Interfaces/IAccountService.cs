@@ -30,5 +30,7 @@ public interface IAccountService
 
     public Task<bool> AccountExistsAsync(Guid uID);
 
+    public Task<AccountPoco?> GetMyAccount();
+    public Task<List<AccountPoco>?> GetAccountsByUsername(string username);
 
 }
