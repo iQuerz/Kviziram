@@ -103,7 +103,7 @@ useEffect(()=>{
                         <Card variant="outlined" sx={{ backgroundColor: "var(--white)", border: 1 }} >
                             <Box className="flex-right wrap margin seperate-children-small" width="90%">
                             {searchedFriends.map((friend, i) => (
-                                <FriendsItem key={i} avatar={friend.avatar} name={friend.username} status={friend.status} />
+                                <FriendsItem key={i} avatar={friend.avatar} name={friend.username} status={friend.status} account={friend} sessionID={props.sessionID}/>
                                 ))}
                             </Box>
                         </Card>
@@ -113,11 +113,9 @@ useEffect(()=>{
                     <Box width={"90%"}>
                         <Card variant="outlined" sx={{ backgroundColor: "var(--white)", border: 1 }} >
                             <Box className="flex-right wrap margin seperate-children-small" width="90%">
-                                {
-                                    recommendedFriends.map(friend => {
-                                        return (<Button>update prijatelj style</Button>);
-                                    })
-                                }
+                             {recommendedFriends.map((friend, i) => (
+                                <FriendsItem key={i} avatar={friend.avatar} name={friend.username} status={friend.status} account={friend} sessionID={props.sessionID}/>
+                                ))}
                             </Box>
                         </Card>
                     </Box>

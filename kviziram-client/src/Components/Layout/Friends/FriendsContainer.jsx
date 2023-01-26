@@ -11,8 +11,6 @@ function FriendsContainer(props) {
 
 
   useEffect(()=>{
-    console.log("Loading Freinds...");
-    console.log(props.sessionID)
     tryGetMyFriends();
   },[])
   async function tryGetMyFriends() {
@@ -61,7 +59,7 @@ function FriendsContainer(props) {
         </Typography>
 
         {friends.map((friend, i) => (
-          <FriendsItem key={i} avatar={friend.avatar} name={friend.username} status={friend.status} />
+          <FriendsItem key={i} avatar={friend.avatar} name={friend.username} status={friend.status} account={friend} sessionID={props.sessionID}/>
         ))}
       </Box>
       <AddFriendModal

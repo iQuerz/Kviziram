@@ -1,9 +1,16 @@
 import { Typography } from "@mui/material";
+import FriendsProfileModul from "./FriendProfileModul";
+import { useState } from "react";
 
 function FriendsItem(props){
-    //<Typography> {props.status ? "online" : "offline"} </Typography>
+    const [isFriendProfileModalOpen, setIsFriendProfileModalOpen] = useState(false);
+
+    function handleIsFriendProfileModalOpen() {
+        setIsFriendProfileModalOpen(!isFriendProfileModalOpen);
+      }
     return (
-        <div className="friend-card">
+        <>
+        <div onClick={setIsFriendProfileModalOpen} className="friend-card">
             <img className="avatar-small" src={props.avatar}></img>
             <Typography variant="h6">
                 {props.name}
@@ -19,6 +26,10 @@ function FriendsItem(props){
                 }
             </div>
         </div>
+        <FriendsProfileModul sessionID={props.sessionID} open={isFriendProfileModalOpen} account={props} onChange={handleIsFriendProfileModalOpen}>
+            
+        </FriendsProfileModul>
+        </>
     )
 }
 export default FriendsItem

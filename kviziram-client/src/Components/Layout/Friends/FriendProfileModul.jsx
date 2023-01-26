@@ -1,12 +1,10 @@
 
-import { Box, Card, Typography } from "@mui/material";
+import { Box, Button, Card, Modal, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { useState } from "react";
-import AchievementIcon from "../Components/Achievements/AchievementIcon";
+import AchievementIcon from "../../Achievements/AchievementIcon";
 
-import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
-
-function ProfilePage(props) {
+function FriendProfileModul(props) {
     //const [account, setAccount] = useState(props.account);
     const [achievements, setAchievements] = useState([]);
     useEffect(()=>
@@ -41,8 +39,8 @@ function ProfilePage(props) {
     ]
 
     return(
-        <>
-            <SidebarLayout  sessionID={props.mySessionID}>
+        <><Modal open={props.open}>
+            <Box className="backgroud-modal">
                 <Box className="flex-right seperate-children-medium" alignItems={"center"}>
                     <img className="avatar" src={props.account.avatar}></img>
                     <Box className="flex-down">
@@ -83,9 +81,14 @@ function ProfilePage(props) {
                         }
                     </Box>
                 </Card>
-            </SidebarLayout>
+                <Button onClick={props.onChange}
+                        variant="contained"
+                        size="large"
+                        color="error"></Button>
+                </Box>
+            </Modal>
         </>
     )
 }
 
-export default ProfilePage
+export default FriendProfileModul

@@ -10,7 +10,6 @@ import { useState, useEffect } from "react";
 
 function PlayPage(props) {
     useEffect(() => {
-        console.log(props.mySessionID)
         window.localStorage.setItem('sessionID', props.mySessionID.toString())
     }, []);
 
