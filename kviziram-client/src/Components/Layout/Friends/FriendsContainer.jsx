@@ -67,6 +67,7 @@ function FriendsContainer(props) {
       <AddFriendModal
         open={isAddFriendModalOpen}
         onChange={handleAddFriendsModalOpenChange}
+        sessionID={props.sessionID}
       ></AddFriendModal>
     </>
   );

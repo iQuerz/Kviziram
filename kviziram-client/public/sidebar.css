@@ -35,6 +35,7 @@
 
 
 .friend-card{
+    display: flex;
     margin: 0.2em 0.4em;
     padding: 0.1em 0.3em;
     cursor: pointer;

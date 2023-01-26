@@ -16,13 +16,12 @@ function App() {
     const [myAccount, setMyAccount] = useState("");
 
     useEffect(()=>{
-        console.log("sessionID changes");
         tryGetAccount();
     },[sessionID])
 
     async function tryGetAccount() {
         try {
-          const response = await fetch("http://localhost:5221/Account?uID=1e60c21d-3b80-4645-95e2-7c9ce8b62618", {
+          const response = await fetch("http://localhost:5221/Account/me", {
             method: "GET",
             headers: {
               accept: "text/plain",

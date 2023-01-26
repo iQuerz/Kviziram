@@ -96,12 +96,17 @@ function CreateQuizPage(props) {
           if(json)
           {
             console.log(json)
-            //handleFetchSuccess()
+            handleFetchSuccess()
           }
         } catch (error) {
           throw error;
         }     
     }  
+    function handleFetchSuccess()
+    {
+      //to do reset everything or something
+      console.log("to be implemented")
+    }
   return (
     <>
       <SidebarLayout sessionID={props.mySessionID}>

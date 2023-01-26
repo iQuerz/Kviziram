@@ -18,7 +18,6 @@ function FriendsItem(props){
                     <div className="status-dot offline"></div>
                 }
             </div>
-            <Typography> {props.status ? "online" : "offline"} </Typography>
         </div>
     )
 }

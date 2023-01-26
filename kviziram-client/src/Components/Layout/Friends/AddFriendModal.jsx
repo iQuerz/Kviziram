@@ -11,7 +11,9 @@ import {
 } from "@mui/material";
 
 import SearchIcon from '@mui/icons-material/Search';
+import FriendsItem from "./FriendsItem";
 import { useState } from "react";
+import { useEffect } from "react";
 
 const style = {
     position: "absolute",
@@ -26,14 +28,14 @@ const style = {
 
 function AddFriendModal(props) {
     const [searchString, setSearchString] = useState("");
+    const [selectedFriend, setSelectedFriend] = useState("");
     const [searchedFriends, setSearchedFriends] = useState([]);
-    function updateSearchedFriends(){
-        let newSearchedFriends = []
-        //todo: piksi fetchuj searched friends :3 koristi searchString state promenljivu
-        setSearchedFriends(newSearchedFriends);
-    }
-    function updateSearchString(event){
+
+    function handleSearchStringChange(event){
         setSearchString(event.target.value);
+    }
+    function updateSearchString(){
+        tryGetFriendsFromSerach()
     }
 
     const [recommendedFriends, setRecommendedFriends] = useState([]);
@@ -42,7 +44,48 @@ function AddFriendModal(props) {
         //todo: piksi fetchuj recommended friends :3
         setRecommendedFriends(newRecommendedFriends);
     }
+useEffect(()=>{
+    console.log("selected friend :");
+    console.log(selectedFriend);
+},[selectedFriend])
 
+    async function tryGetFriendsFromSerach() {
+        console.log(searchString)
+        try {
+          const response = await fetch("http://localhost:5221/Account/search/name="+ searchString, {
+            method: "GET",
+            headers: {
+              accept: "text/plain",
+              'SessionID': props.sessionID
+            },
+          });
+          const json = await response.json();
+    
+          if (response.ok) {
+            setSearchedFriends(json); //predaje se sessionID app komponenti
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+    async function tryGetSendFriendRequest() {
+        try {
+          const response = await fetch("http://localhost:5221/Account/me/friend/911cb3c0-92f2-4dae-92cb-26e5d0167b89/request", {
+            method: "GET",
+            headers: {
+              accept: "text/plain",
+            },
+          });
+          const json = await response.json();
+    
+          if (response.ok) {
+            //setCategoryOptions(json); //predaje se sessionID app komponenti
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
     function cancelButton() {
         props.onChange();
     }
@@ -53,17 +96,15 @@ function AddFriendModal(props) {
                 <Card sx={style} className="flex-down seperate-children-small">
                     <Box className="flex-right seperate-children-small" alignItems={"center"}>
                         <Typography variant="h4">Search</Typography>
-                        <TextField onChange={updateSearchString}></TextField>
-                        <Button variant="contained"><SearchIcon/></Button>
+                        <TextField onChange={handleSearchStringChange}></TextField>
+                        <Button onClick={updateSearchString} variant="contained"><SearchIcon/></Button>
                     </Box>
                     <Box width={"90%"}>
                         <Card variant="outlined" sx={{ backgroundColor: "var(--white)", border: 1 }} >
                             <Box className="flex-right wrap margin seperate-children-small" width="90%">
-                                {
-                                    searchedFriends.map(friend => {
-                                        return (<Button>update prijatelj style</Button>);
-                                    })
-                                }
+                            {searchedFriends.map((friend, i) => (
+                                <FriendsItem key={i} avatar={friend.avatar} name={friend.username} status={friend.status} />
+                                ))}
                             </Box>
                         </Card>
                     </Box>
