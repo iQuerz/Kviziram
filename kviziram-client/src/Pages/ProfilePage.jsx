@@ -16,6 +16,10 @@ function ProfilePage(props) {
         }
     ];
 
+    var friends = [
+        
+    ]
+
     //ovo je malo teze jer se u bazi cuvaju quizzes & participatedIn relations pa idk kako ce da izgleda
     var matches = [
     ]
@@ -37,6 +41,17 @@ function ProfilePage(props) {
                     <Box className="flex-list-row seperate-children-medium margin">
                         {
                             achievements.map(achievement => {
+                                return(<AchievementIcon achievement={achievement}/>)
+                            })
+                        }
+                    </Box>
+                </Card>
+
+                <Card className="flex-down seperate-children-small padding margin">
+                    <Typography variant="h4">Friends</Typography>
+                    <Box className="flex-list-row seperate-children-big margin">
+                        {
+                            friends.map(achievement => {
                                 return(<AchievementIcon achievement={achievement}/>)
                             })
                         }
