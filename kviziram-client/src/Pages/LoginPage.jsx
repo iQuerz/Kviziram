@@ -71,10 +71,10 @@ function LoginPage(props) {
                            field2Type="password" clickHandler={tryUserLogin} value1={email} 
                            value2={password} onChangeField1={handleEmailChange}
                            onChangeField2={handlePasswordChange}></LoginForm>
-                <LoginForm title="Guest Login" field1="Username" field2="Code"
+                {/* <LoginForm title="Guest Login" field1="Username" field2="Code"
                            field2Type="text" clickHandler={tryGuestLogin} value1={userName} 
                            value2={code} onChangeField1={handleUserNameChange}
-                           onChangeField2={handleCodeChange}></LoginForm>
+                           onChangeField2={handleCodeChange}></LoginForm> */}
             </div>
             <Typography variant="subtitle1" color="red">
                 {errorMsg}

@@ -27,7 +27,7 @@ function App() {
                 <Route path="/Create"   element={<CreateQuizPage mySessionID={sessionID}/>} />
                 <Route path="/Profile"  element={<ProfilePage mySessionID={sessionID}/>} />
                 <Route path="/Register" element={<RegisterPage />} />
-                <Route path="/Admin" element={<AdminPage />} />
+                <Route path="/Admin"    element={<AdminPage />} />
             </Routes>
         </Router>
     )

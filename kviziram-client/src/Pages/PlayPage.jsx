@@ -5,9 +5,14 @@ import { useNavigate } from "react-router-dom";
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
 import Ad from "../Components/Layout/Ad";
 import PickQuizModal from "../Components/Lobby/PickQuizModal";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 
 function PlayPage(props) {
+    useEffect(() => {
+        window.localStorage.setItem('sessionID', props.mySessionID.toString())
+    }, []);
+
     const navigate = useNavigate();
     const [lobbyCode, setLobbyCode] = useState("");
     const [newLobbyName, setNewLobbyName] = useState("");
@@ -17,7 +22,6 @@ function PlayPage(props) {
         setLobbyCode(event.target.value);
     }
     function joinLobby(){
-        console.log(props.sesisonID)
         navigate('../Lobby')
     }
 
