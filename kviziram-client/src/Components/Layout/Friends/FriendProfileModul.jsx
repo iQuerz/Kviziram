@@ -2,6 +2,7 @@
 import { Box, Button, Card, Modal, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { useState } from "react";
+import ProfilePage from "../../../Pages/ProfilePage";
 import AchievementIcon from "../../Achievements/AchievementIcon";
 
 const style = {
@@ -91,7 +92,7 @@ function FriendProfileModul(props) {
           const json = await response;
     
           if (response.ok) {
-            console.log(json)
+            console.log("Friend request sent")
           }
         } catch (error) {
           console.error(error);

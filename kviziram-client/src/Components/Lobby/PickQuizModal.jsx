@@ -56,11 +56,12 @@ function PickQuizModal(props) {
     useEffect(() => {
         tryGetCategorys();
         tryGetAchivments();
+        tryGetCreators();
     }, []);
 
     useEffect(() => {
         tryGetQuizzQuerry();
-    }, [category, achievement, order]);
+    }, [category, achievement,creator, order]);
     async function tryGetCategorys() {
         try {
             const response = await fetch("http://localhost:5221/Category/all", {
@@ -73,7 +74,7 @@ function PickQuizModal(props) {
 
             if (response.ok) {
                 let data = [{ id: 0, name: "Any" }, ...json];
-                setCategoryOptions(data); //predaje se sessionID app komponenti
+                setCategoryOptions(data);
             }
         } catch (error) {
             console.error(error);
@@ -91,16 +92,15 @@ function PickQuizModal(props) {
 
             if (response.ok) {
                 let data = [{ id: 0, name: "Any" }, ...json];
-                setAchievementOptions(data); //predaje se sessionID app komponenti
+                setAchievementOptions(data);
             }
         } catch (error) {
             console.error(error);
         }
     }
-    //ovo ce se koristi ako dobijemo funkciju na backend
     async function tryGetCreators() {
         try {
-            const response = await fetch("http://localhost:5221/Achievement/all", {
+            const response = await fetch("http://localhost:5221/Quiz/creator/all", {
                 method: "GET",
                 headers: {
                     accept: "text/plain",
@@ -109,14 +109,23 @@ function PickQuizModal(props) {
             const json = await response.json();
 
             if (response.ok) {
-                setAchievementOptions(json); //predaje se sessionID app komponenti
+                let data = json.reduce((unique, o) => {
+                    if(!unique.some(obj => obj.id === o.id)) {
+                        unique.push(o);
+                    }
+                    return unique;
+                },[]);
+                data = [{ id: 0, name: "Any" }, ...data];
+                setCreatorOptions(data);
             }
         } catch (error) {
             console.error(error);
         }
     }
+    //ovo ce se koristi ako dobijemo funkciju na backend
     async function tryGetQuizzQuerry() {
         let querry = createQuerryString();
+        console.log(querry)
         try {
             const endpoint =
                 "http://localhost:5221/Quiz/search/" + 0 + "/" + 10 + "/q?" + querry;
@@ -150,16 +159,20 @@ function PickQuizModal(props) {
             querry += "AchievementID=" + achievement.id + "&";
         if (category.id && category.id !== 0)
             querry += "CategoryID=" + category.id + "&";
+        if (creator.id && creator.id !== 0)
+            querry += "CreatorID=" + category.id + "&";
 
         querry += "OrderAsc=" + order;
         return querry;
     }
     function handleCategoryChange(event) {
         setCategory(event);
-        console.log(category);
     }
     function handleAchievementChange(event) {
         setAchievement(event);
+    }
+    function handleCreatorChange(event) {
+        setCreator(event);
     }
     function handleOrderChange() {
         setOrder(!order);
@@ -199,8 +212,8 @@ function PickQuizModal(props) {
                                 </Typography>
                                 <SelectComponent
                                     label="Creator"
-                                    options={achievementOptions}
-                                    onChange={handleAchievementChange}
+                                    options={creatorOptions}
+                                    onChange={handleCreatorChange}
                                 />
                                 <Button onClick={handleOrderChange}>
                                     {order ? "ASC" : "DSC"}

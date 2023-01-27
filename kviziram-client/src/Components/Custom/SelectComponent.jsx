@@ -26,7 +26,7 @@ function SelectComponent(props) {
             >
                 {props.options.map((option) => (
                     <MenuItem key={option.id} value={option}>
-                        {option.name}
+                        {option.name}{option.username}
                     </MenuItem>
                 ))}
             </Select>
