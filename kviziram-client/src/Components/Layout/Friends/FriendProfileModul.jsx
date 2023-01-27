@@ -4,11 +4,23 @@ import { useEffect } from "react";
 import { useState } from "react";
 import AchievementIcon from "../../Achievements/AchievementIcon";
 
+const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "50%",
+    bgcolor: "var(--white)",
+    boxShadow: 24,
+    p: 4,
+};
+
 function FriendProfileModul(props) {
     //const [account, setAccount] = useState(props.account);
     const [achievements, setAchievements] = useState([]);
     useEffect(()=>
     {   
+        console.log(props.account)
         tryGetAchivments();
     },[])
     //trenutno izvlaci sve achivments cisto radi testiranja
@@ -18,7 +30,7 @@ function FriendProfileModul(props) {
             method: "GET",
             headers: {
               accept: "text/plain",
-              'SessionID':  props.mySessionID
+              'SessionID':  props.sessionID
             },
           });
           const json = await response.json();
@@ -40,12 +52,11 @@ function FriendProfileModul(props) {
 
     return(
         <><Modal open={props.open}>
-            <Box className="backgroud-modal">
+            <Box sx={style} className="flex-down seperate-children-small">
                 <Box className="flex-right seperate-children-medium" alignItems={"center"}>
                     <img className="avatar" src={props.account.avatar}></img>
                     <Box className="flex-down">
-                        <Typography variant="h1">{props.account.username}</Typography>
-                        <Typography variant="h4">{props.account.email}</Typography>
+                        <Typography variant="h1">{props.account.name}</Typography>
                     </Box>
                 </Box>
                 
@@ -81,11 +92,14 @@ function FriendProfileModul(props) {
                         }
                     </Box>
                 </Card>
-                <Button onClick={props.onChange}
-                        variant="contained"
-                        size="large"
-                        color="error"></Button>
-                </Box>
+                <Card className="seperate-children-medium">
+                    <Button onClick={props.onChange}
+                            variant="contained"
+                            size="large"
+                            color="error">Close</Button>
+                </Card>
+                    </Box>
+
             </Modal>
         </>
     )
