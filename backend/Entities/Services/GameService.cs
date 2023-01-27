@@ -91,8 +91,10 @@ public class GameService: IGameService
 
                                 await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Reconnected:{playerID}");
                             }
-                            else 
+                            else {
                                 Console.WriteLine("Ovaj korisnik nije bio u lobby kad je igra zapoceta");
+                                await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Kickout:{inviteCode}");
+                            }
                         } else {
                             await _redis.HashSetAsync(_util.RK_Lobby(inviteCode), playerID, playerSID);
 
@@ -181,9 +183,7 @@ public class GameService: IGameService
                         Console.WriteLine("How did we end up here?");
                         break;
                     }
-
                 }
-
             });
             //############################################################################
             #endregion

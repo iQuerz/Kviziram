@@ -119,6 +119,12 @@ public class GameHub: Hub
                     break;
                 }
 
+                case "Kickout": {
+                    //msgOperation[1] je inviteCode kome igrac nije mogao da pristupi
+                    await Clients.Caller.SendAsync("receiveKickout", msgOperation[1]);
+                    break;
+                }
+
                 default: {
                     Console.WriteLine("How did we end up here?");
                     break;
