@@ -28,7 +28,6 @@ const style = {
 
 function AddFriendModal(props) {
     const [searchString, setSearchString] = useState("");
-    const [selectedFriend, setSelectedFriend] = useState("");
     const [searchedFriends, setSearchedFriends] = useState([]);
 
     function handleSearchStringChange(event){
@@ -36,6 +35,7 @@ function AddFriendModal(props) {
     }
     function updateSearchString(){
         tryGetFriendsFromSerach()
+        console.log(searchedFriends);
     }
 
     const [recommendedFriends, setRecommendedFriends] = useState([]);
@@ -44,10 +44,6 @@ function AddFriendModal(props) {
         //todo: piksi fetchuj recommended friends :3
         setRecommendedFriends(newRecommendedFriends);
     }
-useEffect(()=>{
-    console.log("selected friend :");
-    console.log(selectedFriend);
-},[selectedFriend])
 
     async function tryGetFriendsFromSerach() {
         console.log(searchString)
@@ -103,7 +99,7 @@ useEffect(()=>{
                         <Card variant="outlined" sx={{ backgroundColor: "var(--white)", border: 1 }} >
                             <Box className="flex-right wrap margin seperate-children-small" width="90%">
                             {searchedFriends.map((friend, i) => (
-                                <FriendsItem key={i} avatar={friend.avatar} name={friend.username} status={friend.status} account={friend} sessionID={props.sessionID}/>
+                                <FriendsItem key={i} account={friend} sessionID={props.sessionID}/>
                                 ))}
                             </Box>
                         </Card>
@@ -114,7 +110,7 @@ useEffect(()=>{
                         <Card variant="outlined" sx={{ backgroundColor: "var(--white)", border: 1 }} >
                             <Box className="flex-right wrap margin seperate-children-small" width="90%">
                              {recommendedFriends.map((friend, i) => (
-                                <FriendsItem key={i} avatar={friend.avatar} name={friend.username} status={friend.status} account={friend} sessionID={props.sessionID}/>
+                                <FriendsItem key={i} account={friend} sessionID={props.sessionID}/>
                                 ))}
                             </Box>
                         </Card>

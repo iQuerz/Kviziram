@@ -11,22 +11,22 @@ function FriendsItem(props){
     return (
         <>
         <div onClick={setIsFriendProfileModalOpen} className="friend-card">
-            <img className="avatar-small" src={props.avatar}></img>
+            <img className="avatar-small" src={props.account.avatar}></img>
             <Typography variant="h6">
-                {props.name}
+                {props.account.username}
             </Typography>
             <div className="flex-list-row">
                 {
-                    props.status == 0 &&
+                    props.account.status == 0 &&
                     <div className="status-dot online"></div>
                 }
                 {
-                    props.status == 1 &&
+                    props.account.status == 1 &&
                     <div className="status-dot offline"></div>
                 }
             </div>
         </div>
-        <FriendsProfileModul sessionID={props.sessionID} open={isFriendProfileModalOpen} account={props} onChange={handleIsFriendProfileModalOpen}>
+        <FriendsProfileModul sessionID={props.sessionID} open={isFriendProfileModalOpen} account={props.account} onChange={handleIsFriendProfileModalOpen}>
             
         </FriendsProfileModul>
         </>

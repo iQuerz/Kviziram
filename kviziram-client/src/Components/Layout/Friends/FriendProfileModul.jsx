@@ -18,11 +18,20 @@ const style = {
 function FriendProfileModul(props) {
     //const [account, setAccount] = useState(props.account);
     const [achievements, setAchievements] = useState([]);
+    const [myFriends, setMyFriends] = useState([]);
+    const [isMyFriend, setIsMyfriend] = useState([]);
+
     useEffect(()=>
     {   
-        console.log(props.account)
         tryGetAchivments();
+        tryGetMyFriends();
     },[])
+
+    useEffect(()=>
+    {   
+        const found = myFriends.some(account => account.id == props.account.id)
+        setIsMyfriend(found)
+    },[myFriends])
     //trenutno izvlaci sve achivments cisto radi testiranja
     async function tryGetAchivments() {
         try {
@@ -42,10 +51,59 @@ function FriendProfileModul(props) {
           console.error(error);
         }
       }
-    var friends = [
-        
-    ]
 
+      useEffect(()=>{
+        tryGetMyFriends();
+      },[])
+      async function tryGetMyFriends() {
+        try {
+          const response = await fetch(
+            "http://localhost:5221/Account/me/friends/all/1",
+            {
+              method: "GET",
+              headers: {
+                accept: "text/plain",
+                SessionID: props.sessionID,
+              },
+            }
+          );
+          const json = await response.json();
+    
+          if (response.ok) {
+            setMyFriends(json);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      async function trySendFreidnRequest() {
+        try {
+          const response = await fetch(
+            "http://localhost:5221/Account/me/friend/" + props.account.id + "/request",
+            {
+              method: "GET",
+              headers: {
+                accept: "text/plain",
+                SessionID: props.sessionID,
+              },
+            }
+          );
+          const json = await response;
+    
+          if (response.ok) {
+            console.log(json)
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      function sendFiriendRequest(){
+        trySendFreidnRequest();
+      }
+
+      var hisFreinds = [
+    ]
     //ovo je malo teze jer se u bazi cuvaju quizzes & participatedIn relations pa idk kako ce da izgleda
     var matches = [
     ]
@@ -56,7 +114,7 @@ function FriendProfileModul(props) {
                 <Box className="flex-right seperate-children-medium" alignItems={"center"}>
                     <img className="avatar" src={props.account.avatar}></img>
                     <Box className="flex-down">
-                        <Typography variant="h1">{props.account.name}</Typography>
+                        <Typography variant="h1">{props.account.username}</Typography>
                     </Box>
                 </Box>
                 
@@ -75,7 +133,7 @@ function FriendProfileModul(props) {
                     <Typography variant="h4">Friends</Typography>
                     <Box className="flex-list-row seperate-children-big margin">
                         {
-                            friends.map(achievement => {
+                            hisFreinds.map(achievement => {
                                 return(<AchievementIcon achievement={achievement}/>)
                             })
                         }
@@ -92,14 +150,18 @@ function FriendProfileModul(props) {
                         }
                     </Box>
                 </Card>
-                <Card className="seperate-children-medium">
+                <Card className="seperate-children-medium">             
+                    <Button disabled={isMyFriend}
+                            onClick={sendFiriendRequest} 
+                            variant="contained"
+                            size="large"
+                            color="success">Add {props.account.name}</Button>
                     <Button onClick={props.onChange}
                             variant="contained"
                             size="large"
-                            color="error">Close</Button>
+                            color="error" >Close</Button>
                 </Card>
                     </Box>
-
             </Modal>
         </>
     )
