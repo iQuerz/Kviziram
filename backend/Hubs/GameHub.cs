@@ -43,7 +43,8 @@ public class GameHub: Hub
         await SetupMatchPubSub(this.InviteCode);
 
         await _matchPubSub.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Connected:{_user.Sid}|{_user.Id}");
-        await _matchPubSub.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Chat:{_user.Name} joined the game.");
+        if (await _redis.HashExistsAsync(_util.RK_Lobby(inviteCode), _user.Id.ToString()))
+            await _matchPubSub.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Chat:{_user.Name} joined the game.");
     }
 
     //Chat poziv
