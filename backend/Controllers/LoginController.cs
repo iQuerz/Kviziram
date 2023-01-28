@@ -21,4 +21,9 @@ public class LoginController : ControllerBase
         return Ok(await _kviziram.LoginGuest(username));
     }
 
+    [HttpGet("logout")]
+    public async Task<ActionResult<string>> Logout() {
+        return Ok(await _kviziram.Logout());
+    }
+
 }

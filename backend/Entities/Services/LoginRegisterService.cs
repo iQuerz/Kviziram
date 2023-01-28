@@ -16,7 +16,8 @@ public class LoginRegisterService: ILoginRegisterService
 
     #region Main Functions
     public async Task<string> Login(string? authorization) {
-        _util.AlreadyLogged();
+        // _util.AlreadyLogged();
+        await Logout();
 
         if (string.IsNullOrEmpty(authorization)) 
             throw new KviziramException(Msg.NoAuth);
@@ -75,6 +76,17 @@ public class LoginRegisterService: ILoginRegisterService
         if (verified == false) 
             throw new KviziramException(Msg.BadPassword);
     }
+
+    public async Task<string> Logout() {
+        string sid = _util.GetRedisSID();
+        if(sid != string.Empty) {
+            Console.WriteLine(sid);
+            if (await _redis.KeyDeleteAsync(sid))
+                return Msg.LoggedOut;
+        }
+        return Msg.NoSession;
+    }
+
 
     public async Task<(bool exists, Account? account)> AccountEmailExistsQueryAsync(string email) {
         IEnumerable<Account?>  query = await _neo.Cypher

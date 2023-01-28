@@ -6,4 +6,7 @@ public interface ILoginRegisterService
 
     //Guest
     public Task<string> LoginGuest(string username);
+
+    //Logout
+    public Task<string> Logout();
 }

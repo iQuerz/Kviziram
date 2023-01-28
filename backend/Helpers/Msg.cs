@@ -19,6 +19,7 @@ public static class Msg
     public const string UsedEmail = "The email you enter is already registered";
     public const string BadPassword = "Bad password entered";
     public const string AlreadyLoggedIn = "You're already logged in";
+    public const string LoggedOut = "You have been logged out";
     #endregion 
 
     #region Account messages
