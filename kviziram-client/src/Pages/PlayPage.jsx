@@ -61,7 +61,7 @@ function PlayPage(props) {
                 </Box>
                 <Ad></Ad>
             
-                <PickQuizModal open={isCreateLobbyModalOpen} onChange={handleCreateLobbyModalOpenChange} name={newLobbyName}></PickQuizModal>
+                <PickQuizModal sessionID={props.mySessionID} open={isCreateLobbyModalOpen} onChange={handleCreateLobbyModalOpenChange} name={newLobbyName}></PickQuizModal>
             </SidebarLayout>
         </>
     )

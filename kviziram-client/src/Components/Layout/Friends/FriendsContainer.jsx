@@ -51,7 +51,6 @@ function FriendsContainer(props) {
       const json = await response.json();
 
       if (response.ok) {
-        console.log(json);
         setFreindsRequests(json);
       }
     } catch (error) {

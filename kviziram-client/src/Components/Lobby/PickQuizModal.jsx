@@ -35,30 +35,64 @@ function PickQuizModal(props) {
     const [category, setCategory] = useState("");
     const [achievement, setAchievement] = useState("");
     const [creator, setCreator] = useState("");
+    const [inviteCode, setInviteCode] = useState("");
+    const [isPublic, setIsPublic] = useState(false);
     const [order, setOrder] = useState(true);
     const [categoryOptions, setCategoryOptions] = useState([]);
     const [achievementOptions, setAchievementOptions] = useState([]);
     const [creatorOptions, setCreatorOptions] = useState([]);
     const [quizzOptions, setQuizzOptions] = useState([]);
+    
 
     function cancelButton() {
         setSelectedQuiz("");
         props.onChange();
     }
     function startButton() {
+        console.log(selectedQuiz)
+        console.log(props.sessionID)
         if(selectedQuiz == "") return;
+
+        tryCreateLobby();
         //imas ovde selectedQuiz promenljivu koja ima full objekat selected kviza :3
         //ovde fetch za pravljenje lobbyja i prosledjivanje osobe u lobby
 
         props.onChange();
-        //navigate("/Lobby");
+        navigate("/Lobby");
     }
     useEffect(() => {
         tryGetCategorys();
         tryGetAchivments();
         tryGetCreators();
     }, []);
-
+    async function tryCreateLobby()
+    {   
+        try {
+          const endpoint = "http://localhost:5221/Game"; // replace with the actual endpoint URL
+          const body = JSON.stringify({
+            isSearchable : isPublic,
+            quizID : selectedQuiz.id
+          });
+          const response = await fetch(endpoint, {
+            method: "POST",
+            body: body,
+            headers: { "Content-Type": "application/json",
+                        SessionID: props.sessionID }
+          });
+          const json = await response.json();
+          if (!response.ok) {
+            throw json;
+          }
+          if(json)
+          {
+            console.log(json);
+            setInviteCode(json.inviteCode)
+            window.localStorage.setItem('inviteCode', json.inviteCode)
+          }
+        } catch (error) {
+          throw error;
+        }     
+    }  
     useEffect(() => {
         tryGetQuizzQuerry();
     }, [category, achievement,creator, order]);
@@ -125,7 +159,6 @@ function PickQuizModal(props) {
     //ovo ce se koristi ako dobijemo funkciju na backend
     async function tryGetQuizzQuerry() {
         let querry = createQuerryString();
-        console.log(querry)
         try {
             const endpoint =
                 "http://localhost:5221/Quiz/search/" + 0 + "/" + 10 + "/q?" + querry;
@@ -177,6 +210,9 @@ function PickQuizModal(props) {
     function handleOrderChange() {
         setOrder(!order);
     }
+    function handleIsPublicChange(){
+        setIsPublic(!isPublic)
+    }
     return (
         <>
             <Modal open={props.open}>
@@ -218,6 +254,9 @@ function PickQuizModal(props) {
                                 <Button onClick={handleOrderChange}>
                                     {order ? "ASC" : "DSC"}
                                 </Button>
+                                <Button onClick={handleIsPublicChange}>
+                                    {isPublic ? "Public" : "Private"}
+                                </Button>
                             </Box>
                             <Box
                                 className="flex-right wrap margin seperate-children-small"
@@ -238,7 +277,7 @@ function PickQuizModal(props) {
                     <Typography variant="h3">{selectedQuiz.name}</Typography>
 
                     <Box className="seperate-children-medium">
-                        <Button variant="contained" size="large" color="success">
+                        <Button onClick={startButton} variant="contained" size="large" color="success">
                             Start
                         </Button>
                         <Button
