@@ -5,9 +5,11 @@ public static class ServiceExtensions
         services.AddCors(options =>
         {
             options.AddPolicy("CORS",
-                builder => builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
+                builder => builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                );
         });
     }
 }

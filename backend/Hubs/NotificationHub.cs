@@ -8,7 +8,6 @@ public class NotificationHub: Hub
     public NotificationHub(KviziramContext context, Utility utility) {
         _context = context;
         _util = utility;
-
     }
 
     public override Task OnConnectedAsync() {

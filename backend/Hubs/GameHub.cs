@@ -18,8 +18,10 @@ public class GameHub: Hub
         _neo = context.Neo;
         _util = utility;
         _matchPubSub = context.Redis.GetSubscriber();
+        
+        if (_util.GetRedisSID() != string.Empty)
+            _user = (_util.GetRedisSID().Contains("account")) ? (_util.CallerAccountExists().ID, _util.GetRedisSID(), _util.CallerAccountExists().Username) : (_util.CallerGuestExists().ID, _util.GetRedisSID(), _util.CallerGuestExists().Username); 
 
-        _user = (_util.GetRedisSID().Contains("account")) ? (_util.CallerAccountExists().ID, _util.GetRedisSID(), _util.CallerAccountExists().Username) : (_util.CallerGuestExists().ID, _util.GetRedisSID(), _util.CallerGuestExists().Username); 
     }
 
     public override Task OnConnectedAsync() {
@@ -43,7 +45,8 @@ public class GameHub: Hub
         await SetupMatchPubSub(this.InviteCode);
 
         await _matchPubSub.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Connected:{_user.Sid}|{_user.Id}");
-        await _matchPubSub.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Chat:{_user.Name} joined the game.");
+        if (await _redis.HashExistsAsync(_util.RK_Lobby(inviteCode), _user.Id.ToString()))
+            await _matchPubSub.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Chat:{_user.Name} joined the game.");
     }
 
     //Chat poziv
@@ -116,6 +119,12 @@ public class GameHub: Hub
                 case "Disconnected": {
                     //msgOperation[1] je player id tj. GUID (nije session id)
                     await Clients.Caller.SendAsync("receiveDisconnected", msgOperation[1]);
+                    break;
+                }
+
+                case "Kickout": {
+                    //msgOperation[1] je inviteCode kome igrac nije mogao da pristupi
+                    await Clients.Caller.SendAsync("receiveKickout", msgOperation[1]);
                     break;
                 }
 
