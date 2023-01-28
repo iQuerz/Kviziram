@@ -18,13 +18,21 @@ public class GameHub: Hub
         _neo = context.Neo;
         _util = utility;
         _matchPubSub = context.Redis.GetSubscriber();
-        
-        if (_util.GetRedisSID() != string.Empty)
-            _user = (_util.GetRedisSID().Contains("account")) ? (_util.CallerAccountExists().ID, _util.GetRedisSID(), _util.CallerAccountExists().Username) : (_util.CallerGuestExists().ID, _util.GetRedisSID(), _util.CallerGuestExists().Username); 
-
     }
 
     public override Task OnConnectedAsync() {
+        var con = Context.GetHttpContext();
+        if(con != null) {
+            string? sid = con.Request.Headers["SessionID"];               
+            if (sid != null) {
+                string? account = _redis.StringGetAsync(_util.RK_Account(sid)).GetAwaiter().GetResult().ToString();
+                if (account != null) {
+                    var accountExists = _util.DeserializeAccountPoco(account);
+                    if (accountExists != null )
+                        _user = (accountExists.ID, _util.RK_Account(sid), accountExists.Username);
+                }
+            }
+        }
         return base.OnConnectedAsync();
     }
 
