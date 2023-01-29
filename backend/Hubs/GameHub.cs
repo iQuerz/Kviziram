@@ -21,7 +21,8 @@ public class GameHub: Hub
     public override Task OnConnectedAsync() {
         var con = Context.GetHttpContext();
         if(con != null) {
-            string? sid = con.Request.Headers["SessionID"];               
+            string? sid = con.Request.Query["sId"].ToString();   
+            Console.WriteLine("SessionID is : " + sid);           
             if (sid != null) {
                 string? account = _redis.StringGetAsync(_util.RK_Account(sid)).GetAwaiter().GetResult().ToString();
                 if (account != null) {
@@ -55,6 +56,7 @@ public class GameHub: Hub
     
     //Ako uspe konekcija na klijentu, ova funkcija se odma zove u .then() delu
     public async Task OnJoinGame(string inviteCode) {
+        Console.WriteLine("Pokusavam da udjem u game sa ovim argumetima :" + inviteCode);
         Context.Items.Add("inviteCode", inviteCode);
         SetInformation();
 

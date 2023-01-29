@@ -32,9 +32,17 @@ function LobbyPage(props) {
     }
     var hubConnection;
     useEffect(() => {
-        hubConnection = new signalR.HubConnectionBuilder().withUrl("http://localhost:5221/Hubs/Game").build();
+        const invCode = window.localStorage.getItem('inviteCode');
+        setInviteCode(invCode)
+        console.log("My inviteCode is " + invCode)
+        console.log("my sessionID is " + props.mySessionID)
+        hubConnection = new signalR.HubConnectionBuilder().withUrl("ws://localhost:5221/hubs/game?sId=" + props.mySessionID,{
+            skipNegotiation : true,
+            transport : signalR.HttpTransportType.WebSockets
+        })
+        .withAutomaticReconnect()
+        .build();
         hubConnection.start().then(hubConnectionSuccess, hubConnectionFailure);
-
         hubConnection.on("connect", function () { 
             //todo: reload podatke
         })
@@ -45,23 +53,23 @@ function LobbyPage(props) {
         startGame = function(){
             hubConnection.send("StartGame", inviteCode);
         }
-    })
+    },[])
     useEffect(() => {
-    const invCode = window.localStorage.getItem('inviteCode');
-    setInviteCode(invCode)
+
 
     },[]);
     useEffect(() => {
-        //tryGetLobbyMembers();
+        tryGetLobbyMembers();
         //tryGetLobbyInformation();
         //tryGetLobby();
     },[inviteCode])
+
     useEffect(() =>{
 
     },[hostID])
     function hubConnectionSuccess() {
         console.log("hvala kurcu ovo radi")
-        alert("hvala kurcu ovo radi");
+        //alert("hvala kurcu ovo radi");
         hubConnection.send("OnJoinGame", inviteCode);
     }
     function hubConnectionFailure() {
@@ -82,12 +90,13 @@ function LobbyPage(props) {
                 SessionID: props.mySessionID,
               },
             }
-          );
+          ); 
           const json = await response.json();
-    
           if (response.ok) {
             console.log(json);
-            //setPlayers(json);
+            const data = [...json]; 
+            if(data.size > 0) 
+                setPlayers(data);
           }
         } catch (error) {
           console.error(error);

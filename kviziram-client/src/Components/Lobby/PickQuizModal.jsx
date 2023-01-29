@@ -85,7 +85,7 @@ function PickQuizModal(props) {
           }
           if(json)
           {
-            console.log(json);
+            //console.log(json);
             setInviteCode(json.inviteCode)
             window.localStorage.setItem('inviteCode', json.inviteCode)
           }

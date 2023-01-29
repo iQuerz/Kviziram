@@ -9,7 +9,7 @@ public interface IGameService
     public Task<Match?> SaveGameToHistoryAsync(Match game);
     public Task<bool> RemoveGameFromRedisAsync(string inviteCode);
     
-    public Task<Dictionary<string, AccountPoco>> GetGameLobbyAsync(string inviteCode);
+    public Task<List<AccountPoco>> GetGameLobbyAsync(string inviteCode);
     public Task<Dictionary<string, int>> GetGameScoresAsync(string inviteCode);
     public Task<List<string>> GetGameChatAsync(string inviteCode, int start = 0, int stop = 100);
     public Task<QuestionDto?> GetGameCurrentQuestionAsync(string inviteCode, Guid quizID);
