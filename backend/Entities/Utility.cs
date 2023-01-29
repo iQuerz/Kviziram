@@ -98,7 +98,7 @@ public class Utility
     public string RK_CurrentQuestion(string key) { return "question:" + key + ":index"; }
 
     //Lobby prati broj igraca koji su trenutno u game, scores cuva rezultat i uporedjujemo ako se igrac disconnect/connect-uje
-    public string RK_Lobby(string key) { return "lobby:" + key + ":id"; }
+    public string RK_Lobby(string? key) { return "lobby:" + key + ":id"; }
     public string RK_Scores(string key) { return "score:" + key + ":id"; }
 
     //Cuvaj poslednje game-ove ako se diskonektuje pa mora reconnect

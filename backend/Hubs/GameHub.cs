@@ -8,61 +8,82 @@ public class GameHub: Hub
     IDatabase _redis;
     IGraphClient _neo;
     Utility _util;
-    ISubscriber _matchPubSub;
-    string InviteCode { get; set; } = string.Empty;
-    (Guid Id, string Sid, string Name) _user;
+    string? InviteCode { get; set; } = string.Empty;
+    (string? Id, string? Sid, string? Name) _user;
 
     public GameHub(KviziramContext context, Utility utility) {
         _context = context;
         _redis = context.Redis.GetDatabase();
         _neo = context.Neo;
         _util = utility;
-        _matchPubSub = context.Redis.GetSubscriber();
-        
-        if (_util.GetRedisSID() != string.Empty)
-            _user = (_util.GetRedisSID().Contains("account")) ? (_util.CallerAccountExists().ID, _util.GetRedisSID(), _util.CallerAccountExists().Username) : (_util.CallerGuestExists().ID, _util.GetRedisSID(), _util.CallerGuestExists().Username); 
-
     }
 
     public override Task OnConnectedAsync() {
+        var con = Context.GetHttpContext();
+        if(con != null) {
+            string? sid = con.Request.Headers["SessionID"];               
+            if (sid != null) {
+                string? account = _redis.StringGetAsync(_util.RK_Account(sid)).GetAwaiter().GetResult().ToString();
+                if (account != null) {
+                    var accountExists = _util.DeserializeAccountPoco(account);
+                    if (accountExists != null ) {
+                        Context.Items.Add("userId", accountExists.ID.ToString());
+                        Context.Items.Add("userSid", _util.RK_Account(sid));
+                        Context.Items.Add("userUsername", accountExists.Username);
+                    }
+                }
+            }
+        }
         return base.OnConnectedAsync();
     }
 
     public override Task OnDisconnectedAsync(Exception? exception) {
+        SetInformation();
 
-        _matchPubSub.PublishAsync(_util.RK_GameWatcher(InviteCode), $"Disconnected:{_user.Sid}|{_user.Id}").GetAwaiter().GetResult();
-        _matchPubSub.PublishAsync(_util.RK_GameWatcher(InviteCode), $"Chat:{_user.Name} has left the game.").GetAwaiter().GetResult();
-
-        _matchPubSub.UnsubscribeAsync(_util.RK_GameWatcher(InviteCode)).GetAwaiter().GetResult();
+        _redis.PublishAsync(_util.RK_GameWatcher(InviteCode), $"Disconnected:{_user.Sid}|{_user.Id}").GetAwaiter().GetResult();
+        _redis.PublishAsync(_util.RK_GameWatcher(InviteCode), $"Chat:{_user.Name} has left the game.").GetAwaiter().GetResult();
 
         return base.OnDisconnectedAsync(exception);
     }
 
+    public void SetInformation() {
+        var id = Context.Items["userId"]; if (id != null) _user.Id = id.ToString();
+        var sid = Context.Items["userSid"]; if (sid != null) _user.Sid = sid.ToString();
+        var username = Context.Items["userUsername"]; if (username != null) _user.Name = username.ToString();
+        var invitecode = Context.Items["inviteCode"]; if (invitecode != null) InviteCode = invitecode.ToString();
+    }
     
     //Ako uspe konekcija na klijentu, ova funkcija se odma zove u .then() delu
     public async Task OnJoinGame(string inviteCode) {
-        this.InviteCode = inviteCode;
-        await SetupMatchPubSub(this.InviteCode);
+        Context.Items.Add("inviteCode", inviteCode);
+        SetInformation();
 
-        await _matchPubSub.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Connected:{_user.Sid}|{_user.Id}");
-        if (await _redis.HashExistsAsync(_util.RK_Lobby(inviteCode), _user.Id.ToString()))
-            await _matchPubSub.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Chat:{_user.Name} joined the game.");
+        await this.Groups.AddToGroupAsync(this.Context.ConnectionId, inviteCode);
+        await _redis.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Connected:{_user.Sid}|{_user.Id}");
+        if (await _redis.HashExistsAsync(_util.RK_Lobby(inviteCode), _user.Id)) {
+            Console.WriteLine("Usao sam u joined the game");
+            await _redis.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Chat:{_user.Name} joined the game.");
+        }
     }
 
     //Chat poziv
     public async Task SendChatMessage(string message) {
-        if (await _redis.HashExistsAsync(_util.RK_Lobby(InviteCode), _user.Id.ToString()))
-            await _matchPubSub.PublishAsync(_util.RK_GameWatcher(InviteCode), $"Chat:{_user.Name}: {message}");
+        SetInformation();
+        if (await _redis.HashExistsAsync(_util.RK_Lobby(InviteCode), _user.Id))
+            await _redis.PublishAsync(_util.RK_GameWatcher(InviteCode), $"Chat:{_user.Name}: {message}");
     }
 
     //Odgovor poziv, ne znam dal moze INT pri pozivu pa bolje samo parse da odradimo u funkciju
     public async Task SendAnswer(string answer) {
-        if (await _redis.HashExistsAsync(_util.RK_Lobby(InviteCode), _user.Id.ToString())) {
-            await _matchPubSub.PublishAsync(_util.RK_GameWatcher(InviteCode), $"Answered:{_user.Id}|{answer}");
-            await _matchPubSub.PublishAsync(_util.RK_GameWatcher(InviteCode), $"Chat:{_user.Name} answered the question.");
+        SetInformation();
+        if (await _redis.HashExistsAsync(_util.RK_Lobby(InviteCode), _user.Id)) {
+            await _redis.PublishAsync(_util.RK_GameWatcher(InviteCode), $"Answered:{_user.Id}|{answer}");
+            await _redis.PublishAsync(_util.RK_GameWatcher(InviteCode), $"Chat:{_user.Name} answered the question.");
         }
     }
 
+    //COMMENTED - AL MOZ SE ISKORISTI DA SE VIDE SVE PORUKE KOJE SIGNALR SALJE
+    /*
     public async Task SetupMatchPubSub(string inviteCode) {
         await _matchPubSub.SubscribeAsync(_util.RK_GameActions(inviteCode), async (channel, message) => {
             string[] msgOperation = message.ToString().Split(":", 2);;
@@ -134,8 +155,6 @@ public class GameHub: Hub
                 }
             }
         });
-    }
-
-
-    
+    }    
+    */
 }

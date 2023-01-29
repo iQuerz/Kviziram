@@ -98,6 +98,15 @@ public class GameController : ControllerBase
     #endregion
 
     #region Test Methods
+    // [HttpGet("createPubSub/{channelName}")]
+    // public async Task CreatePubSub(string channelName) {
+    //     await _kviziram.CreatePubSubAsync(channelName);
+    // }
+
+    // [HttpGet("testPubSub/{channelName}/{msg}")]
+    // public async Task testPubSub(string channelName, string msg) {
+    //     await _kviziram.TestPubSubAsync(channelName, msg);
+    // }
     // [HttpPost("test/converter")]
     // public async Task<ActionResult<GameDto>> ConvertMatchToGameDto([FromBody] Match game) {
     //     return Ok(await _kviziram.ConvertMatchToGameDtoAsync(game));
