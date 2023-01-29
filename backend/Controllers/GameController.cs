@@ -28,7 +28,7 @@ public class GameController : ControllerBase
     }
 
     [HttpGet("{inviteCode}/scores")]
-    public async Task<ActionResult<Dictionary<string, int>>> GetGameScores(string inviteCode) {
+    public async Task<ActionResult<List<GameScore>>> GetGameScores(string inviteCode) {
         return Ok(await _kviziram.GetGameScoresAsync(inviteCode));
     }
 

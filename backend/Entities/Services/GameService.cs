@@ -330,21 +330,27 @@ public class GameService: IGameService
 
     public async Task<List<AccountPoco>> GetGameLobbyAsync(string inviteCode) {
         var lobby = await _redis.HashGetAllAsync(_util.RK_Lobby(inviteCode));
-        List<AccountPoco> dic = new List<AccountPoco>();
+        List<AccountPoco> accList = new List<AccountPoco>();
         foreach(var elem in lobby) {
             var redisAcc = await _redis.StringGetAsync(elem.Value.ToString());
             AccountPoco? acc = _util.DeserializeAccountPoco(redisAcc);
-            if (acc != null) dic.Add(acc);
+            if (acc != null) accList.Add(acc);
         }
-        return dic;
+        return accList;
     }
 
-    public async Task<Dictionary<string, int>> GetGameScoresAsync(string inviteCode) {
+    public async Task<List<GameScore>> GetGameScoresAsync(string inviteCode) {
         var scores = await _redis.SortedSetRangeByScoreWithScoresAsync(_util.RK_Scores(inviteCode), double.NegativeInfinity, double.PositiveInfinity, Exclude.None, Order.Descending);
-        Dictionary<string, int> dic = new Dictionary<string, int>();
-        foreach(var elem in scores)
-            dic.Add(elem.Element.ToString(), (int) elem.Score);
-        return dic;
+        List<GameScore> scoresList = new List<GameScore>();
+        foreach(var elem in scores) {
+            AccountPoco? acc = await _account.GetAccountAsync(Guid.Parse(elem.Element.ToString()));
+            GameScore score = new GameScore();
+
+            score.Account = acc;
+            score.Score = (int) elem.Score;
+            scoresList.Add(score);
+        }
+        return scoresList;
     }
 
     public async Task<List<string>> GetGameChatAsync(string inviteCode, int start = 0, int stop = 100) {
