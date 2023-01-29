@@ -22,6 +22,9 @@ public interface IGameService
 
     public Task<List<string>> GetPlayersAnswered(string inviteCode);
 
-    // public Task AddToLobby(string inviteCode, Guid auID, string sid);
+    public Task CreatePubSubAsync(string channelName);
+    public Task TestPubSubAsync(string channelName, string msg);
 
+
+    // public Task AddToLobby(string inviteCode, Guid auID, string sid);
 }

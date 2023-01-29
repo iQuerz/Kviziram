@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.SignalR;
 using Neo4jClient;
 using StackExchange.Redis;
 
@@ -11,8 +12,9 @@ public class GameService: IGameService
     IMatchService _match;
     IAccountService _account;
     KviziramContext _context;
+    IHubContext<GameHub> _gameHub;
     
-    public GameService(KviziramContext context, Utility utility, IQuizService quiz, IMatchService match, IAccountService account) {
+    public GameService(KviziramContext context, Utility utility, IQuizService quiz, IMatchService match, IAccountService account, IHubContext<GameHub> gameHub) {
         _context = context;
         _redis = context.Redis.GetDatabase();
         _neo = context.Neo;
@@ -20,6 +22,7 @@ public class GameService: IGameService
         _quiz = quiz;
         _match = match;
         _account = account;
+        _gameHub = gameHub;
     }
 
     public async Task<Match?> CreateGameAsync(Match game) {
@@ -89,16 +92,16 @@ public class GameService: IGameService
                             if (await _redis.HashExistsAsync(_util.RK_Lobby(inviteCode), playerID)) {
                                 await _redis.HashSetAsync(_util.RK_Lobby(inviteCode), playerID, playerSID);
 
-                                await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Reconnected:{playerID}");
+                                await _gameHub.Clients.Group(inviteCode).SendAsync("receiveReconnected", playerID);
                             }
                             else {
                                 Console.WriteLine("Ovaj korisnik nije bio u lobby kad je igra zapoceta");
-                                await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Kickout:{inviteCode}");
+                                await _gameHub.Clients.Group(inviteCode).SendAsync("receiveKickout", inviteCode);
                             }
                         } else {
                             await _redis.HashSetAsync(_util.RK_Lobby(inviteCode), playerID, playerSID);
 
-                            await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Connected:{playerID}");
+                            await _gameHub.Clients.Group(inviteCode).SendAsync("receiveConnected", playerID);
                         }
                         break;
                     }
@@ -110,7 +113,7 @@ public class GameService: IGameService
                         await _redis.HashDeleteAsync(_util.RK_Lobby(inviteCode), playerID);
                         await _redis.HashDeleteAsync(_util.RK_PlayersAnswered(inviteCode), playerID);   
 
-                        await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Disconnected:{playerID}");
+                        await _gameHub.Clients.Group(inviteCode).SendAsync("receiveDisconnected", playerID);
 
                         if (await _redis.HashLengthAsync(_util.RK_Lobby(inviteCode)) == 0 && game != null) {
                             if (await _redis.KeyExistsAsync(_util.RK_Scores(inviteCode))) {
@@ -153,7 +156,7 @@ public class GameService: IGameService
                                 await _redis.KeyDeleteAsync(_util.RK_PlayersAnswered(inviteCode));
                                 await _redis.StringIncrementAsync(_util.RK_CurrentQuestion(inviteCode));
 
-                                await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Answered:{playerID}");
+                                await _gameHub.Clients.Group(inviteCode).SendAsync("receiveAnswered", playerID);
                             }   
 
                             long numOfQuestions = await _redis.ListLengthAsync(_util.RK_Questions(game.QuizID));
@@ -162,11 +165,11 @@ public class GameService: IGameService
                                 await SaveGameToHistoryAsync(game);
                                 await RemoveGameFromRedisAsync(inviteCode);
 
-                                await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Finished:{game.ID}");
+                                await _gameHub.Clients.Group(inviteCode).SendAsync("receiveFinishedGame", game.ID);
     
                                 await masterOfDisaster.UnsubscribeAsync(channel);                          
                             } else {
-                                await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"NextQuestion:{inviteCode}");
+                                await _gameHub.Clients.Group(inviteCode).SendAsync("receiveNextQuestion", game.QuizID);
                             }                                      
                         }
                         break;
@@ -175,7 +178,7 @@ public class GameService: IGameService
                     case "Chat": {
                         string chatMessage = msgOperation[1];
                         await _redis.ListLeftPushAsync(_util.RK_Chat(inviteCode), chatMessage);
-                        await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Chat:{chatMessage}");
+                        await _gameHub.Clients.Group(inviteCode).SendAsync("receiveChatMessage", chatMessage);
                         break;
                     }
 
@@ -233,7 +236,7 @@ public class GameService: IGameService
                     double PublicGameKey = match.Created.Value.ToOADate();
                     await _redis.SortedSetRemoveRangeByScoreAsync(_util.RK_PublicMatches, PublicGameKey, PublicGameKey);
 
-                    await _redis.PublishAsync(_util.RK_GameActions(inviteCode), $"Start:{inviteCode}");
+                    await _gameHub.Clients.Group(inviteCode).SendAsync("receiveGameStarted", inviteCode);
                     return Msg.GameStarted;
                 }
                 return Msg.NoLobby;
@@ -411,5 +414,20 @@ public class GameService: IGameService
         if (_context.AccountCaller != null && invite.Game != null) {
             await _redis.SortedSetRemoveRangeByScoreAsync(_util.RK_Invite(_context.AccountCaller.ID.ToString()), invite.Game.Created.ToOADate(), invite.Game.Created.ToOADate());
         }
+    }
+
+    public async Task CreatePubSubAsync(string channelName) {
+        Console.WriteLine("Zapocinjem kreiranje masterOfDisaster");
+        ISubscriber masterOfDisaster = _context.Redis.GetSubscriber();
+        await masterOfDisaster.SubscribeAsync(channelName, async (channel, message) => {
+            Console.WriteLine(await Task.FromResult($"Primio poruku: {channel} | {message}"));
+        });
+        Console.WriteLine("Zavrsio sa masterOfDisaster");
+    }
+
+    public async Task TestPubSubAsync(string channelName, string msg) {
+        Console.WriteLine($"Spremam se da posaljem {channelName} poruku {msg}");
+        await _redis.PublishAsync(channelName, msg);
+        Console.WriteLine("Poruka poslata");
     }
 }
