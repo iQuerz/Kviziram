@@ -23,7 +23,7 @@ public class GameController : ControllerBase
     }
 
     [HttpGet("{inviteCode}/lobby")]
-    public async Task<ActionResult<Dictionary<string, AccountPoco>>> GetGameLobby(string inviteCode) {
+    public async Task<ActionResult<List<AccountPoco>>> GetGameLobby(string inviteCode) {
         return Ok(await _kviziram.GetGameLobbyAsync(inviteCode));
     }
 

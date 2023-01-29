@@ -21,7 +21,7 @@ public class GameHub: Hub
     public override Task OnConnectedAsync() {
         var con = Context.GetHttpContext();
         if(con != null) {
-            string? sid = con.Request.Headers["SessionID"];               
+            string? sid = con.Request.Query["sid"].ToString();               
             if (sid != null) {
                 string? account = _redis.StringGetAsync(_util.RK_Account(sid)).GetAwaiter().GetResult().ToString();
                 if (account != null) {

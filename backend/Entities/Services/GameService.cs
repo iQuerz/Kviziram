@@ -328,15 +328,15 @@ public class GameService: IGameService
         return false;
     }
 
-    public async Task<Dictionary<string, AccountPoco>> GetGameLobbyAsync(string inviteCode) {
+    public async Task<List<AccountPoco>> GetGameLobbyAsync(string inviteCode) {
         var lobby = await _redis.HashGetAllAsync(_util.RK_Lobby(inviteCode));
-        Dictionary<string, AccountPoco> dic = new Dictionary<string, AccountPoco>();
+        List<AccountPoco> accList = new List<AccountPoco>();
         foreach(var elem in lobby) {
             var redisAcc = await _redis.StringGetAsync(elem.Value.ToString());
             AccountPoco? acc = _util.DeserializeAccountPoco(redisAcc);
-            if (acc != null) dic.Add(elem.Name.ToString(), acc);
+            if (acc != null) accList.Add(acc);
         }
-        return dic;
+        return accList;
     }
 
     public async Task<Dictionary<string, int>> GetGameScoresAsync(string inviteCode) {
