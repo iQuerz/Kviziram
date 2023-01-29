@@ -339,12 +339,18 @@ public class GameService: IGameService
         return accList;
     }
 
-    public async Task<Dictionary<string, int>> GetGameScoresAsync(string inviteCode) {
+    public async Task<List<GameScore>> GetGameScoresAsync(string inviteCode) {
         var scores = await _redis.SortedSetRangeByScoreWithScoresAsync(_util.RK_Scores(inviteCode), double.NegativeInfinity, double.PositiveInfinity, Exclude.None, Order.Descending);
-        Dictionary<string, int> dic = new Dictionary<string, int>();
-        foreach(var elem in scores)
-            dic.Add(elem.Element.ToString(), (int) elem.Score);
-        return dic;
+        List<GameScore> scoresList = new List<GameScore>();
+        foreach(var elem in scores) {
+            AccountPoco? acc = await _account.GetAccountAsync(Guid.Parse(elem.Element.ToString()));
+            GameScore score = new GameScore();
+
+            score.Account = acc;
+            score.Score = (int) elem.Score;
+            scoresList.Add(score);
+        }
+        return scoresList;
     }
 
     public async Task<List<string>> GetGameChatAsync(string inviteCode, int start = 0, int stop = 100) {
