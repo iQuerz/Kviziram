@@ -130,3 +130,7 @@ body{
     display: inline-block;
     font-size: 1.5em;
 }
+
+.public-lobbies-card{
+    max-height: 30em;
+}

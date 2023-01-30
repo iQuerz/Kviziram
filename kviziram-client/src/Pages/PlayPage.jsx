@@ -86,25 +86,26 @@ function PlayPage(props) {
                 <Typography variant="h4" color="textSecondary" textAlign="center" maxWidth={'20em'} marginBottom={'2em'}>
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas pharetra bibendum tempor.
                 </Typography>
-                <Card className="width-75 flex-down seperate-children-small padding">
-                <Button variant="contained" size="large" onClick={RefreshPublicLobbies}>Refresh</Button>
-                    <Card>
-                        <Typography variant="h4">Browse Public Lobbies</Typography>
-                        <Typography variant="h4">Selected lobby : {selectedLobby.inviteCode}</Typography>
-                    </Card>
-                    <Card className="flex-right wrap">
+
+                <Card className="public-lobbies-card width-75 flex-down seperate-children-small padding">
+                    <Button variant="contained" size="large" onClick={RefreshPublicLobbies}>Refresh</Button>
+                    <Typography variant="h4">Browse Public Lobbies</Typography>
+                    {/* <Typography variant="h4">Selected lobby : {selectedLobby.inviteCode}</Typography> */}
+                    <Card className="flex-right wrap" sx={{overflow: "scroll"}}>
                         {
                         publicLobbies.map((lobby, index) => {
                                 return (<LobbyCard  handleClick={()=>{
                                     handleSelectedLobbyChange(lobby);
                                 }} 
-                                lobby={lobby} key={index} ></LobbyCard>)
+                                lobby={lobby} key={index} onClick={joinPublicLobby}></LobbyCard>)
                             })
                     }
                     </Card>
-                    <Button variant="contained" size="large" onClick={joinPublicLobby}>Join</Button>
+                    {/* <Button variant="contained" size="large" onClick={joinPublicLobby}>Join</Button> */}
                 </Card>
+
                 <Ad></Ad>
+
                 <Box className="flex-right width-75 seperate-children-big">
                     <Card className="width-35 flex-down seperate-children-small padding">
                         <Typography variant="h4">Join via Code</Typography>
@@ -118,6 +119,7 @@ function PlayPage(props) {
                         <Button variant="contained" size="large" onClick={handleCreateLobbyModalOpenChange}>Host</Button>
                     </Card>
                 </Box>
+
                 <Ad></Ad>
             
                 <PickQuizModal sessionID={props.mySessionID} open={isCreateLobbyModalOpen} onChange={handleCreateLobbyModalOpenChange} name={newLobbyName}></PickQuizModal>
