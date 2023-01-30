@@ -1,7 +1,7 @@
 
 import { Box, Button, Card, List, Typography } from "@mui/material";
 import { useEffect } from "react";
-import { useState, useRef } from "react";
+import { useState, useRef,useMemo } from "react";
 import ChatContainer from "../Components/Chat/ChatContainer";
 
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
@@ -11,23 +11,25 @@ import * as signalR from "@microsoft/signalr"
 import AppData from "../js/AppData";
 import { useNavigate } from "react-router-dom";
 
+var hubConnection;
+
 function LobbyPage(props) {
     AppData.loadTestData();
     const [players, setPlayers] = useState([]);
     //const [inviteCode, setInviteCode] = useState();
     const [quizzName, setQuizzName] = useState("");
     const [quizzCategory, setQuizzCategory] = useState("");
+    const [msgRecived, setMsgRecived] = useState(0);
+    const [inviteCodeState, setinviteCodeState] = useState("");
     const inviteCode = useRef("");
     const navigate = useNavigate();
     
-    if(!hubConnection)
-    {
-        var hubConnection;
-    }
+    //var hubConnection;
 
     useEffect(() => {
         const invCode = window.localStorage.getItem('inviteCode');
         inviteCode.current = invCode;
+        setinviteCodeState(invCode)
         hubConnection = new signalR.HubConnectionBuilder().withUrl("ws://localhost:5221/hubs/game?sId=" + props.mySessionID,{
             skipNegotiation : true,
             transport : signalR.HttpTransportType.WebSockets
@@ -37,16 +39,21 @@ function LobbyPage(props) {
         hubConnection.start().then(hubConnectionSuccess, hubConnectionFailure);
 
         hubConnection.on("receiveConnected", function () { 
-            console.log("Neko se connectovao u game")
+            //console.log("Neko se connectovao u game")
             tryGetLobbyMembers();
         })
         hubConnection.on("receiveDisconnected", function () { 
-          console.log("Neko se disconectovao iz gama")
+          //console.log("Neko se disconectovao iz gama")
           tryGetLobbyMembers();
       })
+      hubConnection.on("receiveChatMessage", function () { 
+        console.log("stigla mi prouka..")
+        handleMsgRecived();
+    })
     
         hubConnection.on("receiveGameStarted", function(){
           console.log("Game started")
+          
           navigate('/Game')
         })
 
@@ -54,19 +61,25 @@ function LobbyPage(props) {
         tryGetLobbyInformation();
         tryGetLobby();
     },[])
-
-    function  SendMsg(params) {
-      hubConnection.send("startGame", inviteCode)
+    function print(){
+      console.log(hubConnection);
+    }
+    function handleMsgRecived(){
+      setMsgRecived((msgRecived) => msgRecived + 1)
+    }
+    function SendMsg(msg) {
+      hubConnection.send("SendChatMessage", msg)
     }
     async function handleStartGame () {
       tryStartGame();
     };
 
     function hubConnectionSuccess() {
-        console.log("hvala kurcu ovo radi")
+        //console.log("hvala kurcu ovo radi")
         //alert("hvala kurcu ovo radi");
         hubConnection.send("OnJoinGame", inviteCode.current);
     }
+
     function hubConnectionFailure() {
         console.log("hub connection unsuccesful.")
         alert("hub connection unsuccesful.");
@@ -90,7 +103,7 @@ function LobbyPage(props) {
           if (response.ok) {
 
             const data = json;  
-            console.log(data)          
+            //console.log(data)          
             setPlayers(data);
           }
         } catch (error) {
@@ -181,7 +194,7 @@ function LobbyPage(props) {
 
                 <Box className="flex-right seperate-children-big">
                     <Button variant="contained" size="large" onClick={handleStartGame} color="success">Start</Button>
-                    <Button variant="contained" size="large">Invite</Button>
+                    <Button variant="contained" size="large" onClick={print}>Check Connetion</Button>
                     <Button variant="contained" size="large" color="error">Leave</Button>
                 </Box>
 
@@ -194,7 +207,7 @@ function LobbyPage(props) {
                     }
                 </Box>
 
-                <ChatContainer></ChatContainer>
+                <ChatContainer sendMsg={SendMsg} inviteCode={inviteCodeState} msgRecived={msgRecived} sessionId={props.mySessionID}></ChatContainer>
 
             </SidebarLayout>
         </>
