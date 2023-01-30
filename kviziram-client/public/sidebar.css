@@ -16,6 +16,7 @@
     display: block;
     color: var(--white);/*nepotrebno, ali tu je dok ne implementiramo friends*/
 }
+
 .sidebar-nav-button:hover{
     background-color: var(--black-hover);
 }

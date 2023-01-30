@@ -50,11 +50,6 @@ function LobbyPage(props) {
           navigate('/Game')
         })
 
-        startGame = function(){
-          console.log("usao sam")
-          hubConnection.send("StartGame", inviteCode.current);
-        }     
-
         tryGetLobbyMembers();
         tryGetLobbyInformation();
         tryGetLobby();

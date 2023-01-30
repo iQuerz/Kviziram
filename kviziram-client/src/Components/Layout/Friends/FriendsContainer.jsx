@@ -74,7 +74,7 @@ function FriendsContainer(props) {
           My friends<Button color="error">{"Friend Request "}{FreindsRequests.length}</Button>
           <Button
             variant="contained"
-            fullWidth="true"
+            fullWidth={true}
             onClick={handleAddFriendsModalOpenChange}
           >
             +
