@@ -9,6 +9,7 @@ import LobbyParticipant from "../Components/Lobby/LobbyParticipant";
 
 import * as signalR from "@microsoft/signalr"
 import AppData from "../js/AppData";
+import { useNavigate } from "react-router-dom";
 
 function LobbyPage(props) {
     AppData.loadTestData();
@@ -18,23 +19,9 @@ function LobbyPage(props) {
     const [quizzName, setQuizzName] = useState("");
     const [quizzCategory, setQuizzCategory] = useState("");
     const inviteCode = useRef("");
-    function updatePlayers(){
-        //ovde bi isao fetch za playere iz lobby, ovu funkciju bi pozvao signalR as well
-        let array = [
-            {
-                username: "iQuerz"
-            },
-            {
-                username: "Piksi"
-            },
-            {
-                username: "Lajron"
-            }
-        ];
-        setPlayers(array);
-    }
+    const navigate = useNavigate();
     var hubConnection;
-
+    var startGame;
     useEffect(() => {
         const invCode = window.localStorage.getItem('inviteCode');
         inviteCode.current = invCode;
@@ -56,25 +43,28 @@ function LobbyPage(props) {
       })
     
         hubConnection.on("receiveGameStarted", function(){
-            //todo: prebaci se na game page
+          navigate('../../Lobby')
         })
 
-            
-    startGame = function(){
-        hubConnection.send("StartGame", inviteCode);
-    }
+        startGame = function(){
+          console.log("usao sam")
+          hubConnection.send("StartGame", inviteCode.current);
+        }     
+
         tryGetLobbyMembers();
         tryGetLobbyInformation();
         tryGetLobby();
     },[])
 
 
+    async function handleStartGame () {
+      console.log("why is this not working");
+      console.log(hubConnection)
+      if (hubConnection) {
+        hubConnection.send("StartGame", inviteCode.current);
+      }
+    };
 
-
-
-    useEffect(() =>{
-
-    },[hostID])
     function hubConnectionSuccess() {
         console.log("hvala kurcu ovo radi")
         //alert("hvala kurcu ovo radi");
@@ -85,7 +75,7 @@ function LobbyPage(props) {
         alert("hub connection unsuccesful.");
     }
 
-    let startGame = function(){}
+
 
      async function tryGetLobbyMembers() {
         try {
@@ -160,27 +150,6 @@ function LobbyPage(props) {
         }
       }
     
-      async function tryGetHost() {
-        try {
-          const response = await fetch(
-            "http://localhost:5221/Account/",
-            {
-              method: "GET",
-              headers: {
-                accept: "text/plain",
-                SessionID: props.sessionID,
-              },
-            }
-          );
-          const json = await response.json();
-    
-          if (response.ok) {
-
-          }
-        } catch (error) {
-          console.error(error);
-        }
-      }
 
     return (
         <>
@@ -194,7 +163,7 @@ function LobbyPage(props) {
                 </Card>
 
                 <Box className="flex-right seperate-children-big">
-                    <Button variant="contained" size="large" onClick={startGame()} color="success">Start</Button>
+                    <Button variant="contained" size="large" onClick={handleStartGame} color="success">Start</Button>
                     <Button variant="contained" size="large">Invite</Button>
                     <Button variant="contained" size="large" color="error">Leave</Button>
                 </Box>
