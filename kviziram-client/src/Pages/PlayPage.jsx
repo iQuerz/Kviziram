@@ -7,6 +7,7 @@ import Ad from "../Components/Layout/Ad";
 import PickQuizModal from "../Components/Lobby/PickQuizModal";
 
 import { useState, useEffect } from "react";
+import { useRef } from "react";
 
 function PlayPage(props) {
     useEffect(() => {
@@ -14,14 +15,14 @@ function PlayPage(props) {
     }, []);
 
     const navigate = useNavigate();
-    const [lobbyCode, setLobbyCode] = useState("");
+    //const [lobbyCode, setLobbyCode] = useState("");
+    const lobbyCode = useRef("");
     const [newLobbyName, setNewLobbyName] = useState("");
     const [isCreateLobbyModalOpen, setCreateLobbyModalOpen] = useState(false);
     
-    function lobbyCodeInputChanged(event){
-        setLobbyCode(event.target.value);
-    }
     function joinLobby(){
+        console.log(lobbyCode.current.value);
+        window.localStorage.setItem('inviteCode', lobbyCode.current.value)
         navigate('../Lobby')
     }
 
@@ -49,7 +50,7 @@ function PlayPage(props) {
                 <Box className="flex-right width-75 seperate-children-big">
                     <Card className="width-35 flex-down seperate-children-small padding">
                         <Typography variant="h4">Join via Code</Typography>
-                        <TextField label="Lobby code" onChange={lobbyCodeInputChanged}></TextField>
+                        <TextField label="Lobby code" inputRef={lobbyCode}></TextField>
                         <Button variant="contained" size="large" onClick={joinLobby}>Join</Button>
                     </Card>
                     <Card className="width-35 flex-down seperate-children-small padding">

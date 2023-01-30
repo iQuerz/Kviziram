@@ -48,12 +48,10 @@ function PickQuizModal(props) {
         setSelectedQuiz("");
         props.onChange();
     }
-    function startButton() {
-        console.log(selectedQuiz)
-        console.log(props.sessionID)
+    async function startButton() {
         if(selectedQuiz == "") return;
 
-        tryCreateLobby();
+        await tryCreateLobby();
         //imas ovde selectedQuiz promenljivu koja ima full objekat selected kviza :3
         //ovde fetch za pravljenje lobbyja i prosledjivanje osobe u lobby
 
@@ -86,7 +84,7 @@ function PickQuizModal(props) {
           if(json)
           {
             //console.log(json);
-            setInviteCode(json.inviteCode)
+            //setInviteCode(json.inviteCode)
             window.localStorage.setItem('inviteCode', json.inviteCode)
           }
         } catch (error) {

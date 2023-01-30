@@ -1,7 +1,7 @@
 
 import { Box, Button, Card, List, Typography } from "@mui/material";
 import { useEffect } from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import ChatContainer from "../Components/Chat/ChatContainer";
 
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
@@ -14,7 +14,10 @@ function LobbyPage(props) {
     AppData.loadTestData();
     const [players, setPlayers] = useState([]);
     const [hostID , setHostID] = useState("");
-    const [inviteCode, setInviteCode] = useState("");
+    //const [inviteCode, setInviteCode] = useState();
+    const [quizzName, setQuizzName] = useState("");
+    const [quizzCategory, setQuizzCategory] = useState("");
+    const inviteCode = useRef("");
     function updatePlayers(){
         //ovde bi isao fetch za playere iz lobby, ovu funkciju bi pozvao signalR as well
         let array = [
@@ -31,11 +34,10 @@ function LobbyPage(props) {
         setPlayers(array);
     }
     var hubConnection;
+
     useEffect(() => {
         const invCode = window.localStorage.getItem('inviteCode');
-        setInviteCode(invCode)
-        console.log("My inviteCode is " + invCode)
-        console.log("my sessionID is " + props.mySessionID)
+        inviteCode.current = invCode;
         hubConnection = new signalR.HubConnectionBuilder().withUrl("ws://localhost:5221/hubs/game?sId=" + props.mySessionID,{
             skipNegotiation : true,
             transport : signalR.HttpTransportType.WebSockets
@@ -43,26 +45,32 @@ function LobbyPage(props) {
         .withAutomaticReconnect()
         .build();
         hubConnection.start().then(hubConnectionSuccess, hubConnectionFailure);
-        hubConnection.on("connect", function () { 
-            //todo: reload podatke
+
+        hubConnection.on("receiveConnected", function () { 
+            console.log("Neko se connectovao u game")
+            tryGetLobbyMembers();
         })
+        hubConnection.on("receiveDisconnected", function () { 
+          console.log("Neko se disconectovao iz gama")
+          tryGetLobbyMembers();
+      })
+    
         hubConnection.on("receiveGameStarted", function(){
             //todo: prebaci se na game page
         })
-        
-        startGame = function(){
-            hubConnection.send("StartGame", inviteCode);
-        }
-    },[])
-    useEffect(() => {
 
-
-    },[]);
-    useEffect(() => {
+            
+    startGame = function(){
+        hubConnection.send("StartGame", inviteCode);
+    }
         tryGetLobbyMembers();
-        //tryGetLobbyInformation();
-        //tryGetLobby();
-    },[inviteCode])
+        tryGetLobbyInformation();
+        tryGetLobby();
+    },[])
+
+
+
+
 
     useEffect(() =>{
 
@@ -70,7 +78,7 @@ function LobbyPage(props) {
     function hubConnectionSuccess() {
         console.log("hvala kurcu ovo radi")
         //alert("hvala kurcu ovo radi");
-        hubConnection.send("OnJoinGame", inviteCode);
+        hubConnection.send("OnJoinGame", inviteCode.current);
     }
     function hubConnectionFailure() {
         console.log("hub connection unsuccesful.")
@@ -82,7 +90,7 @@ function LobbyPage(props) {
      async function tryGetLobbyMembers() {
         try {
           const response = await fetch(
-            "http://localhost:5221/Game/" + inviteCode + "/lobby",
+            "http://localhost:5221/Game/" + inviteCode.current + "/lobby",
             {
               method: "GET",
               headers: {
@@ -93,10 +101,10 @@ function LobbyPage(props) {
           ); 
           const json = await response.json();
           if (response.ok) {
-            console.log(json);
-            const data = [...json]; 
-            if(data.size > 0) 
-                setPlayers(data);
+
+            const data = json;  
+            console.log(data)          
+            setPlayers(data);
           }
         } catch (error) {
           console.error(error);
@@ -106,7 +114,7 @@ function LobbyPage(props) {
       async function tryGetLobbyInformation() {
         try {
           const response = await fetch(
-            "http://localhost:5221/Game/" + inviteCode + "/information",
+            "http://localhost:5221/Game/" + inviteCode.current + "/information",
             {
               method: "GET",
               headers: {
@@ -118,7 +126,9 @@ function LobbyPage(props) {
           const json = await response.json();
     
           if (response.ok) {
-            console.log(json);
+            //console.log(json);
+            setQuizzName(json.quizName)
+            setQuizzCategory(json.categoryName)
             //setPlayers(json);
           }
         } catch (error) {
@@ -130,7 +140,7 @@ function LobbyPage(props) {
       async function tryGetLobby() {
         try {
           const response = await fetch(
-            "http://localhost:5221/Game/" + inviteCode,
+            "http://localhost:5221/Game/" + inviteCode.current,
             {
               method: "GET",
               headers: {
@@ -142,7 +152,7 @@ function LobbyPage(props) {
           const json = await response.json();
     
           if (response.ok) {
-            console.log(json);
+            //console.log(json);
             //setPlayers(json);
           }
         } catch (error) {
@@ -175,12 +185,12 @@ function LobbyPage(props) {
     return (
         <>
             <SidebarLayout  sessionID={props.mySessionID}>
-                <Typography variant="h1" color="textPrimary" marginBottom="0.5em">Dzoni's Lobby {inviteCode}</Typography>
+                <Typography variant="h1" color="textPrimary" marginBottom="0.5em">Lobby : {inviteCode.current}</Typography>
 
                 <Card className="flex-right seperate-children-small padding">
                     <Typography variant="h5">Selected Quiz:</Typography>
-                    <Typography variant="h5" fontWeight="bold">"props.quiz.name"</Typography>
-                    <Typography variant="h5">[props.quiz.category]</Typography>
+                    <Typography variant="h5" fontWeight="bold">"{quizzName}"</Typography>
+                    <Typography variant="h5">({quizzCategory})</Typography>
                 </Card>
 
                 <Box className="flex-right seperate-children-big">
