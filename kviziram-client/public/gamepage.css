@@ -35,3 +35,7 @@
 .game-card{
     height: 100%;
 }
+
+.question-progressbar{
+    height: 2em!important;
+}

@@ -1,5 +1,6 @@
 
 import { Box, Card, Typography } from "@mui/material";
+import CurrentQuestion from "../Components/Game/CurrentQuestion";
 
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
 
@@ -31,7 +32,7 @@ function GamePage(props) {
                     </Box>
                     <Box className="game-quiz game-padding">
                         <Card className="game-card">
-                            Quiz ovde
+                            <CurrentQuestion/>
                         </Card>
                     </Box>
 

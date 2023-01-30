@@ -81,6 +81,9 @@ body{
 .margin{
     margin: 1em!important;
 }
+.margin-big{
+    margin: 3em!important;
+}
 .padding{
     padding: 1em!important;
 }
