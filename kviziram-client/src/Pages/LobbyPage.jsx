@@ -14,14 +14,17 @@ import { useNavigate } from "react-router-dom";
 function LobbyPage(props) {
     AppData.loadTestData();
     const [players, setPlayers] = useState([]);
-    const [hostID , setHostID] = useState("");
     //const [inviteCode, setInviteCode] = useState();
     const [quizzName, setQuizzName] = useState("");
     const [quizzCategory, setQuizzCategory] = useState("");
     const inviteCode = useRef("");
     const navigate = useNavigate();
-    var hubConnection;
-    var startGame;
+    
+    if(!hubConnection)
+    {
+        var hubConnection;
+    }
+
     useEffect(() => {
         const invCode = window.localStorage.getItem('inviteCode');
         inviteCode.current = invCode;
@@ -43,7 +46,8 @@ function LobbyPage(props) {
       })
     
         hubConnection.on("receiveGameStarted", function(){
-          navigate('../../Lobby')
+          console.log("Game started")
+          navigate('/Game')
         })
 
         startGame = function(){
@@ -56,13 +60,11 @@ function LobbyPage(props) {
         tryGetLobby();
     },[])
 
-
+    function  SendMsg(params) {
+      hubConnection.send("startGame", inviteCode)
+    }
     async function handleStartGame () {
-      console.log("why is this not working");
-      console.log(hubConnection)
-      if (hubConnection) {
-        hubConnection.send("StartGame", inviteCode.current);
-      }
+      tryStartGame();
     };
 
     function hubConnectionSuccess() {
@@ -149,7 +151,27 @@ function LobbyPage(props) {
           console.error(error);
         }
       }
+      async function tryStartGame() {
+        try {
+          const response = await fetch(
+            "http://localhost:5221/Game/" + inviteCode.current + "/start",
+            {
+              method: "GET",
+              headers: {
+                accept: "text/plain",
+                SessionID: props.mySessionID,
+              },
+            }
+          );
+          //const json = await response.json();
     
+          if (response.ok) {
+            //console.log(json)
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
 
     return (
         <>
