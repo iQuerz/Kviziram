@@ -40,7 +40,7 @@ public class LoginRegisterService: ILoginRegisterService
         return JsonSerializer.Serialize(newSID);
     }
 
-    public async Task<bool> Register(Account newAccount) {
+    public async Task<Guid> Register(Account newAccount) {
         var checkAccount = await AccountEmailExistsQueryAsync(newAccount.Email);
         if (checkAccount.exists)
             throw new KviziramException(Msg.UsedEmail);
@@ -51,7 +51,7 @@ public class LoginRegisterService: ILoginRegisterService
         newAccount.Status = PlayerState.Offline;
         
         await _neo.Cypher.Create("(a:Account $prop)").WithParam("prop", newAccount).ExecuteWithoutResultsAsync();
-        return true;
+        return newAccount.ID;
     }
 
     public async Task<string> LoginGuest(string username) {
