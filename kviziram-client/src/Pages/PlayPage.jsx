@@ -12,7 +12,6 @@ import LobbyCard from "../Components/Lobby/LobbyCard";
 
 function PlayPage(props) {
     useEffect(() => {
-        window.localStorage.setItem('sessionID', props.mySessionID.toString())
         tryGetPublicLobbies();
     }, []);
     function RefreshPublicLobbies()
@@ -90,8 +89,7 @@ function PlayPage(props) {
                 <Card className="public-lobbies-card width-75 flex-down seperate-children-small padding">
                     <Button variant="contained" size="large" onClick={RefreshPublicLobbies}>Refresh</Button>
                     <Typography variant="h4">Browse Public Lobbies</Typography>
-                    {/* <Typography variant="h4">Selected lobby : {selectedLobby.inviteCode}</Typography> */}
-                    <Card className="flex-right wrap" sx={{overflow: "scroll"}}>
+                    <Card className="flex-right wrap" sx={{overflow: "auto"}}>
                         {
                         publicLobbies.map((lobby, index) => {
                                 return (<LobbyCard  handleClick={()=>{
@@ -99,9 +97,13 @@ function PlayPage(props) {
                                 }} 
                                 lobby={lobby} key={index} onClick={joinPublicLobby}></LobbyCard>)
                             })
-                    }
+
+                        }
                     </Card>
-                    {/* <Button variant="contained" size="large" onClick={joinPublicLobby}>Join</Button> */}
+                    {publicLobbies.length == 0
+                        ? <Typography>Sorry, no matches found.</Typography>
+                        : <></>
+                    }
                 </Card>
 
                 <Ad></Ad>

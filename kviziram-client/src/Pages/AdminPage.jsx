@@ -132,10 +132,10 @@ function AdminPage() {
     let [paidAmount, setPaidAmount] = useState("");
 
     function onLinkChange(event){
-        setSelectedCategory(event.target.value);
+        setLink(event.target.value);
     }
     function onCompanyPicURL(event){
-        setSelectedAd(event.target.value);
+        setCompanyPicURL(event.target.value);
     }
     function onPaiedChange(event){
         setPaidAmount(event.target.value);
@@ -155,7 +155,7 @@ function AdminPage() {
             
             if(response.ok)
             {
-                console.log("Ad added")
+                console.log("Ad connected.")
                 setAdname("");
                 setCompanyName("");
                 setLink("");
@@ -215,11 +215,13 @@ function AdminPage() {
     return(
         <>
             <Box className="flex-right seperate-children-big padding">
+
                 <Card className="flex-down seperate-children-small padding">
                     <Typography>Add Category</Typography>
                     <TextField label="Name" value={categoryName} onChange={onCategoryNameChange}></TextField>
                     <Button type="contained" onClick={addCategory} >Add</Button>
                 </Card>
+
                 <Card className="flex-down seperate-children-small padding">
                     <Typography>Add Achievement</Typography>
                     <TextField label="Name" value={achievementName} onChange={onAchievementNameChange}></TextField>
@@ -227,6 +229,7 @@ function AdminPage() {
                     <TextField label="Picture URL" value={pictureUrl} onChange={onUrlChange}></TextField>
                     <Button type="contained" onClick={addAchievement}>Add</Button>
                 </Card>
+
                 <Card className="flex-down seperate-children-small padding">
                     <Typography>Add Ad</Typography>
                     <TextField label="Name" value={adName} onChange={onAdNameChange}></TextField>
@@ -235,6 +238,7 @@ function AdminPage() {
                     <TextField label="url" value={companyPicURL} onChange={onCompanyPicURL}></TextField>
                     <Button type="contained" onClick={addAd}>Add</Button>
                 </Card>
+
                 <Card className="flex-down seperate-children-small padding">
                     <Typography>Connect Ad to Category</Typography>
                     <TextField label="Ammout paid" value={paidAmount} onChange={onPaiedChange}></TextField>

@@ -11,6 +11,9 @@ import RegisterPage from './Pages/RegisterPage';
 import AdminPage from './Pages/AdminPage';
 import SidebarLayout from './Components/Layout/Sidebar/SidebarLayout';
 
+var globalAccount;
+var globalSessionID;
+
 function App() {
     const [sessionID, setSessionID] = useState("")
     const [myAccount, setMyAccount] = useState("");
@@ -41,6 +44,7 @@ function App() {
 
     function handleSessionIDChange(sessionID){
         setSessionID(sessionID);
+        localStorage.setItem('sessionID', sessionID);
     }
     function handleHubConnectionChange(hub)
     {
