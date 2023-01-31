@@ -3,11 +3,14 @@ import { TabPanelUnstyled } from "@mui/base";
 import { Box, Card, Typography } from "@mui/material";
 import { func } from "prop-types";
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import ChatContainer from "../Components/Chat/ChatContainer";
 import CurrentQuestion from "../Components/Game/CurrentQuestion";
 import MatchModal from "../Components/Game/MatchModal";
 
 function GamePage(props) {
+    const navigate = useNavigate();
+
     const [selectedAnswer, setSelectedAnswer] = useState(-1)
     const [msgRecived, setMsgRecived] = useState(0);
     const [quizzID, setQuizzID] = useState("");
@@ -55,12 +58,12 @@ function GamePage(props) {
     function handleGameFinished(){
         setIsEndGameModalOpen(true);
     }
-    function handleMsgRecived(){ 
+    function handleMsgRecived() { 
         setMsgRecived((msgRecived) => msgRecived + 1)
-      }
-    function handleAnswerChange(answer){
+    }
+    function handleAnswerChange(answer) {
         setSelectedAnswer(answer)
-      }
+    }
     function handleSubmitQuestion(){
         console.log("Selected answer is")
         console.log(selectedAnswer)
@@ -71,7 +74,6 @@ function GamePage(props) {
     function SendMsg(msg) { 
         props.hubConnection.send("SendChatMessage", msg)
       }
-
 
       function handleNextQuestion(){
         tryGetNextQuestion();
@@ -210,6 +212,9 @@ function GamePage(props) {
                 <MatchModal         
                     open={isEndGameModalOpen}
                     onChange={setIsEndGameModalOpen}
+                    onClick={function(){
+                      navigate("../Play")
+                    }}
                     matchID={matchID}
                     sessionID={props.mySessionID}>
                 </MatchModal>

@@ -35,7 +35,7 @@ function CurrentQuestion(props) {
                 <RadioGroup value={props.selectedAnswer} onChange={handleAnswerChanged} sx={{alignSelf:"start"}}>
                     {
                         props.question.options.map((option, index) => (
-                            <FormControlLabel className="margin" value={index} control={<Radio />} label={<Typography variant="h4">{option}</Typography>} />
+                            <FormControlLabel key={index} className="margin" value={index} control={<Radio />} label={<Typography variant="h4">{option}</Typography>} />
                             ) 
                         )
                     }
