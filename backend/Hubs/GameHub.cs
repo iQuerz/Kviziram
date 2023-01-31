@@ -61,10 +61,6 @@ public class GameHub: Hub
 
         await this.Groups.AddToGroupAsync(this.Context.ConnectionId, inviteCode);
         await _redis.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Connected:{_user.Sid}|{_user.Id}");
-        if (await _redis.HashExistsAsync(_util.RK_Lobby(inviteCode), _user.Id)) {
-            Console.WriteLine("Usao sam u joined the game");
-            await _redis.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Chat:{_user.Name} joined the game.");
-        }
     }
 
     //Chat poziv

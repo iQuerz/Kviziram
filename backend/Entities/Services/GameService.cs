@@ -87,21 +87,26 @@ public class GameService: IGameService
                         string playerSID = SIDandID[0];
                         string playerID = SIDandID[1];
                         Console.WriteLine(playerSID + " ----- " + playerID);
+                        AccountPoco acc = await _account.GetAccountAsync(Guid.Parse(playerID));
 
                         if (await _redis.KeyExistsAsync(_util.RK_Scores(inviteCode))) {
                             if (await _redis.HashExistsAsync(_util.RK_Lobby(inviteCode), playerID)) {
                                 await _redis.HashSetAsync(_util.RK_Lobby(inviteCode), playerID, playerSID);
 
                                 await _gameHub.Clients.Group(inviteCode).SendAsync("receiveReconnected", playerID);
+                                await _redis.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Chat:{acc.Username} came back.");
                             }
                             else {
                                 Console.WriteLine("Ovaj korisnik nije bio u lobby kad je igra zapoceta");
                                 await _gameHub.Clients.Group(inviteCode).SendAsync("receiveKickout", inviteCode);
+                                await _redis.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Chat:{acc.Username} tried to join the game.");
                             }
                         } else {
                             await _redis.HashSetAsync(_util.RK_Lobby(inviteCode), playerID, playerSID);
 
                             await _gameHub.Clients.Group(inviteCode).SendAsync("receiveConnected", playerID);
+                            await _redis.PublishAsync(_util.RK_GameWatcher(inviteCode), $"Chat:{acc.Username} joined the game.");
+
                         }
                         break;
                     }
@@ -160,9 +165,11 @@ public class GameService: IGameService
                             }   
 
                             long numOfQuestions = await _redis.ListLengthAsync(_util.RK_Questions(game.QuizID));
-                            if ( (index+1) == numOfQuestions) {
+                            if ((index+1) == numOfQuestions) {
                                 game.GameState = GameState.Finished;
+                                Console.WriteLine("Server: Iznad SaveGameToHistory");
                                 await SaveGameToHistoryAsync(game);
+                                Console.WriteLine("Server: Ispod SaveGameToHistory");
                                 await RemoveGameFromRedisAsync(inviteCode);
 
                                 await _gameHub.Clients.Group(inviteCode).SendAsync("receiveFinishedGame", game.ID);
@@ -277,28 +284,48 @@ public class GameService: IGameService
 
     public async Task<Match?> SaveGameToHistoryAsync(Match game) {
         if (game.InviteCode != null && game.QuizID != null) {
+            Console.WriteLine("Server: Usao u SaveGameToHistory i prosao prvi IF");
             var playerIDsAndScores = await _redis.SortedSetRangeByScoreWithScoresAsync(_util.RK_Scores(game.InviteCode), double.NegativeInfinity, double.PositiveInfinity, Exclude.None, Order.Descending);
             game.SetPlayerIDsScores = new Dictionary<Guid, int>();
             game.Guests = new Dictionary<string, int>();
 
-            int maxPoints = (await _redis.ListRangeAsync(_util.RK_QuestionsAnswers(game.QuizID))).Select(x => (int) x).Sum();
             Quiz? tempQuiz =  await _quiz.GetQuizAsync((Guid) game.QuizID);
+            
+            int maxPoints = 0;
+            if (tempQuiz != null && tempQuiz.Questions != null) {
+                maxPoints = tempQuiz.Questions.Select(q => q.Points).Sum();
+                Console.WriteLine($"Server: maxPoints = ${maxPoints}");
+            }
 
             foreach(SortedSetEntry playerScore in playerIDsAndScores) {
+                Console.WriteLine($"Server: PlayerID: {playerScore.Element} -> PlayerScore: {playerScore.Score}");
+
                 Guid tempGUID = Guid.Parse(playerScore.Element.ToString());
+                Console.WriteLine($"Server: tempGuid = {tempGUID}");
+
                 if (await _account.AccountExistsAsync(tempGUID)) {
+                    Console.WriteLine("Server: Account sa tempGuid postoji i usli smo u IF");
                     game.SetPlayerIDsScores.Add(tempGUID, (int) playerScore.Score);
-                    if (playerScore.Score == maxPoints && tempQuiz != null && tempQuiz.Achievement != null)
+                    Console.WriteLine("Server: Iznad dodavanja Achievement-a ako treba");
+                    if (playerScore.Score == maxPoints && tempQuiz != null && tempQuiz.Achievement != null) {
+                        Console.WriteLine("Server: U IF delu za dodavanje Achievement-a");
                         await _account.SetUpdateAchievementAsync(tempGUID, tempQuiz.Achievement.ID);
+                    }
+                    Console.WriteLine("Server: Ispod IF dela za dodavanje Achievement-a");
                 } else {
                     game.Guests.Add(tempGUID.ToString(), (int) playerScore.Score);
+                    Console.WriteLine("Server: Guest je dodat, tempGuid nije bio account u Neo4j");
                 }
             }
 
-            if (game.GameState == GameState.Unfinished) 
+            if (game.GameState == GameState.Unfinished) {
                 game.WinnerID = Guid.Empty;
-            else 
-                game.WinnerID = Guid.Parse(playerIDsAndScores.ElementAt(0).ToString());
+                Console.WriteLine($"Server: Game je Unfinished i postavljamo praznog Winner-a {game.WinnerID}");
+            }
+            else {
+                game.WinnerID = Guid.Parse(playerIDsAndScores.ElementAt(0).Element.ToString());
+                Console.WriteLine($"Server: Game je Finished i Winner je {game.WinnerID}");
+            }
 
             await _match.SaveMatchAsync(game);
             return await _match.GetMatchAsync(game.ID);

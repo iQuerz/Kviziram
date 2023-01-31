@@ -11,7 +11,13 @@ public class NotificationHub: Hub
     }
 
     public override Task OnConnectedAsync() {
-        Groups.AddToGroupAsync(Context.ConnectionId, _util.CallerAccountExists().ID.ToString()).GetAwaiter().GetResult();
+        var con = Context.GetHttpContext();
+        if(con != null) {
+            string? neoID = con.Request.Query["neoID"].ToString();               
+            if (neoID != null) {
+                Groups.AddToGroupAsync(Context.ConnectionId, neoID).GetAwaiter().GetResult();
+            }
+        }
         return base.OnConnectedAsync();
     }
 }
