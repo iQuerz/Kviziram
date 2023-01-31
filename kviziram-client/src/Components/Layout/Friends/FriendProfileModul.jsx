@@ -20,7 +20,9 @@ function FriendProfileModul(props) {
     //const [account, setAccount] = useState(props.account);
     const [achievements, setAchievements] = useState([]);
     const [myFriends, setMyFriends] = useState([]);
-    const [isMyFriend, setIsMyfriend] = useState([]);
+    const [myFriendRequests, setmyFriendRequests] = useState([]);
+    const [isMyFriend, setIsMyfriend] = useState(false);
+    const [sentMeARequest, setSentMeARequest] = useState(false);
 
     useEffect(()=>
     {   
@@ -30,8 +32,14 @@ function FriendProfileModul(props) {
 
     useEffect(()=>
     {   
-        const found = myFriends.some(account => account.id == props.account.id)
-        setIsMyfriend(found)
+        const foundF = myFriends.some(account => account.id == props.account.id)
+        if (foundF){
+          setIsMyfriend(true)
+        }
+        const foundR = myFriends.some(account => account.id == props.account.id)
+        if (foundR){
+          setSentMeARequest(true)
+        }
     },[myFriends])
     //trenutno izvlaci sve achivments cisto radi testiranja
     async function tryGetAchivments() {
@@ -55,6 +63,7 @@ function FriendProfileModul(props) {
 
       useEffect(()=>{
         tryGetMyFriends();
+        tryGetMyFriendRequests();
       },[])
       async function tryGetMyFriends() {
         try {
@@ -72,6 +81,27 @@ function FriendProfileModul(props) {
     
           if (response.ok) {
             setMyFriends(json);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      async function tryGetMyFriendRequests() {
+        try {
+          const response = await fetch(
+            "http://localhost:5221/Account/me/friends/all/0",
+            {
+              method: "GET",
+              headers: {
+                accept: "text/plain",
+                SessionID: props.sessionID,
+              },
+            }
+          );
+          const json = await response.json();
+    
+          if (response.ok) {
+            setmyFriendRequests(json);
           }
         } catch (error) {
           console.error(error);
@@ -98,9 +128,33 @@ function FriendProfileModul(props) {
           console.error(error);
         }
       }
+      async function tryAnswerFreidnRequest() {
+        try {
+          const response = await fetch(
+            "http://localhost:5221/Account/me/friend/" + props.account.id + "/request/1",
+            {
+              method: "GET",
+              headers: {
+                accept: "text/plain",
+                SessionID: props.sessionID,
+              },
+            }
+          );
+          const json = await response;
+    
+          if (response.ok) {
+            console.log("Friend request sent")
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
 
       function sendFiriendRequest(){
         trySendFreidnRequest();
+      }
+      function answerFiriendRequest(){
+        tryAnswerFreidnRequest();
       }
 
       var hisFreinds = [
@@ -152,12 +206,18 @@ function FriendProfileModul(props) {
                     </Box>
                 </Card>
                 <Card className="seperate-children-medium">             
-                    <Button disabled={isMyFriend}
+                    <Button style={{display: !isMyFriend ? "none" : "initial"}}
                             onClick={sendFiriendRequest} 
                             variant="contained"
                             size="large"
-                            color="success">Add {props.account.name}</Button>
-                    <Button onClick={props.onChange}
+                            color="success">Add </Button>
+                    <Button style={{display: sentMeARequest ? "none" : "initial"}}
+                            onClick={answerFiriendRequest} 
+                            variant="contained"
+                            size="large"
+                            color="success">Accept Friend Request</Button>
+                    <Button
+                            onClick={props.onChange}
                             variant="contained"
                             size="large"
                             color="error" >Close</Button>

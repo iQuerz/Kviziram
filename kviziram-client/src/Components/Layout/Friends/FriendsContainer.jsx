@@ -3,11 +3,13 @@ import { useEffect } from "react";
 import { useState } from "react";
 import AddFriendModal from "./AddFriendModal";
 import FriendsItem from "./FriendsItem";
+import FriendRequestModal from "./FriendRequestsModal";
 
 function FriendsContainer(props) {
   const [isAddFriendModalOpen, setAddFriendModalOpen] = useState(false);
+  const [isFriendRequestModalOpen, setIsFriendRequestModalOpen] = useState(false);
   const [numOfFreinds, setnumOfFreinds] = useState(0);
-  const [FreindsRequests, setFreindsRequests] = useState([]);
+  const [FriendsRequests, setFriendsRequests] = useState([]);
   const [friends, setFriends] = useState([]);
 
 
@@ -51,7 +53,7 @@ function FriendsContainer(props) {
       const json = await response.json();
 
       if (response.ok) {
-        setFreindsRequests(json);
+        setFriendsRequests(json);
       }
     } catch (error) {
       console.error(error);
@@ -66,12 +68,16 @@ function FriendsContainer(props) {
     setAddFriendModalOpen(!isAddFriendModalOpen);
   }
 
+  function handleFriendRequestModalOpen() {
+    setIsFriendRequestModalOpen(!isFriendRequestModalOpen);
+  }
+
   return (
     <>
       <Divider variant="middle" className="sidebar-divider"></Divider>
       <Box className="friends-container">
         <Typography variant="h4" fontWeight={"bold"}>
-          My friends<Button color="error">{"Friend Request "}{FreindsRequests.length}</Button>
+          My friends<Button onClick={handleFriendRequestModalOpen} color="error">{"Friend Request "}{FriendsRequests.length}</Button>
           <Button
             variant="contained"
             fullWidth={true}
@@ -90,6 +96,13 @@ function FriendsContainer(props) {
         onChange={handleAddFriendsModalOpenChange}
         sessionID={props.sessionID}
       ></AddFriendModal>
+      <FriendRequestModal
+          open={isFriendRequestModalOpen}
+          onChange={handleFriendRequestModalOpen}
+          sessionID={props.sessionID}
+          requests={FriendsRequests}>
+          
+      </FriendRequestModal>
     </>
   );
 }

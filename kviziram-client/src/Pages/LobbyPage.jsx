@@ -87,7 +87,10 @@ function LobbyPage(props) {
         alert("hub connection unsuccesful.");
     }
 
-
+    function leave(){
+      hubConnection.stop();
+      navigate("/Play")
+    }
 
      async function tryGetLobbyMembers() {
         try {
@@ -197,7 +200,7 @@ function LobbyPage(props) {
                 <Box className="flex-right seperate-children-big">
                     <Button variant="contained" size="large" onClick={handleStartGame} color="success">Start</Button>
                     <Button variant="contained" size="large" onClick={print}>Check Connetion</Button>
-                    <Button variant="contained" size="large" color="error">Leave</Button>
+                    <Button variant="contained" size="large" onClick={leave}color="error">Leave</Button>
                 </Box>
 
                 <Box marginTop={"1.5em"} className="width-50 flex-down seperate-children-small">
