@@ -290,7 +290,6 @@ public class GameService: IGameService
             game.Guests = new Dictionary<string, int>();
 
             Quiz? tempQuiz =  await _quiz.GetQuizAsync((Guid) game.QuizID);
-            
             int maxPoints = 0;
             if (tempQuiz != null && tempQuiz.Questions != null) {
                 maxPoints = tempQuiz.Questions.Select(q => q.Points).Sum();

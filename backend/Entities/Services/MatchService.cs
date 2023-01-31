@@ -131,8 +131,8 @@ public class MatchService: IMatchService
                 .Set("p.GameScore = scores[index]");
             // Console.WriteLine(query.Query.DebugQueryText);
             await query.ExecuteWithoutResultsAsync();
+            await _ad.SetMatchAdAccounts(match);
         }
-        await _ad.SetMatchAdAccounts(match);
     }
     #endregion
 }
