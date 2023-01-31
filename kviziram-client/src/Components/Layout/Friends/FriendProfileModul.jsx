@@ -143,7 +143,7 @@ function FriendProfileModul(props) {
           const json = await response;
     
           if (response.ok) {
-            console.log("Friend request sent")
+            console.log("Friend request accepted")
           }
         } catch (error) {
           console.error(error);
@@ -152,9 +152,12 @@ function FriendProfileModul(props) {
 
       function sendFiriendRequest(){
         trySendFreidnRequest();
+
       }
       function answerFiriendRequest(){
         tryAnswerFreidnRequest();
+        setIsMyfriend(true)
+        setSentMeARequest(false)
       }
 
       var hisFreinds = [
