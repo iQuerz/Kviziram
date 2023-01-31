@@ -40,14 +40,17 @@ public class MatchService: IMatchService
 
     #region Helper Functions
     public async Task<List<Match>?> SearchMatchesHistoryQueryAsync(MatchQuery matchQuery, FromToDate? fromToDate, int skip, int limit) {
-        if (matchQuery.HostID == null && _context.AccountCaller != null)
-            matchQuery.HostID = _context.AccountCaller.ID;
+        if (matchQuery.PlayerID == null && _context.AccountCaller != null)
+            matchQuery.PlayerID = _context.AccountCaller.ID;
 
-        var finalQuery = _neo.Cypher.OptionalMatch("(m:Match)").Where("m.IsSearchable = $searchable").WithParam("searchable", matchQuery.IsSearchable);
+        var finalQuery = _neo.Cypher
+            .OptionalMatch("(a:Account)-[r:PARTICIPATED_IN]->(m:Match)")
+            .Where((AccountPoco a) => a.ID == matchQuery.PlayerID);
+        if (matchQuery.IsSearchable != null) finalQuery = finalQuery.AndWhere("m.IsSearchable = $searchable").WithParam("searchable", matchQuery.IsSearchable);
         if (matchQuery.HostID != null) finalQuery = finalQuery.AndWhere((MatchPoco m) => m.HostID == matchQuery.HostID);
         if (matchQuery.WinnerID != null) finalQuery = finalQuery.AndWhere((MatchPoco m) => m.WinnerID == matchQuery.WinnerID);
         var result = finalQuery.Return( m => m.As<MatchDto>().ID);
-        // Console.WriteLine(result.Query.DebugQueryText);   
+        Console.WriteLine(result.Query.DebugQueryText);   
         IEnumerable<Guid> matchGuids = await result.ResultsAsync;
         //Moze ovo bolje ispod ali to je sto je >_>
         List<Match> matches = new List<Match>();
