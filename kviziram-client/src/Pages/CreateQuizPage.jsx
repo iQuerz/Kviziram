@@ -2,11 +2,14 @@ import { PropaneSharp } from "@mui/icons-material";
 import { Typography, Button } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
+import { Navigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import QuizzInfoForm from "../Components/Create/QuizInfoForm";
 import QuizzQuestions from "../Components/Create/QuizzQuestions";
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
 
 function CreateQuizPage(props) {
+  const navigate = useNavigate();
   const [numOfQuestion, setNumOfQuestions] = useState(1);
   const [quizzName, setQuizzName] = useState("");
   const [category, setCategory] = useState("");
@@ -107,11 +110,11 @@ function CreateQuizPage(props) {
     {
       //to do reset everything or something
       console.log("to be implemented")
+      navigate('/Play')
     }
   return (
     <>
       <SidebarLayout sessionID={props.mySessionID}>
-        <Typography>sesion id is: {props.mySessionID}</Typography>
         <QuizzInfoForm
           quizzName={quizzName}
           onQuizzNameChange={handleQuizzNameChange}
