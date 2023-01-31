@@ -118,10 +118,11 @@ public class CategoryService: ICategoryService
             .Where((Category c) => c.ID == cuID)
             .Return( ad => ad.As<Ad>());
         var result = await query.ResultsAsync;
-        if (result.Count() != 0) {
+        if (result.ElementAt(0) != null) {
             return result.ToList();
+        } else {
+            return null;
         }
-        return null;
     }
     #endregion
 
