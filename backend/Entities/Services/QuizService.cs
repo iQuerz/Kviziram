@@ -139,7 +139,7 @@ public class QuizService: IQuizService
                 .Merge("(q)-[:IS_TYPE]->(c)")
                 .ExecuteWithoutResultsAsync();
 
-            if (newQuiz.AchievementID != null && _util.CallerAccountExists().isAdmin)
+            if (newQuiz.AchievementID != null)
                 await ConnectQuizAchievementQueryAsync(newQuiz.ID, newQuiz.AchievementID);
                 
             return await GetQuizAsync(newQuiz.ID);            
