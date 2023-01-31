@@ -30,10 +30,11 @@
 
 
 .game-padding{
-    padding:3em;
+    padding:1em;
 }
 .game-card{
     height: 100%;
+    overflow: auto;
 }
 
 .question-progressbar{

@@ -66,6 +66,7 @@ function GamePage(props) {
         console.log(selectedAnswer)
         console.log(selectedAnswer.toString())
         props.hubConnection.send("SendAnswer", selectedAnswer.toString())
+        setSelectedAnswer(-1);
     }
     function SendMsg(msg) { 
         props.hubConnection.send("SendChatMessage", msg)
@@ -90,10 +91,9 @@ function GamePage(props) {
           ); 
           const json = await response.json();
           if (response.ok) {
-
             const data = json;  
-            console.log(data)
-            setCurrentQuestion(data)    
+            console.log(data);
+            setCurrentQuestion(data);
           }
         } catch (error) {
           console.error(error);
@@ -178,14 +178,14 @@ function GamePage(props) {
                     <Box className="player-info game-padding">
                         <Card className="game-card">
                            {
-                            scores.map((Score, index)=>(
-                                <Typography variant="h6" key={index} >{Score.account.username} = {Score.score}</Typography>
+                            scores.sort().map((Score, index)=>(
+                                <Typography margin={"0.5em"} variant="h6" key={index} >{Score.account.username} - {Score.score} points</Typography>
                             ))
                            }
                         </Card>
                     </Box>
                     <Box className="game-chat game-padding">
-                        <Card className="game-card">
+                        <Card className="game-card" sx={{overflow:"auto"}}>
                             <ChatContainer sendMsg={SendMsg} inviteCode={inviteCodeState} msgRecived={msgRecived} sessionId={props.mySessionID}></ChatContainer>
                         </Card>
                     </Box>
@@ -194,16 +194,14 @@ function GamePage(props) {
                 <Box className="game-right">
 
                     <Box className="game-header game-padding">
-                        <Card className="game-card">
-                            <Typography variant="h6">{"\"" + quizzName + "\""} &nbsp;</Typography>
-                            <Typography variant="h6">{"by " + hostName} &nbsp; </Typography>
-                            <Typography variant="h6"> {"(" + quizzCategory + ")"} &nbsp;</Typography>
-                            <Typography variant="h6" > POWERD BY KVIZIRAM </Typography>
+                        <Card className="game-card flex-right" sx={{alignItems:"center"}}>
+                            <Typography variant="h2">{quizzName} &nbsp;</Typography>
+                            <Typography variant="h2"> {"(" + quizzCategory + ")"} &nbsp;</Typography>
                         </Card>
                     </Box>
                     <Box className="game-quiz game-padding">
                         <Card className="game-card">
-                            <CurrentQuestion setAnswer={handleAnswerChange} question={currentQuestion} submitQuestion={handleSubmitQuestion}/>
+                            <CurrentQuestion selectedAnswer={selectedAnswer} setAnswer={handleAnswerChange} question={currentQuestion} submitQuestion={handleSubmitQuestion}/>
                         </Card>
                     </Box>
 

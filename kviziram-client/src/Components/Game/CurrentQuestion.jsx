@@ -4,14 +4,12 @@ import { useState } from "react";
 import { useEffect } from "react";
 
 function CurrentQuestion(props) {
-    const [selectedAnswer, setSelectedAnswer] = useState(-1);
     function handleAnswerChanged(event){
-        setSelectedAnswer(event.target.value);
         props.setAnswer(event.target.value)
     }
 
     const [questionTimePercentage, setQuestionTimePercentage] = useState(0);
-    const questionTimeSeconds = 30 //izvuci iz pitanja koje prosledis kao prop i guess
+    const questionTimeSeconds = 45 //izvuci iz pitanja koje prosledis kao prop i guess
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -34,8 +32,7 @@ function CurrentQuestion(props) {
             <Box className="margin flex-down" sx={{ justifyContent:"space-around", height:"90%"}}>
                 <Typography className="margin" variant="h2">{props.question.description}</Typography>
 
-                <RadioGroup value={selectedAnswer} onChange={handleAnswerChanged} sx={{alignSelf:"start"}}>
-                    {/* ovde mozes da loopujes answers i napravis ova dole cuda, stavi za value index answera, sinhronizuje se sa selectedAnswerState */}
+                <RadioGroup value={props.selectedAnswer} onChange={handleAnswerChanged} sx={{alignSelf:"start"}}>
                     {
                         props.question.options.map((option, index) => (
                             <FormControlLabel className="margin" value={index} control={<Radio />} label={<Typography variant="h4">{option}</Typography>} />
