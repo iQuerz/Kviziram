@@ -17,7 +17,7 @@ public class LoginRegisterService: ILoginRegisterService
     #region Main Functions
     public async Task<string> Login(string? authorization) {
         // _util.AlreadyLogged();
-        await Logout();
+        // await Logout();
 
         if (string.IsNullOrEmpty(authorization)) 
             throw new KviziramException(Msg.NoAuth);
@@ -31,7 +31,9 @@ public class LoginRegisterService: ILoginRegisterService
         string newSID = BCrypt.Net.BCrypt.GenerateSalt();
         string accountKey = _util.RK_Account(newSID);
 
+        await UpdateAccountStateQueryAsync(checkAccount.account.ID, PlayerState.Online);
         AccountPoco accountView = new AccountPoco(checkAccount.account);
+        accountView.Status = PlayerState.Online;
 
         await _redis.StringSetAsync(accountKey, accountView.ToJsonString(), Duration.AccountLogin);
 
@@ -46,6 +48,7 @@ public class LoginRegisterService: ILoginRegisterService
         newAccount.ID = Guid.NewGuid();
         newAccount.Password = HashPassword(newAccount.Password);
         newAccount.isAdmin = false;
+        newAccount.Status = PlayerState.Offline;
         
         await _neo.Cypher.Create("(a:Account $prop)").WithParam("prop", newAccount).ExecuteWithoutResultsAsync();
         return true;
@@ -81,8 +84,10 @@ public class LoginRegisterService: ILoginRegisterService
         string sid = _util.GetRedisSID();
         if(sid != string.Empty) {
             Console.WriteLine(sid);
-            if (await _redis.KeyDeleteAsync(sid))
-                return Msg.LoggedOut;
+            if (await _redis.KeyDeleteAsync(sid)) {
+                await UpdateAccountStateQueryAsync(_util.CallerAccountExists().ID, PlayerState.Offline);
+                return Msg.LoggedOut;                
+            }
         }
         return Msg.NoSession;
     }
@@ -95,10 +100,21 @@ public class LoginRegisterService: ILoginRegisterService
             .Return(a => a.As<Account>())
             .ResultsAsync;
         
-        if (query.Any())
+        if (query.Any()) {
             return (true, query.SingleOrDefault<Account?>());
-
+        }
         return (false, null);
+    }
+
+    public async Task UpdateAccountStateQueryAsync(Guid auID, PlayerState state) {
+        var query = _neo.Cypher
+            .Match("(a:Account)")
+            .Where((Account a) => a.ID == auID)
+            .Set("a.Status = $prop")
+            .WithParam("prop", state);
+        Console.WriteLine(query.Query.DebugQueryText);
+        await query.ExecuteWithoutResultsAsync();
+            
     }
     #endregion
 }
