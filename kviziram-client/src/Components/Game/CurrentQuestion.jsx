@@ -1,11 +1,13 @@
+import { PropaneSharp } from "@mui/icons-material";
 import { Box, Button, FormControlLabel, LinearProgress, Radio, RadioGroup, Typography } from "@mui/material";
 import { useState } from "react";
 import { useEffect } from "react";
 
-function CurrentQuestion() {
+function CurrentQuestion(props) {
     const [selectedAnswer, setSelectedAnswer] = useState(-1);
     function handleAnswerChanged(event){
         setSelectedAnswer(event.target.value);
+        props.setAnswer(event.target.value)
     }
 
     const [questionTimePercentage, setQuestionTimePercentage] = useState(0);
@@ -30,16 +32,19 @@ function CurrentQuestion() {
         <Box sx={{height:"100%"}}>
             <LinearProgress className="question-progressbar" variant="determinate" value={questionTimePercentage}></LinearProgress>
             <Box className="margin flex-down" sx={{ justifyContent:"space-around", height:"90%"}}>
-                <Typography className="margin" variant="h2">If monkey had balls, would he scratch them?</Typography>
+                <Typography className="margin" variant="h2">{props.question.description}</Typography>
 
                 <RadioGroup value={selectedAnswer} onChange={handleAnswerChanged} sx={{alignSelf:"start"}}>
                     {/* ovde mozes da loopujes answers i napravis ova dole cuda, stavi za value index answera, sinhronizuje se sa selectedAnswerState */}
-                    <FormControlLabel className="margin" value="0" control={<Radio />} label={<Typography variant="h4">Answer 1</Typography>} />
-                    <FormControlLabel className="margin" value="1" control={<Radio />} label={<Typography variant="h4">Answer 2</Typography>} />
-                    <FormControlLabel className="margin" value="2" control={<Radio />} label={<Typography variant="h4">Answer 3</Typography>} />
+                    {
+                        props.question.options.map((option, index) => (
+                            <FormControlLabel className="margin" value={index} control={<Radio />} label={<Typography variant="h4">{option}</Typography>} />
+                            ) 
+                        )
+                    }
                 </RadioGroup>
 
-                <Button sx={{marginTop:"auto", alignSelf:"end"}} variant="contained" size="large">Submit Answer</Button>
+                <Button onClick={props.submitQuestion}sx={{marginTop:"auto", alignSelf:"end"}} variant="contained" size="large">Submit Answer</Button>
             </Box>
         </Box>
     )

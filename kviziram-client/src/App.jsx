@@ -14,6 +14,7 @@ import SidebarLayout from './Components/Layout/Sidebar/SidebarLayout';
 function App() {
     const [sessionID, setSessionID] = useState("")
     const [myAccount, setMyAccount] = useState("");
+    const [hubConnection, setHubConnection] = useState();
 
     useEffect(()=>{
         tryGetAccount();
@@ -41,18 +42,23 @@ function App() {
     function handleSessionIDChange(sessionID){
         setSessionID(sessionID);
     }
+    function handleHubConnectionChange(hub)
+    {
+      console.log(hub)
+      setHubConnection(hub);
+    }
 
     return (
         <Router>
             <Routes>     
                 <Route path="/"         element={<LoginPage onSessionIDChange={handleSessionIDChange} />} />
                 <Route path="/Play"     element={<PlayPage mySessionID={sessionID}/>} />
-                <Route path="/Lobby"    element={<LobbyPage mySessionID={sessionID}/>} />
+                <Route path="/Lobby"    element={<LobbyPage mySessionID={sessionID} onHubChange={handleHubConnectionChange}/>} />
                 <Route path="/Create"   element={<CreateQuizPage mySessionID={sessionID}/>} />
                 <Route path="/Profile"  element={<ProfilePage mySessionID={sessionID} account={myAccount}/>} />
                 <Route path="/Register" element={<RegisterPage />} />
                 <Route path="/Admin"    element={<AdminPage />} />
-                <Route path="/Game"     element={<GamePage mySessionID={sessionID} />} />
+                <Route path="/Game"     element={<GamePage mySessionID={sessionID} hubConnection={hubConnection} />} />
             </Routes>
         </Router>
     )

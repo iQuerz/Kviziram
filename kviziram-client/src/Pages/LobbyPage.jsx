@@ -49,13 +49,15 @@ function LobbyPage(props) {
       hubConnection.on("receiveChatMessage", function () { 
         console.log("stigla mi prouka..")
         handleMsgRecived();
-    })
+      })
     
-        hubConnection.on("receiveGameStarted", function(){
+         hubConnection.on("receiveGameStarted", function(){
           console.log("Game started")
           
           navigate('/Game')
         })
+
+        props.onHubChange(hubConnection);
 
         tryGetLobbyMembers();
         tryGetLobbyInformation();
