@@ -72,6 +72,7 @@ public class GameHub: Hub
 
     //Odgovor poziv, ne znam dal moze INT pri pozivu pa bolje samo parse da odradimo u funkciju
     public async Task SendAnswer(string answer) {
+        Console.WriteLine("Answer is u gameHub" + answer);
         SetInformation();
         if (await _redis.HashExistsAsync(_util.RK_Lobby(InviteCode), _user.Id)) {
             await _redis.PublishAsync(_util.RK_GameWatcher(InviteCode), $"Answered:{_user.Id}|{answer}");

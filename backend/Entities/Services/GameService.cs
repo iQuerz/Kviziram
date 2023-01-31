@@ -131,10 +131,11 @@ public class GameService: IGameService
                         break;
                     }
 
-                    case "Answered": {
-                        string[] IDAndAnswer = msgOperation[1].Split('|');
+                    case "Answered": {               
+                        string[] IDAndAnswer = msgOperation[1].Split('|');  
                         string playerID = IDAndAnswer[0];
                         int playerAnswer = Int32.Parse(IDAndAnswer[1]);
+                        Console.WriteLine("answer is from GameService" + playerAnswer);
 
                         await _redis.HashSetAsync(_util.RK_PlayersAnswered(inviteCode), playerID, playerAnswer);
 
@@ -143,18 +144,22 @@ public class GameService: IGameService
 
                         //Svi odgovorili, ako neko ne odgovara, force-uj ga da posalje -1 kao odgovor
                         if (LobbyLength == AnsweredLength && game != null) {
+                            Console.WriteLine("Unutar if lobby lenght");
                             int index = (int) (await _redis.StringGetAsync(_util.RK_CurrentQuestion(inviteCode)));
+                            Console.WriteLine("Index odgovora je" + index);
                             //Potrebno da vidimo koliko poena pitanje iznosi
                             string res = (await _redis.ListGetByIndexAsync(_util.RK_Questions(game.QuizID), index)).ToString();
-                            QuestionDto? question = _util.DeserializeQuestion(res);
+                            QuestionDto? question = _util.DeserializeQuestion(res);   
                             if (question != null) {
+                                Console.WriteLine("Question je " + question.Answer);
                                 //Tacan odgovor
                                 int correctAnswer = Int32.Parse((await _redis.ListGetByIndexAsync(_util.RK_QuestionsAnswers(game.QuizID), index)).ToString());
-
+                                Console.WriteLine("Tacan odgovor je" + correctAnswer);
                                 var finalAnswers = await _redis.HashGetAllAsync(_util.RK_PlayersAnswered(inviteCode));
                                 foreach(var elem in finalAnswers) {
-                                    //Dal je odgovor tacan
+                                    Console.WriteLine("Parsirano je" + Int32.Parse(elem.Value.ToString()));
                                     if (Int32.Parse(elem.Value.ToString()) == correctAnswer) {
+                                        Console.WriteLine("Unutar if nakon pars");
                                         await _redis.SortedSetIncrementAsync(_util.RK_Scores(inviteCode), elem.Name, (double) question.Points);
                                     }
                                 }

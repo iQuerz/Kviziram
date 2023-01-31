@@ -62,7 +62,7 @@ function CreateQuizPage(props) {
     };
     for (let question of questions) {
       let opetions = []
-      var answeCounter = 0;
+      var answeCounter = -1;
       var answerCorrectIndex = 0;
       for (let answer of question[0].allAnswers) {
         answeCounter++;
@@ -73,7 +73,7 @@ function CreateQuizPage(props) {
         description: question[0].questionName,
         options: opetions,
         answer: answerCorrectIndex,
-        points: question[0].points,
+        points: question[0].questionPoints,
       });
     }
     return Quizz;
@@ -81,6 +81,7 @@ function CreateQuizPage(props) {
   async function tryCreate(Quizz)
     {   
         try {
+          console.log(Quizz)
           const endpoint = "http://localhost:5221/Quiz"; // replace with the actual endpoint URL
           const body = JSON.stringify(Quizz);
           const response = await fetch(endpoint, {

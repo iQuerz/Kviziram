@@ -37,6 +37,7 @@ function QuizzQuestions(props) {
   }
   function handlePointsChange(event)
   {
+    console.log(event.target.value)
     setPoints(event.target.value)
     sendQuestionToParentPage();
   }

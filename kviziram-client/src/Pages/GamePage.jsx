@@ -49,7 +49,6 @@ function GamePage(props) {
           props.hubConnection.on("receiveFinishedGame", function (matchID) { 
             setMatchID(matchID);
             handleGameFinished();
-            tryGetLobbyScores();
           })
     },[props.hubConnection])
 
@@ -60,10 +59,12 @@ function GamePage(props) {
         setMsgRecived((msgRecived) => msgRecived + 1)
       }
     function handleAnswerChange(answer){
-        console.log(answer)
         setSelectedAnswer(answer)
       }
     function handleSubmitQuestion(){
+        console.log("Selected answer is")
+        console.log(selectedAnswer)
+        console.log(selectedAnswer.toString())
         props.hubConnection.send("SendAnswer", selectedAnswer.toString())
     }
     function SendMsg(msg) { 
