@@ -32,6 +32,7 @@ function FriendsContainer(props) {
       const json = await response.json();
 
       if (response.ok) {
+        console.log(json)
         setFriends(json);
       }
     } catch (error) {

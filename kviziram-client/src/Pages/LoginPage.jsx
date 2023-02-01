@@ -3,6 +3,7 @@ import LoginForm from "../Components/Login/LoginForm";
 import { Typography, Box, Button } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useRef } from "react";
 
 
 function LoginPage(props) {
@@ -12,6 +13,8 @@ function LoginPage(props) {
     const [password, setpassword] = useState("");
     const [code, setcode] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
+    const [isNewAccount, setIsNewAccount] = useState(true);
+    const sessionIDRef = useRef();
 
     function handleUserNameChange(event){
         setUserName(event.target.value)
@@ -26,7 +29,31 @@ function LoginPage(props) {
         setcode(event.target.value)
     }
     
+    async function tryGetPrefferdCategories() {
+        try {
+        console.log(sessionIDRef.current)
+          const response = await fetch("http://localhost:5221/Account/me/categories/preferred/get", {
+            method: "GET",
+            headers: {
+              accept: "text/plain",
+              SessionID: sessionIDRef.current
+            },
+          });
+          const json = await response.json();
     
+          if (response.ok) {
+            if(json[0] == null)
+            {
+                setIsNewAccount(true);
+                return true;  
+            }
+            else 
+                return false;
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
     async function tryUserLogin(){
             try {
                 const response = await fetch('http://localhost:5221/Login', {
@@ -40,6 +67,7 @@ function LoginPage(props) {
                 
                 if(response.ok)
                 {
+                    sessionIDRef.current = json;
                     props.onSessionIDChange(json) //predaje se sessionID app komponenti
                     handleLoginSuccess()
                 }
@@ -53,8 +81,12 @@ function LoginPage(props) {
                 console.error(error);
             }
     }
-    function handleLoginSuccess(){    
-        navigate('Play')//fali login
+    async function handleLoginSuccess(){
+        let flag = await tryGetPrefferdCategories();
+        if(flag)
+            navigate('Category')
+        else
+            navigate('Play')//fali login
     }
     function tryGuestLogin(){
         navigate('Play')//da se zameni sa lobby

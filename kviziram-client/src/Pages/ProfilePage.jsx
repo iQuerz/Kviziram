@@ -20,14 +20,15 @@ function ProfilePage(props) {
     //trenutno izvlaci sve achivments cisto radi testiranja
     async function tryGetAchivments() {
         try {
-            const response = await fetch("http://localhost:5221/Achievement/all", {
-                method: "GET",
-                headers: {
-                    accept: "text/plain",
-                    'SessionID':  props.mySessionID
-                },
-            });
-            const json = await response.json();
+        console.log(props.mySessionID)
+          const response = await fetch("http://localhost:5221/Account/"+props.account.id+"/achievements/get", {
+            method: "GET",
+            headers: {
+              accept: "text/plain",
+              'SessionID':  props.mySessionID
+            },
+          });
+          const json = await response.json();
     
             if (response.ok) {
                 setAchievements(json); 
@@ -88,7 +89,7 @@ function ProfilePage(props) {
                         }
                     </Box>
                 </Card>
-
+{/* 
                 <Card className="flex-down seperate-children-small padding margin">
                     <Typography variant="h4">Friends</Typography>
                     <Box className="flex-list-row seperate-children-big margin">
@@ -98,7 +99,7 @@ function ProfilePage(props) {
                             })
                         }
                     </Box>
-                </Card>
+                </Card> */}
 
                 <Card className="flex-down seperate-children-small padding margin">
                     <Typography variant="h4">Recent matches</Typography>

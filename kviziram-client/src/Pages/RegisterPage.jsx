@@ -1,9 +1,11 @@
 //napravicemo kada implementiramo kategorije i tako to
 
-import { Typography,Box } from "@mui/material";
+import { Typography,Box, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import RegisterForm from "../Components/Login/RegisterForm";
 import { useState } from "react";
+import CheckList from "../Components/Login/CheckList";
+import { useEffect } from "react";
 
 function RegisterPage() {
     const [email, setEmail] = useState("");
@@ -65,7 +67,7 @@ function RegisterPage() {
                 <RegisterForm email={email} userName={userName} avatarURL={avatarURL} password={password} confirmPassword={confirmPassword} 
                 onChangeEmail={handleEmailChange} onChangeUserName={handleUserNameChange} onAvatarURLChange={handleAvatarUrlChange} onChangePassword={handlePasswordChange} onChangeConfirmPassword={handleConfirmPasswordChange}
                 clickHandler={tryRegister}></RegisterForm>
-            </div>     
+            </div>   
         </Box>
  
     )

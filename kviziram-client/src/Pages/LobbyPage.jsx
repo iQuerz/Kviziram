@@ -212,7 +212,7 @@ function LobbyPage(props) {
                     }
                 </Box>
 
-                <Card sx={{width:"50%", height:"20em", position:"fixed", bottom:"0", marginBottom:"1em", overflow:"auto"}} className="padding">
+                <Card sx={{width:"50%", height:"20%", position:"fixed", bottom:"0", marginBottom:"1em", overflow:"auto"}} className="padding">
                   <ChatContainer sx={{height:"100%", width:"100%"}} sendMsg={SendMsg} inviteCode={inviteCodeState} msgRecived={msgRecived} sessionId={props.mySessionID}></ChatContainer>
                 </Card>
 

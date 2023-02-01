@@ -10,6 +10,7 @@ import ProfilePage from './Pages/ProfilePage';
 import RegisterPage from './Pages/RegisterPage';
 import AdminPage from './Pages/AdminPage';
 import SidebarLayout from './Components/Layout/Sidebar/SidebarLayout';
+import CategoryPicker from './Pages/CategoryPicker';
 
 var globalAccount;
 var globalSessionID;
@@ -17,6 +18,7 @@ var globalSessionID;
 function App() {
     const [sessionID, setSessionID] = useState("")
     const [myAccount, setMyAccount] = useState("");
+    const [myAd, setMyAd] = useState("");
     const [hubConnection, setHubConnection] = useState();
 
     useEffect(()=>{
@@ -41,7 +43,39 @@ function App() {
           console.error(error);
         }
       }
+    async function tryGetAd() {
+        try {
+          const response = await fetch("http://localhost:5221/Account/me/ads/recommended", {
+            method: "GET",
+            headers: {
+              accept: "text/plain",
+              'SessionID':  sessionID
+            },
+          });
+  
+          if (response.ok) {
+            if(response.status == 204)
+            {
+              setMyAd({
+                id:0,
+                name:"Kviziram",
+                companyName:"Samo Ventilatori TM",
+                link:"https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                url:"https://media.discordapp.net/attachments/946153561102884932/965300367485206538/logo-SI-white.png"
+              })
+            }
+            else
+            {
+              const json = await response.json();
+              console.log(json)
+              setMyAd(json); 
+            }
 
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
     function handleSessionIDChange(sessionID){
         setSessionID(sessionID);
         localStorage.setItem('sessionID', sessionID);
@@ -62,6 +96,7 @@ function App() {
                 <Route path="/Profile"  element={<ProfilePage mySessionID={sessionID} account={myAccount}/>} />
                 <Route path="/Register" element={<RegisterPage />} />
                 <Route path="/Admin"    element={<AdminPage />} />
+                <Route path="/Category" element={<CategoryPicker mySessionID={sessionID}/>} />
                 <Route path="/Game"     element={<GamePage mySessionID={sessionID} hubConnection={hubConnection} />} />
             </Routes>
         </Router>

@@ -7,7 +7,7 @@ function AchievementIcon(props) {
         <div>
         <Box className="flex-list-row margin">
             <img className="avatar" src={props.achievement.picture}></img>
-            <Typography variant="h6">"{props.achievement.name}" x10</Typography>
+            <Typography variant="h6">"{props.achievement.name}" x{props.achievement.progress}</Typography>
         </Box>
         </div>
     )

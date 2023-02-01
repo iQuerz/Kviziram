@@ -33,7 +33,6 @@ function MatchIcon(props) {
             const json = await response.json();
     
             if (response.ok) {
-                console.log("quiz:", json);
                 setQuiz(json)
             }
         }

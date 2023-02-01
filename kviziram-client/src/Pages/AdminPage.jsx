@@ -183,7 +183,8 @@ function AdminPage() {
           const json = await response.json();
     
           if (response.ok) {
-            setCategoryOptions(json); //predaje se sessionID app komponenti
+            if(json.length > 0)
+                setCategoryOptions(json); //predaje se sessionID app komponenti
           }
         } catch (error) {
           console.error(error);
@@ -200,7 +201,9 @@ function AdminPage() {
           const json = await response.json();
     
           if (response.ok) {
-            setAdOptions(json); //predaje se sessionID app komponenti
+            console.log(json);
+            if(json[0] != null)
+                setAdOptions(json); 
           }
         } catch (error) {
           console.error(error);

@@ -27,13 +27,17 @@ var matchDate = "";
 
 function MatchModal(props) {
   const [match, setMatch] = useState("");
+  const [winerName, setWinerName] = useState("");
   const [quiz, setQuiz] = useState({});
+  const [scores, setScores] = useState([]);
   
   useEffect(() => {
     tryGetMatch();
-    tryGetQuiz();
-
   }, [props.matchID])
+  useEffect(()=>{
+    tryGetQuiz();
+    tryGetWinner();
+  },[match])
 
   async function tryGetMatch() {
     try {
@@ -49,9 +53,15 @@ function MatchModal(props) {
       );
       const json = await response.json();
       if (response.ok) {
-        console.log("match:", json)
         const data = json;
         setMatch(data)
+        //if(data.getPlayerIDsScores.lenght > 0)
+        const sortedScore = data.getPlayerIDsScores
+        sortedScore.sort(function(a,b) {
+          return b.score-a.score;
+        })
+        sortedScore.reverse();
+        setScores(sortedScore)
       }
     } catch (error) {
       console.error(error);
@@ -69,7 +79,6 @@ function MatchModal(props) {
       const json = await response.json();
 
       if (response.ok) {
-        console.log("quiz:", json);
         setQuiz(json)
       }
     }
@@ -79,7 +88,8 @@ function MatchModal(props) {
   }
 
   async function tryGetWinner() {
-
+    const winer = match.getPlayerIDsScores.find(l => l.account.id == match.winnerID)
+    setWinerName(winer.account.username)
   }
 
   async function TryGetPlayers() {
@@ -91,13 +101,13 @@ function MatchModal(props) {
       <Modal open={props.open}>
         <Card sx={style} className="flex-down seperate-children-small">
           <Typography variant="h3">Match summary</Typography>
-          <Typography variant="h4" color={"var(--success)"}>{match.winnerID} Won!</Typography>
+          <Typography variant="h4" color={"var(--success)"}>{winerName} Won!</Typography>
           <Typography variant="h5">Quiz: "{quiz.name}"</Typography>
           <Typography>&nbsp;</Typography>
           <Typography variant="h5" width={"80%"} textAlign={"left"}>Scoreboard:</Typography>
           <Card variant="outlined" className="padding" sx={{ width: "80%", backgroundColor: "transparent" }}>
             {
-              match.getPlayerIDsScores.map((playerScore, index) => {
+              scores.map((playerScore, index) => {
                 return (<Typography key={index} variant="h6">{playerScore.account.username} - {playerScore.gameScore}</Typography>)
               })
             }

@@ -57,9 +57,9 @@
     margin-right: 0.5em;
 }
 .online{
-    background-color: var(--succes);
+    background-color: #55aa55;
 }
 .offline{
-    background-color: var(--error)
+    background-color: #4f4f4f
 }
 /*#endregion*/

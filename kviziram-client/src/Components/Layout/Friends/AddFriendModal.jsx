@@ -30,6 +30,9 @@ function AddFriendModal(props) {
     const [searchString, setSearchString] = useState("");
     const [searchedFriends, setSearchedFriends] = useState([]);
 
+    useEffect(() => {
+      tryGetRecommendedFriends();
+    },[])
     function handleSearchStringChange(event){
         setSearchString(event.target.value);
     }
@@ -39,11 +42,6 @@ function AddFriendModal(props) {
     }
 
     const [recommendedFriends, setRecommendedFriends] = useState([]);
-    function updateRecommendedFriends(){
-        let newRecommendedFriends = []
-        //todo: piksi fetchuj recommended friends :3
-        setRecommendedFriends(newRecommendedFriends);
-    }
 
     async function tryGetFriendsFromSerach() {
         console.log(searchString)
@@ -59,6 +57,24 @@ function AddFriendModal(props) {
     
           if (response.ok) {
             setSearchedFriends(json); //predaje se sessionID app komponenti
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+      async function tryGetRecommendedFriends() {
+        try {
+          const response = await fetch("http://localhost:5221/Account/me/friends/recommended", {
+            method: "GET",
+            headers: {
+              accept: "text/plain",
+              'SessionID': props.sessionID
+            },
+          });
+          const json = await response.json();
+    
+          if (response.ok) {
+            setRecommendedFriends(json); //predaje se sessionID app komponenti
           }
         } catch (error) {
           console.error(error);

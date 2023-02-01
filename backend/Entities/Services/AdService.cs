@@ -207,11 +207,11 @@ public class AdService: IAdService
 
     public async Task ConnectAdAccountQueryAsync(Guid aduID, List<Guid> accountGuids) {
         var query = _neo.Cypher
-            .OptionalMatch("(advertisment:Ad)")
+            .Match("(advertisment:Ad)")
             .Where((Ad advertisment) => advertisment.ID == aduID)
             .With("advertisment AS ad")
             .Unwind(accountGuids, "auID")
-            .OptionalMatch("(a:Account)")
+            .Match("(a:Account)")
             .Where("a.ID = auID")
             .AndWhere("NOT (ad)-[:AD_ACCOUNT]->(a)")
             .Merge("(ad)-[r:AD_ACCOUNT { Blocked: false, Viewed: 0, Clicked: 0 }]->(a)");

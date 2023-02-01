@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 import ProfilePage from "../../../Pages/ProfilePage";
 import AchievementIcon from "../../Achievements/AchievementIcon";
+import MatchIcon from "../../Game/MatchIcon";
 
 const style = {
     position: "absolute",
@@ -23,6 +24,7 @@ function FriendProfileModul(props) {
     const [myFriendRequests, setmyFriendRequests] = useState([]);
     const [isMyFriend, setIsMyfriend] = useState(false);
     const [sentMeARequest, setSentMeARequest] = useState(false);
+    const [matches, setMatches] = useState([]);
 
     useEffect(()=>
     {   
@@ -36,34 +38,37 @@ function FriendProfileModul(props) {
         if (foundF){
           setIsMyfriend(true)
         }
-        const foundR = myFriends.some(account => account.id == props.account.id)
+        const foundR = myFriendRequests.some(account => account.id == props.account.id)
         if (foundR){
           setSentMeARequest(true)
         }
-    },[myFriends])
+    },[myFriends,myFriendRequests])
     //trenutno izvlaci sve achivments cisto radi testiranja
     async function tryGetAchivments() {
-        try {
-          const response = await fetch("http://localhost:5221/Achievement/all", {
-            method: "GET",
-            headers: {
-              accept: "text/plain",
-              'SessionID':  props.sessionID
-            },
-          });
-          const json = await response.json();
-    
-          if (response.ok) {
+      try {
+        const response = await fetch("http://localhost:5221/Account/"+props.account.id+"/achievements/get", {
+          method: "GET",
+          headers: {
+            accept: "text/plain",
+            'SessionID':  props.sessionID
+          },
+        });
+          
+        if (response.ok) {
+          if(response.status != 204){
+            const json = await response.json();
             setAchievements(json); 
           }
-        } catch (error) {
-          console.error(error);
         }
+      } catch (error) {
+        console.error(error);
       }
+    }
 
       useEffect(()=>{
         tryGetMyFriends();
         tryGetMyFriendRequests();
+        tryGetMatches();
       },[])
       async function tryGetMyFriends() {
         try {
@@ -160,11 +165,30 @@ function FriendProfileModul(props) {
         setSentMeARequest(false)
       }
 
-      var hisFreinds = [
-    ]
+      async function tryGetMatches(){
+        try {
+            let body = {
+                fromDate:"2022-02-01T15:48:49.968Z",
+                toDate: "2030-02-01T15:48:49.968Z"
+            }
+            const response = await fetch("http://localhost:5221/Match/search/history/0/10/q?PlayerID=" + props.account.id, {
+                method: "POST",
+                headers: {
+                    accept: "text/plain",
+                    'SessionID':  localStorage.getItem('sessionID')
+                },
+            });
+            const json = await response.json();
+    
+            if (response.ok) {
+                setMatches(json); 
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
     //ovo je malo teze jer se u bazi cuvaju quizzes & participatedIn relations pa idk kako ce da izgleda
-    var matches = [
-    ]
 
     return(
         <><Modal open={props.open}>
@@ -186,7 +210,7 @@ function FriendProfileModul(props) {
                         }
                     </Box>
                 </Card>
-
+{/* 
                 <Card className="flex-down seperate-children-small padding margin">
                     <Typography variant="h4">Friends</Typography>
                     <Box className="flex-list-row seperate-children-big margin">
@@ -196,25 +220,25 @@ function FriendProfileModul(props) {
                             })
                         }
                     </Box>
-                </Card>
+                </Card> */}
 
                 <Card className="flex-down seperate-children-small padding margin">
                     <Typography variant="h4">Recent matches</Typography>
                     <Box className="flex-list-row seperate-children-big margin">
                         {
-                            matches.map(achievement => {
-                                return(<AchievementIcon achievement={achievement}/>)
-                            })
+                            matches.map((match,index) => {
+                              return(<MatchIcon match={match} key={index}></MatchIcon>)
+                          })
                         }
                     </Box>
                 </Card>
                 <Card className="seperate-children-medium">             
-                    <Button style={{display: !isMyFriend ? "none" : "initial"}}
+                    <Button style={{display: isMyFriend ? "none" : "initial"}}
                             onClick={sendFiriendRequest} 
                             variant="contained"
                             size="large"
                             color="success">Add </Button>
-                    <Button style={{display: sentMeARequest ? "none" : "initial"}}
+                    <Button style={{display: !sentMeARequest ? "none" : "initial"}}
                             onClick={answerFiriendRequest} 
                             variant="contained"
                             size="large"

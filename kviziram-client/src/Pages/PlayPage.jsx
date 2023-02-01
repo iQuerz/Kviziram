@@ -106,7 +106,7 @@ function PlayPage(props) {
                     }
                 </Card>
 
-                <Ad></Ad>
+                <Ad mySessionID={props.mySessionID}></Ad>
 
                 <Box className="flex-right width-75 seperate-children-big">
                     <Card className="width-35 flex-down seperate-children-small padding">
@@ -121,9 +121,7 @@ function PlayPage(props) {
                         <Button variant="contained" size="large" onClick={handleCreateLobbyModalOpenChange}>Host</Button>
                     </Card>
                 </Box>
-
-                <Ad></Ad>
-            
+          
                 <PickQuizModal sessionID={props.mySessionID} open={isCreateLobbyModalOpen} onChange={handleCreateLobbyModalOpenChange} name={newLobbyName}></PickQuizModal>
             </SidebarLayout>
         </>
