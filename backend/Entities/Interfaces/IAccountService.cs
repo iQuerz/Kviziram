@@ -23,7 +23,7 @@ public interface IAccountService
     public Task<List<Achievement>?> GetAccountAchievementsAsync(Guid auID);
 
     public Task<Ad?> GetRecommendedAdsAsync();
-    public Task<List<AccountPoco>?> GetRecommendedFriendsAsync(Guid auID);
+    public Task<List<AccountPoco>?> GetRecommendedFriendsAsync();
     public Task<List<AccountPoco>?> GetFriendsOfFriendsAsync(Guid auID);
     public Task<List<AccountPoco>?> RecommendedPlayersFromMatchAsync(Guid auID);
     public Task<List<Quiz>?> GetRecommendedQuizzesAsync();

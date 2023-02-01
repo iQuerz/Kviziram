@@ -186,15 +186,18 @@ public class AccountService: IAccountService
         return await GetRecommendedAdsQueryAsync();
     }
 
-    public async Task<List<AccountPoco>?> GetRecommendedFriendsAsync(Guid auID) {
+    public async Task<List<AccountPoco>?> GetRecommendedFriendsAsync() {
+        if (_context.AccountCaller != null) {
         List<AccountPoco> recommended = new List<AccountPoco>();
-        var fof = await GetFriendsOfFriendsAsync(auID);
-        var players = await RecommendedPlayersFromMatchAsync(auID);
+        var fof = await GetFriendsOfFriendsAsync(_context.AccountCaller.ID);
+        var players = await RecommendedPlayersFromMatchAsync(_context.AccountCaller.ID);
 
         if (fof != null) recommended.AddRange(fof);
         if (players != null) recommended.AddRange(players);
 
         return recommended.DistinctBy(a => a.ID).ToList();
+        }
+        return null;
     }
 
     public async Task<List<AccountPoco>?> GetFriendsOfFriendsAsync(Guid auID) {

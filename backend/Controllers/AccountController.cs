@@ -79,9 +79,9 @@ namespace backend.Controllers
             return Ok(await _kviziram.GetRecommendedAdsAsync());
         }
 
-        [HttpGet("{auID}/friends/recommended")]
-        public async Task<ActionResult<List<AccountPoco>>> GetRecommendedFriends(Guid auID) {
-            return Ok(await _kviziram.GetRecommendedFriendsAsync(auID));
+        [HttpGet("me/friends/recommended")]
+        public async Task<ActionResult<List<AccountPoco>>> GetRecommendedFriends() {
+            return Ok(await _kviziram.GetRecommendedFriendsAsync());
         }
 
         [HttpGet("{auID}/match/players")]
