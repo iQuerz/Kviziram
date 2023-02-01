@@ -3,42 +3,69 @@ import { Box, Card, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { useState } from "react";
 import AchievementIcon from "../Components/Achievements/AchievementIcon";
+import MatchIcon from "../Components/Game/MatchIcon";
 
 import SidebarLayout from "../Components/Layout/Sidebar/SidebarLayout";
 
 function ProfilePage(props) {
     //const [account, setAccount] = useState(props.account);
     const [achievements, setAchievements] = useState([]);
+    const [matches, setMatches] = useState([]);
+
     useEffect(()=>
     {   
         tryGetAchivments();
+        tryGetMatches();
     },[])
     //trenutno izvlaci sve achivments cisto radi testiranja
     async function tryGetAchivments() {
         try {
-          const response = await fetch("http://localhost:5221/Achievement/all", {
-            method: "GET",
-            headers: {
-              accept: "text/plain",
-              'SessionID':  props.mySessionID
-            },
-          });
-          const json = await response.json();
+            const response = await fetch("http://localhost:5221/Achievement/all", {
+                method: "GET",
+                headers: {
+                    accept: "text/plain",
+                    'SessionID':  props.mySessionID
+                },
+            });
+            const json = await response.json();
     
-          if (response.ok) {
-            setAchievements(json); 
-          }
-        } catch (error) {
-          console.error(error);
+            if (response.ok) {
+                setAchievements(json); 
+            }
         }
-      }
+        catch (error) {
+            console.error(error);
+        }
+    }
+    async function tryGetMatches(){
+        try {
+            let body = {
+                fromDate:"2022-02-01T15:48:49.968Z",
+                toDate: "2030-02-01T15:48:49.968Z"
+            }
+            const response = await fetch("http://localhost:5221/Match/search/history/0/10/q", {
+                method: "POST",
+                headers: {
+                    accept: "text/plain",
+                    'SessionID':  localStorage.getItem('sessionID')
+                },
+            });
+            const json = await response.json();
+    
+            if (response.ok) {
+                console.log("matches:",json);
+                setMatches(json); 
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
     var friends = [
         
     ]
 
     //ovo je malo teze jer se u bazi cuvaju quizzes & participatedIn relations pa idk kako ce da izgleda
-    var matches = [
-    ]
 
     return(
         <>
@@ -77,8 +104,8 @@ function ProfilePage(props) {
                     <Typography variant="h4">Recent matches</Typography>
                     <Box className="flex-list-row seperate-children-big margin">
                         {
-                            matches.map(achievement => {
-                                return(<AchievementIcon achievement={achievement}/>)
+                            matches.map((match,index) => {
+                                return(<MatchIcon match={match} key={index}></MatchIcon>)
                             })
                         }
                     </Box>

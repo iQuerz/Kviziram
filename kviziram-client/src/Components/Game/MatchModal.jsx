@@ -27,8 +27,12 @@ var matchDate = "";
 
 function MatchModal(props) {
   const [match, setMatch] = useState("");
+  const [quiz, setQuiz] = useState({});
+  
   useEffect(() => {
     tryGetMatch();
+    tryGetQuiz();
+
   }, [props.matchID])
 
   async function tryGetMatch() {
@@ -45,7 +49,7 @@ function MatchModal(props) {
       );
       const json = await response.json();
       if (response.ok) {
-
+        console.log("match:", json)
         const data = json;
         setMatch(data)
       }
@@ -53,27 +57,23 @@ function MatchModal(props) {
       console.error(error);
     }
   }
-
   async function tryGetQuiz() {
     try {
-      const response = await fetch(
-        "http://localhost:5221/Match/?muID=" + props.matchID,
-        {
-          method: "GET",
-          headers: {
-            accept: "text/plain",
-            SessionID: props.sessionID,
-          },
-        }
-      );
+      const response = await fetch("http://localhost:5221/Quiz?quID=" + match.quizID, {
+        method: "GET",
+        headers: {
+          accept: "text/plain",
+          'SessionID': localStorage.getItem('sessionID')
+        },
+      });
       const json = await response.json();
+
       if (response.ok) {
-        console.log("match response ok")
-        const data = json;
-        setMatch(data)
-        console.log("match date string = ", match.created)
+        console.log("quiz:", json);
+        setQuiz(json)
       }
-    } catch (error) {
+    }
+    catch (error) {
       console.error(error);
     }
   }
@@ -92,14 +92,15 @@ function MatchModal(props) {
         <Card sx={style} className="flex-down seperate-children-small">
           <Typography variant="h3">Match summary</Typography>
           <Typography variant="h4" color={"var(--success)"}>{match.winnerID} Won!</Typography>
-          <Typography variant="h5">Quiz: "{match.quizID}"</Typography>
+          <Typography variant="h5">Quiz: "{quiz.name}"</Typography>
           <Typography>&nbsp;</Typography>
           <Typography variant="h5" width={"80%"} textAlign={"left"}>Scoreboard:</Typography>
           <Card variant="outlined" className="padding" sx={{ width: "80%", backgroundColor: "transparent" }}>
-            {/*ovde moze loop kroz ljude u match. treba da se fetchuju*/}
-            <Typography variant="h6">Piksi - 10p</Typography>
-            <Typography variant="h6">iQuerz - 8p</Typography>
-            <Typography variant="h6">Lajron - 8p</Typography>
+            {
+              match.getPlayerIDsScores.map((playerScore, index) => {
+                return (<Typography key={index} variant="h6">{playerScore.account.username} - {playerScore.gameScore}</Typography>)
+              })
+            }
           </Card>
           <Typography width={"80%"} textAlign={"right"}>played on {match.created}</Typography>
           <Button variant="contained" size="large" color="error" onClick={props.onClick}>Close</Button>
