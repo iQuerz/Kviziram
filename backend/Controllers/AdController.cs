@@ -22,19 +22,19 @@ public class AdController : ControllerBase
         return Ok(await _kviziram.GetAllAdsAsync());
     }
 
-    [HttpGet("{aduID}/account/{auID}/block")]
-    public async Task<ActionResult<string>> BlockAdAccount(Guid aduID, Guid auID) {
-        return Ok(await _kviziram.BlockAdAccountAsync(aduID, auID));
+    [HttpGet("{aduID}/me/block")]
+    public async Task<ActionResult<string>> BlockAdAccount(Guid aduID) {
+        return Ok(await _kviziram.BlockAdAccountAsync(aduID));
     }
 
-    [HttpGet("{aduID}/account/{auID}/viewed")]
-    public async Task<ActionResult<string>> IncrementViewedAdAccount(Guid aduID, Guid auID) {
-        return Ok(await _kviziram.IncrementViewedAdAccountAsync(aduID, auID));
+    [HttpGet("{aduID}/me/viewed")]
+    public async Task<ActionResult<string>> IncrementViewedAdAccount(Guid aduID) {
+        return Ok(await _kviziram.IncrementViewedAdAccountAsync(aduID));
     }
 
-    [HttpGet("{aduID}/account/{auID}/clicked")]
-    public async Task<ActionResult<string>> IncrementClickedAdAccount(Guid aduID, Guid auID) {
-        return Ok(await _kviziram.IncrementClickedAdAccountAsync(aduID, auID));
+    [HttpGet("{aduID}/me/clicked")]
+    public async Task<ActionResult<string>> IncrementClickedAdAccount(Guid aduID) {
+        return Ok(await _kviziram.IncrementClickedAdAccountAsync(aduID));
     }
     #endregion
 
