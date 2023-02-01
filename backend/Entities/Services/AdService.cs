@@ -82,18 +82,18 @@ public class AdService: IAdService
         return await GetAdAccountQueryAsync(aduID, accountGuids);
     }
 
-    public async Task<string> BlockAdAccountAsync(Guid aduID, Guid auID) {
-        await BlockAdAccountQueryAsync(aduID, auID);
+    public async Task<string> BlockAdAccountAsync(Guid aduID) {
+        await BlockAdAccountQueryAsync(aduID);
         return Msg.AdBlocked;
     }
 
-    public async Task<string> IncrementViewedAdAccountAsync(Guid aduID, Guid auID) {
-        await IncrementViewedAdAccountQueryAsync(aduID, auID);
+    public async Task<string> IncrementViewedAdAccountAsync(Guid aduID) {
+        await IncrementViewedAdAccountQueryAsync(aduID);
         return Msg.OperationDone;
     }
 
-    public async Task<string> IncrementClickedAdAccountAsync(Guid aduID, Guid auID) {
-        await IncrementClickedAdAccountQueryAsync(aduID, auID);
+    public async Task<string> IncrementClickedAdAccountAsync(Guid aduID) {
+        await IncrementClickedAdAccountQueryAsync(aduID);
         return Msg.OperationDone;
     }
 
@@ -253,31 +253,37 @@ public class AdService: IAdService
             .ExecuteWithoutResultsAsync();
     }
 
-    public async Task BlockAdAccountQueryAsync(Guid aduID, Guid auID) {
+    public async Task BlockAdAccountQueryAsync(Guid aduID) {
+        if (_context.AccountCaller != null) {
         await _neo.Cypher
             .OptionalMatch("(ad)-[r:AD_ACCOUNT]->(a)")
             .Where((Ad ad) => ad.ID == aduID)
-            .AndWhere((Account a) => a.ID == auID)
+            .AndWhere((Account a) => a.ID == _context.AccountCaller.ID)
             .Set("r.Blocked = true")
             .ExecuteWithoutResultsAsync();
+        }
     }
 
-    public async Task IncrementViewedAdAccountQueryAsync(Guid aduID, Guid auID) {
+    public async Task IncrementViewedAdAccountQueryAsync(Guid aduID) {
+        if (_context.AccountCaller != null) {
         await _neo.Cypher
             .OptionalMatch("(ad)-[r:AD_ACCOUNT]->(a)")
             .Where((Ad ad) => ad.ID == aduID)
-            .AndWhere((Account a) => a.ID == auID)
+            .AndWhere((Account a) => a.ID == _context.AccountCaller.ID)
             .Set("r.Viewed = r.Viewed + 1")
             .ExecuteWithoutResultsAsync();
+        }
     }
 
-    public async Task IncrementClickedAdAccountQueryAsync(Guid aduID, Guid auID) {
+    public async Task IncrementClickedAdAccountQueryAsync(Guid aduID) {
+        if (_context.AccountCaller != null) {
         await _neo.Cypher
             .OptionalMatch("(ad)-[r:AD_ACCOUNT]->(a)")
             .Where((Ad ad) => ad.ID == aduID)
-            .AndWhere((Account a) => a.ID == auID)
+            .AndWhere((Account a) => a.ID == _context.AccountCaller.ID)
             .Set("r.Clicked = r.Clicked + 1")
             .ExecuteWithoutResultsAsync();
+        }
     }
 
     #endregion
