@@ -14,9 +14,9 @@ public interface IAdService
     public Task<List<AdAccountDto>?> ConnectAdAccountAsync(Guid aduID, List<Guid> accountGuids);  
     public Task<string> RemoveAdAccountAsync(Guid aduID, Guid auID);
 
-    public Task<string> BlockAdAccountAsync(Guid aduID, Guid auID);
-    public Task<string> IncrementViewedAdAccountAsync(Guid aduID, Guid auID);
-    public Task<string> IncrementClickedAdAccountAsync(Guid aduID, Guid auID);
+    public Task<string> BlockAdAccountAsync(Guid aduID);
+    public Task<string> IncrementViewedAdAccountAsync(Guid aduID);
+    public Task<string> IncrementClickedAdAccountAsync(Guid aduID);
 
     public Task<string> SetMatchAdAccounts(Match match);
 }
