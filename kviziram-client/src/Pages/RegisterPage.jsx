@@ -47,7 +47,7 @@ function RegisterPage() {
           if (!response.ok) {
             throw json;
           }
-          if(json)
+          if(response.ok)
           {
             handleFetchSuccess()
           }
